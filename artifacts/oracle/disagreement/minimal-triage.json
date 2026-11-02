@@ -1,0 +1,15 @@
+{
+  "query": {
+    "source": "data/b",
+    "destination": "apps/b",
+    "protocol": "TCP",
+    "port": 8080
+  },
+  "netscope": "Allow",
+  "nca_2.1.0": "Deny",
+  "policies_original": 8,
+  "policies_reduced": 1,
+  "pods_original": 4,
+  "pods_reduced": 2,
+  "scope": "Deletion-preserved disagreement, not a universal minimum. Final one-rule reproducer rechecked with the oracle harness; see artifacts/oracle-replay/summary.json. Real CNI adjudication pending."
+}

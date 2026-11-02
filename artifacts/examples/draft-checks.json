@@ -1,0 +1,38 @@
+{
+  "schemaVersion": 1,
+  "reference_input_hash": "27431489eda0276116b80d1c05c293cb7da13e1a416a2a0cceaa9108ff170e55",
+  "checks": [
+    {
+      "id": "draft-1",
+      "source": "apps/agent",
+      "destination": "apps/frontend",
+      "protocol": "TCP",
+      "port": 8090,
+      "expect": "must_deny"
+    },
+    {
+      "id": "draft-2",
+      "source": "apps/tool-gateway",
+      "destination": "ops/metrics",
+      "protocol": "TCP",
+      "port": 9090,
+      "expect": "must_deny"
+    },
+    {
+      "id": "draft-3",
+      "source": "apps/tool-gateway",
+      "destination": "apps/agent",
+      "protocol": "TCP",
+      "port": 8090,
+      "expect": "must_deny"
+    },
+    {
+      "id": "draft-4",
+      "source": "ops/metrics",
+      "destination": "apps/tool-gateway",
+      "protocol": "TCP",
+      "port": 8081,
+      "expect": "must_deny"
+    }
+  ]
+}

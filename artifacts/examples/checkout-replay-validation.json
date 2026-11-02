@@ -1,0 +1,19 @@
+{
+  "preserved": true,
+  "witness": "t-95f35ba8c2a6fc34",
+  "signature": [
+    "Allow",
+    "Deny",
+    [
+      false,
+      true,
+      false,
+      true
+    ],
+    [
+      "payments-to-database"
+    ]
+  ],
+  "runtime_status": "NOT_VERIFIED",
+  "input_hash": "92f7c1a883841bea1f7a23ef58995d345a2162e36e258005df37b59d209285e4"
+}

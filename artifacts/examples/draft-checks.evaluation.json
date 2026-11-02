@@ -1,0 +1,111 @@
+{
+  "reference_input_hash": "27431489eda0276116b80d1c05c293cb7da13e1a416a2a0cceaa9108ff170e55",
+  "draft_count": 4,
+  "specification": {
+    "schemaVersion": 1,
+    "reference_input_hash": "27431489eda0276116b80d1c05c293cb7da13e1a416a2a0cceaa9108ff170e55",
+    "checks": [
+      {
+        "id": "draft-1",
+        "source": "apps/agent",
+        "destination": "apps/frontend",
+        "protocol": "TCP",
+        "port": 8090,
+        "expect": "must_deny"
+      },
+      {
+        "id": "draft-2",
+        "source": "apps/tool-gateway",
+        "destination": "ops/metrics",
+        "protocol": "TCP",
+        "port": 9090,
+        "expect": "must_deny"
+      },
+      {
+        "id": "draft-3",
+        "source": "apps/tool-gateway",
+        "destination": "apps/agent",
+        "protocol": "TCP",
+        "port": 8090,
+        "expect": "must_deny"
+      },
+      {
+        "id": "draft-4",
+        "source": "ops/metrics",
+        "destination": "apps/tool-gateway",
+        "protocol": "TCP",
+        "port": 8081,
+        "expect": "must_deny"
+      }
+    ]
+  },
+  "reference_check": {
+    "status": "PASS",
+    "exit_code": 0,
+    "checks": [
+      {
+        "id": "draft-1",
+        "source": "apps/agent",
+        "destination": "apps/frontend",
+        "protocol": "TCP",
+        "port": 8090,
+        "expect": "must_deny",
+        "tuple_id": "t-07bb75764c236883",
+        "actual": "Deny",
+        "status": "PASS"
+      },
+      {
+        "id": "draft-2",
+        "source": "apps/tool-gateway",
+        "destination": "ops/metrics",
+        "protocol": "TCP",
+        "port": 9090,
+        "expect": "must_deny",
+        "tuple_id": "t-a59074a891eb6a29",
+        "actual": "Deny",
+        "status": "PASS"
+      },
+      {
+        "id": "draft-3",
+        "source": "apps/tool-gateway",
+        "destination": "apps/agent",
+        "protocol": "TCP",
+        "port": 8090,
+        "expect": "must_deny",
+        "tuple_id": "t-02428b44959817b3",
+        "actual": "Deny",
+        "status": "PASS"
+      },
+      {
+        "id": "draft-4",
+        "source": "ops/metrics",
+        "destination": "apps/tool-gateway",
+        "protocol": "TCP",
+        "port": 8081,
+        "expect": "must_deny",
+        "tuple_id": "t-064d52825c419ce0",
+        "actual": "Deny",
+        "status": "PASS"
+      }
+    ],
+    "input_hash": "27431489eda0276116b80d1c05c293cb7da13e1a416a2a0cceaa9108ff170e55",
+    "reference_input_hash": "27431489eda0276116b80d1c05c293cb7da13e1a416a2a0cceaa9108ff170e55",
+    "same_as_reference": true,
+    "scope": "Exact connection checks against this candidate; this result does not certify the full SRS review gate or live enforcement."
+  },
+  "training": {
+    "effective_faults": 14,
+    "caught_before": 8,
+    "caught_with_drafts": 14
+  },
+  "holdout": {
+    "effective_faults": 6,
+    "caught_before": 2,
+    "caught_with_drafts": 4
+  },
+  "faults_generated": 24,
+  "budget_limited": false,
+  "uncovered_training_faults": [],
+  "method": "Deterministic fault split (every fourth sorted candidate hash held out); greedy connection-check selection using missed training faults only. No minimum-size or generalization guarantee.",
+  "warning": "Review these drafts: they preserve reference candidate behaviour, not inferred security requirements. Holdout faults come from the same synthetic generator; coverage is not analyzer accuracy or independent validation."
+}

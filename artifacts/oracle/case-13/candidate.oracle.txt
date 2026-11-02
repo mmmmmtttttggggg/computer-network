@@ -1,0 +1,16 @@
+0.0.0.0-255.255.255.255 => data/a : All connections
+0.0.0.0-255.255.255.255 => data/b : All connections
+apps/a => 0.0.0.0-255.255.255.255 : {protocols:UDP,dst_ports:5353}
+apps/a => data/a : {protocols:TCP,dst_ports:8080-8081}
+apps/a => data/a : {protocols:UDP,dst_ports:5353}
+apps/a => data/b : {protocols:TCP,dst_ports:8080-8081}
+apps/a => data/b : {protocols:UDP,dst_ports:5353}
+apps/b => 0.0.0.0-255.255.255.255 : {protocols:UDP,dst_ports:5353}
+apps/b => data/a : {protocols:TCP,dst_ports:8080-8081}
+apps/b => data/a : {protocols:UDP,dst_ports:5353}
+apps/b => data/b : {protocols:TCP,dst_ports:8080-8081}
+apps/b => data/b : {protocols:UDP,dst_ports:5353}
+data/a => 0.0.0.0-255.255.255.255 : All connections
+data/a => data/b : All connections
+data/b => 0.0.0.0-255.255.255.255 : All connections
+data/b => data/a : All connections

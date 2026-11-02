@@ -1,0 +1,3 @@
+global: cluster has 4 unique endpoints, 2 namespaces
+wrote query output to: /tmp/netscope-oracle-9vmq0_1r/connections.txt
+Total run time:   0.02 seconds

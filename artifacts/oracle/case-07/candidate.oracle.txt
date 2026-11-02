@@ -1,0 +1,15 @@
+0.0.0.0-255.255.255.255 => apps/b : All connections
+0.0.0.0-255.255.255.255 => data/a : {protocols:TCP}
+0.0.0.0-255.255.255.255 => data/b : {protocols:TCP}
+apps/a => apps/b : All connections
+apps/a => data/a : {protocols:TCP}
+apps/a => data/b : {protocols:TCP}
+apps/b => 0.0.0.0-255.255.255.255 : All connections
+apps/b => data/a : {protocols:TCP}
+apps/b => data/b : {protocols:TCP}
+data/a => 0.0.0.0-255.255.255.255 : All connections
+data/a => apps/b : All connections
+data/a => data/b : {protocols:TCP}
+data/b => 0.0.0.0-255.255.255.255 : All connections
+data/b => apps/b : All connections
+data/b => data/a : {protocols:TCP}

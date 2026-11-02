@@ -1,0 +1,534 @@
+{
+  "schemaVersion": 1,
+  "name": "seed-303-20",
+  "topology": [
+    {
+      "apiVersion": "v1",
+      "kind": "Namespace",
+      "metadata": {
+        "name": "apps",
+        "labels": {
+          "team": "apps"
+        }
+      }
+    },
+    {
+      "apiVersion": "v1",
+      "kind": "Namespace",
+      "metadata": {
+        "name": "data",
+        "labels": {
+          "team": "data"
+        }
+      }
+    },
+    {
+      "apiVersion": "v1",
+      "kind": "Pod",
+      "metadata": {
+        "name": "a",
+        "namespace": "apps",
+        "labels": {
+          "app": "a"
+        }
+      },
+      "spec": {
+        "containers": [
+          {
+            "name": "app",
+            "image": "data-only/not-executed",
+            "ports": [
+              {
+                "name": "web",
+                "containerPort": 8080,
+                "protocol": "TCP"
+              },
+              {
+                "name": "dns",
+                "containerPort": 5353,
+                "protocol": "UDP"
+              }
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "apiVersion": "v1",
+      "kind": "Pod",
+      "metadata": {
+        "name": "b",
+        "namespace": "apps",
+        "labels": {
+          "app": "b"
+        }
+      },
+      "spec": {
+        "containers": [
+          {
+            "name": "app",
+            "image": "data-only/not-executed",
+            "ports": [
+              {
+                "name": "web",
+                "containerPort": 8081,
+                "protocol": "TCP"
+              },
+              {
+                "name": "dns",
+                "containerPort": 5353,
+                "protocol": "UDP"
+              }
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "apiVersion": "v1",
+      "kind": "Pod",
+      "metadata": {
+        "name": "a",
+        "namespace": "data",
+        "labels": {
+          "app": "a"
+        }
+      },
+      "spec": {
+        "containers": [
+          {
+            "name": "app",
+            "image": "data-only/not-executed",
+            "ports": [
+              {
+                "name": "web",
+                "containerPort": 8080,
+                "protocol": "TCP"
+              },
+              {
+                "name": "dns",
+                "containerPort": 5353,
+                "protocol": "UDP"
+              }
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "apiVersion": "v1",
+      "kind": "Pod",
+      "metadata": {
+        "name": "b",
+        "namespace": "data",
+        "labels": {
+          "app": "b"
+        }
+      },
+      "spec": {
+        "containers": [
+          {
+            "name": "app",
+            "image": "data-only/not-executed",
+            "ports": [
+              {
+                "name": "web",
+                "containerPort": 8081,
+                "protocol": "TCP"
+              },
+              {
+                "name": "dns",
+                "containerPort": 5353,
+                "protocol": "UDP"
+              }
+            ]
+          }
+        ]
+      }
+    }
+  ],
+  "baseline": [
+    {
+      "apiVersion": "networking.k8s.io/v1",
+      "kind": "NetworkPolicy",
+      "metadata": {
+        "name": "p-0",
+        "namespace": "data"
+      },
+      "spec": {
+        "podSelector": {
+          "matchLabels": {
+            "app": "a"
+          }
+        },
+        "policyTypes": [
+          "Egress"
+        ],
+        "egress": [
+          {}
+        ]
+      }
+    },
+    {
+      "apiVersion": "networking.k8s.io/v1",
+      "kind": "NetworkPolicy",
+      "metadata": {
+        "name": "p-1",
+        "namespace": "apps"
+      },
+      "spec": {
+        "podSelector": {
+          "matchExpressions": [
+            {
+              "key": "app",
+              "operator": "NotIn",
+              "values": [
+                "a"
+              ]
+            }
+          ]
+        },
+        "policyTypes": [
+          "Ingress",
+          "Egress"
+        ],
+        "ingress": [],
+        "egress": [
+          {
+            "to": [
+              {
+                "podSelector": {}
+              }
+            ],
+            "ports": [
+              {
+                "protocol": "UDP",
+                "port": 5353
+              },
+              {
+                "port": "web"
+              }
+            ]
+          },
+          {
+            "to": [
+              {
+                "podSelector": {
+                  "matchLabels": {
+                    "app": "a"
+                  }
+                }
+              },
+              {
+                "namespaceSelector": {}
+              },
+              {
+                "namespaceSelector": {},
+                "podSelector": {
+                  "matchExpressions": [
+                    {
+                      "key": "app",
+                      "operator": "Exists"
+                    }
+                  ]
+                }
+              }
+            ]
+          }
+        ]
+      }
+    }
+  ],
+  "candidate": [
+    {
+      "apiVersion": "networking.k8s.io/v1",
+      "kind": "NetworkPolicy",
+      "metadata": {
+        "name": "p-0",
+        "namespace": "apps"
+      },
+      "spec": {
+        "podSelector": {
+          "matchExpressions": [
+            {
+              "key": "absent",
+              "operator": "DoesNotExist"
+            }
+          ]
+        },
+        "policyTypes": [
+          "Ingress",
+          "Egress"
+        ],
+        "ingress": [
+          {
+            "from": [],
+            "ports": []
+          }
+        ],
+        "egress": []
+      }
+    },
+    {
+      "apiVersion": "networking.k8s.io/v1",
+      "kind": "NetworkPolicy",
+      "metadata": {
+        "name": "p-1",
+        "namespace": "apps"
+      },
+      "spec": {
+        "podSelector": {
+          "matchExpressions": [
+            {
+              "key": "app",
+              "operator": "In",
+              "values": [
+                "a",
+                "b"
+              ]
+            }
+          ]
+        },
+        "policyTypes": [
+          "Ingress"
+        ],
+        "ingress": [
+          {
+            "ports": []
+          }
+        ]
+      }
+    },
+    {
+      "apiVersion": "networking.k8s.io/v1",
+      "kind": "NetworkPolicy",
+      "metadata": {
+        "name": "p-2",
+        "namespace": "data"
+      },
+      "spec": {
+        "podSelector": {
+          "matchExpressions": [
+            {
+              "key": "absent",
+              "operator": "DoesNotExist"
+            }
+          ]
+        },
+        "policyTypes": [
+          "Ingress",
+          "Egress"
+        ],
+        "ingress": [],
+        "egress": []
+      }
+    },
+    {
+      "apiVersion": "networking.k8s.io/v1",
+      "kind": "NetworkPolicy",
+      "metadata": {
+        "name": "p-3",
+        "namespace": "data"
+      },
+      "spec": {
+        "podSelector": {
+          "matchLabels": {
+            "app": "a"
+          }
+        },
+        "policyTypes": [
+          "Egress"
+        ],
+        "egress": [
+          {
+            "to": [
+              {
+                "namespaceSelector": {},
+                "podSelector": {
+                  "matchExpressions": [
+                    {
+                      "key": "app",
+                      "operator": "In",
+                      "values": [
+                        "a",
+                        "b"
+                      ]
+                    }
+                  ]
+                }
+              },
+              {
+                "namespaceSelector": {}
+              }
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "apiVersion": "networking.k8s.io/v1",
+      "kind": "NetworkPolicy",
+      "metadata": {
+        "name": "p-4",
+        "namespace": "data"
+      },
+      "spec": {
+        "podSelector": {
+          "matchExpressions": [
+            {
+              "key": "app",
+              "operator": "In",
+              "values": [
+                "a",
+                "b"
+              ]
+            }
+          ]
+        },
+        "policyTypes": [
+          "Ingress",
+          "Egress"
+        ],
+        "ingress": [
+          {
+            "from": [],
+            "ports": []
+          },
+          {
+            "from": [
+              {
+                "podSelector": {
+                  "matchExpressions": [
+                    {
+                      "key": "absent",
+                      "operator": "DoesNotExist"
+                    }
+                  ]
+                }
+              },
+              {
+                "namespaceSelector": {
+                  "matchLabels": {
+                    "team": "data"
+                  }
+                }
+              },
+              {
+                "namespaceSelector": {}
+              }
+            ]
+          }
+        ],
+        "egress": []
+      }
+    },
+    {
+      "apiVersion": "networking.k8s.io/v1",
+      "kind": "NetworkPolicy",
+      "metadata": {
+        "name": "p-5",
+        "namespace": "data"
+      },
+      "spec": {
+        "podSelector": {
+          "matchExpressions": [
+            {
+              "key": "app",
+              "operator": "Exists"
+            }
+          ]
+        },
+        "policyTypes": [
+          "Egress"
+        ],
+        "egress": []
+      }
+    },
+    {
+      "apiVersion": "networking.k8s.io/v1",
+      "kind": "NetworkPolicy",
+      "metadata": {
+        "name": "p-6",
+        "namespace": "data"
+      },
+      "spec": {
+        "podSelector": {
+          "matchExpressions": [
+            {
+              "key": "app",
+              "operator": "NotIn",
+              "values": [
+                "a"
+              ]
+            }
+          ]
+        },
+        "policyTypes": [
+          "Ingress",
+          "Egress"
+        ],
+        "ingress": [
+          {},
+          {
+            "from": []
+          }
+        ],
+        "egress": [
+          {
+            "to": [
+              {
+                "podSelector": {
+                  "matchExpressions": [
+                    {
+                      "key": "app",
+                      "operator": "In",
+                      "values": [
+                        "a",
+                        "b"
+                      ]
+                    }
+                  ]
+                }
+              },
+              {
+                "namespaceSelector": {
+                  "matchLabels": {
+                    "team": "data"
+                  }
+                }
+              }
+            ],
+            "ports": []
+          }
+        ]
+      }
+    }
+  ],
+  "ports": [
+    {
+      "protocol": "TCP",
+      "port": 8079
+    },
+    {
+      "protocol": "TCP",
+      "port": 8080
+    },
+    {
+      "protocol": "TCP",
+      "port": 8081
+    },
+    {
+      "protocol": "TCP",
+      "port": 8082
+    },
+    {
+      "protocol": "UDP",
+      "port": 5353
+    },
+    {
+      "protocol": "UDP",
+      "port": 8080
+    }
+  ],
+  "intents": []
+}

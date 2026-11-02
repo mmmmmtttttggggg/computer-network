@@ -1,0 +1,200 @@
+apiVersion: v1
+kind: Namespace
+metadata:
+  labels:
+    team: apps
+  name: apps
+---
+apiVersion: v1
+kind: Namespace
+metadata:
+  labels:
+    team: data
+  name: data
+---
+apiVersion: v1
+kind: Pod
+metadata:
+  labels:
+    app: a
+  name: a
+  namespace: apps
+spec:
+  containers:
+  - image: data-only/not-executed
+    name: app
+    ports:
+    - containerPort: 8080
+      name: web
+      protocol: TCP
+    - containerPort: 5353
+      name: dns
+      protocol: UDP
+---
+apiVersion: v1
+kind: Pod
+metadata:
+  labels:
+    app: b
+  name: b
+  namespace: apps
+spec:
+  containers:
+  - image: data-only/not-executed
+    name: app
+    ports:
+    - containerPort: 8081
+      name: web
+      protocol: TCP
+    - containerPort: 5353
+      name: dns
+      protocol: UDP
+---
+apiVersion: v1
+kind: Pod
+metadata:
+  labels:
+    app: a
+  name: a
+  namespace: data
+spec:
+  containers:
+  - image: data-only/not-executed
+    name: app
+    ports:
+    - containerPort: 8080
+      name: web
+      protocol: TCP
+    - containerPort: 5353
+      name: dns
+      protocol: UDP
+---
+apiVersion: v1
+kind: Pod
+metadata:
+  labels:
+    app: b
+  name: b
+  namespace: data
+spec:
+  containers:
+  - image: data-only/not-executed
+    name: app
+    ports:
+    - containerPort: 8081
+      name: web
+      protocol: TCP
+    - containerPort: 5353
+      name: dns
+      protocol: UDP
+---
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: p-0
+  namespace: data
+spec:
+  egress:
+  - to:
+    - namespaceSelector:
+        matchLabels:
+          team: data
+  - ports:
+    - port: 5353
+      protocol: UDP
+    - port: 8080
+  ingress:
+  - from: []
+    ports:
+    - endPort: 8081
+      port: 8080
+    - port: 8080
+  - from: []
+  podSelector:
+    matchExpressions:
+    - key: absent
+      operator: DoesNotExist
+  policyTypes:
+  - Ingress
+  - Egress
+---
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: p-1
+  namespace: data
+spec:
+  ingress:
+  - {}
+  podSelector: {}
+  policyTypes:
+  - Ingress
+---
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: p-2
+  namespace: apps
+spec:
+  egress:
+  - {}
+  podSelector:
+    matchExpressions:
+    - key: app
+      operator: NotIn
+      values:
+      - a
+  policyTypes:
+  - Egress
+---
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: p-3
+  namespace: apps
+spec:
+  egress:
+  - ports:
+    - {}
+    - port: web
+    to:
+    - namespaceSelector: {}
+    - namespaceSelector:
+        matchLabels:
+          team: apps
+  - ports:
+    - {}
+    - port: 5353
+      protocol: UDP
+  podSelector: {}
+  policyTypes:
+  - Egress
+---
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: p-4
+  namespace: apps
+spec:
+  ingress:
+  - from:
+    - podSelector:
+        matchLabels:
+          app: a
+    - namespaceSelector:
+        matchLabels:
+          team: apps
+    - namespaceSelector: {}
+      podSelector: {}
+    ports:
+    - port: web
+    - {}
+  podSelector:
+    matchExpressions:
+    - key: app
+      operator: In
+      values:
+      - a
+      - b
+  policyTypes:
+  - Ingress

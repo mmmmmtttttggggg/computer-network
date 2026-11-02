@@ -2,6 +2,7 @@
 
 Comparison is semantic: it uses evaluator verdicts, never policy text or rule order.
 """
+
 from __future__ import annotations
 
 import hashlib
@@ -42,6 +43,7 @@ class ConnectionComparison:
 @dataclass(frozen=True)
 class Approval:
     """Approval of one exact change: tuple plus before/after verdicts."""
+
     tuple_id: str
     baseline: Verdict
     candidate: Verdict
@@ -113,6 +115,7 @@ def unapproved_changes(
     approved = {(a.tuple_id, a.baseline, a.candidate) for a in approvals}
     changed = (Change.NEWLY_ALLOWED, Change.NEWLY_BLOCKED)
     return tuple(
-        c for c in comparisons
+        c
+        for c in comparisons
         if c.change in changed and (c.tuple_id, c.baseline, c.candidate) not in approved
     )

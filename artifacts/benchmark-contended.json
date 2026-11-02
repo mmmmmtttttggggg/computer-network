@@ -1,0 +1,64 @@
+{
+  "method": "20 warm runs of parsing + full two-revision review + traces + intent + report construction. No HTTP serialization/browser/Kubernetes timing.",
+  "platform": "Linux-6.18.55-x86_64-with-glibc2.39",
+  "python": "3.12.14",
+  "reference": {
+    "endpoints": 30,
+    "namespaces": 5,
+    "policies_per_revision": 100,
+    "port_combinations": 20,
+    "queries_per_revision": 17400
+  },
+  "samples_ms": [
+    8489.62,
+    5212.88,
+    6595.17,
+    7017.81,
+    8328.34,
+    10745.58,
+    9530.68,
+    6526.39,
+    9688.27,
+    4487.08,
+    4437.83,
+    3857.4,
+    3883.79,
+    3819.34,
+    7096.44,
+    8905.99,
+    3618.97,
+    3479.12,
+    3647.85,
+    3606.06
+  ],
+  "median_ms": 5869.64,
+  "max_ms": 10745.58,
+  "runs_under_5_seconds": 9,
+  "runtime_verified": false,
+  "process_peak_rss_mib": 149.49,
+  "demonstration_reduction": {
+    "witness": "t-95f35ba8c2a6fc34",
+    "status": "1-minimal",
+    "reason": "No remaining paired policy can be individually removed while preserving this signature.",
+    "parent_input_hash": "136439c1236445438c062353671f98c1b6189aebabb1f7c998c080f9c84405a5",
+    "policy_units_before": 10,
+    "policy_units_after": 1,
+    "reduction_percent": 90.0,
+    "calls": 16,
+    "duration_ms": 8.22,
+    "runtime_status": "NOT_VERIFIED",
+    "scope": "Only the selected tuple signature is preserved. Topology is unchanged. This is not a unique-cause or global-minimum claim.",
+    "bundle_hash": "92f7c1a883841bea1f7a23ef58995d345a2162e36e258005df37b59d209285e4"
+  },
+  "repair_proposals": {
+    "checkout-regression": 1,
+    "agent-escape": 1,
+    "selector-trap": 1
+  },
+  "intent_sensitivity": {
+    "total": 24,
+    "effective_on_scope": 20,
+    "newly_caught": 10,
+    "interpretation": "Intent sensitivity experiment, not correctness accuracy. Changes not covered by an intent can remain uncaught. Start from a passing project for meaningful new-failure detection."
+  }
+}

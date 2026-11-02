@@ -1,4 +1,5 @@
 """Application-intent checking (must_allow / must_deny) over compared connections."""
+
 from __future__ import annotations
 
 from dataclasses import dataclass, field, replace
@@ -34,6 +35,7 @@ def _empty_selector() -> LabelSelector:
 @dataclass(frozen=True)
 class EndpointSelector:
     """Pod + namespace selector. Empty selectors match everything (missing = all namespaces)."""
+
     pod: LabelSelector = field(default_factory=_empty_selector)
     namespace: LabelSelector = field(default_factory=_empty_selector)
 
@@ -123,7 +125,9 @@ def parse_intent(raw: Any) -> Intent:
     try:
         expectation = Expectation(raw["expect"])
     except ValueError:
-        raise IntentError(f"{iid}: expect must be 'must_allow' or 'must_deny', got {raw['expect']!r}") from None
+        raise IntentError(
+            f"{iid}: expect must be 'must_allow' or 'must_deny', got {raw['expect']!r}"
+        ) from None
     return Intent(
         id=iid,
         source=_parse_endpoint(raw["source"], f"{iid}.source"),
@@ -208,7 +212,9 @@ def check_intents(
     matched: Dict[str, List[ConnectionComparison]] = {
         i.id: [c for c in comparisons if _intent_matches(i, c, topology)] for i in intents
     }
-    allow_ids = {c.tuple_id for i in intents if i.expectation is Expectation.MUST_ALLOW for c in matched[i.id]}
+    allow_ids = {
+        c.tuple_id for i in intents if i.expectation is Expectation.MUST_ALLOW for c in matched[i.id]
+    }
     deny_ids = {c.tuple_id for i in intents if i.expectation is Expectation.MUST_DENY for c in matched[i.id]}
     conflicts = allow_ids & deny_ids
     return tuple(_build_result(i, matched[i.id], conflicts) for i in intents)

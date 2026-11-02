@@ -1,0 +1,22 @@
+[
+  {
+    "control": "does-not-exist",
+    "netscope": "Allow",
+    "nca": "Deny"
+  },
+  {
+    "control": "empty-selector",
+    "netscope": "Allow",
+    "nca": "Allow"
+  },
+  {
+    "control": "source-labelled",
+    "netscope": "Allow",
+    "nca": "Deny"
+  },
+  {
+    "control": "destination-labelled",
+    "netscope": "Deny",
+    "nca": "Deny"
+  }
+]

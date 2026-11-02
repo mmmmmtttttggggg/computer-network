@@ -1,0 +1,404 @@
+apiVersion: v1
+kind: Namespace
+metadata:
+  labels:
+    team: apps
+  name: apps
+---
+apiVersion: v1
+kind: Namespace
+metadata:
+  labels:
+    team: data
+  name: data
+---
+apiVersion: v1
+kind: Namespace
+metadata:
+  labels:
+    team: ops
+  name: ops
+---
+apiVersion: v1
+kind: Pod
+metadata:
+  annotations:
+    netscope.io/role: workload
+  labels:
+    app: frontend
+    tier: service
+  name: frontend
+  namespace: apps
+spec:
+  automountServiceAccountToken: false
+  containers:
+  - image: data-only/not-executed
+    name: app
+    ports:
+    - containerPort: 8080
+      name: http
+      protocol: TCP
+---
+apiVersion: v1
+kind: Pod
+metadata:
+  annotations:
+    netscope.io/role: workload
+  labels:
+    app: payments
+    tier: service
+  name: payments
+  namespace: apps
+spec:
+  automountServiceAccountToken: false
+  containers:
+  - image: data-only/not-executed
+    name: app
+    ports:
+    - containerPort: 8080
+      name: http
+      protocol: TCP
+---
+apiVersion: v1
+kind: Pod
+metadata:
+  annotations:
+    netscope.io/role: workload
+  labels:
+    app: analytics
+    tier: service
+  name: analytics
+  namespace: apps
+spec:
+  automountServiceAccountToken: false
+  containers:
+  - image: data-only/not-executed
+    name: app
+    ports:
+    - containerPort: 8082
+      name: http
+      protocol: TCP
+---
+apiVersion: v1
+kind: Pod
+metadata:
+  annotations:
+    netscope.io/role: agent
+  labels:
+    app: agent
+    tier: service
+  name: agent
+  namespace: apps
+spec:
+  automountServiceAccountToken: false
+  containers:
+  - image: data-only/not-executed
+    name: app
+    ports:
+    - containerPort: 8090
+      name: http
+      protocol: TCP
+---
+apiVersion: v1
+kind: Pod
+metadata:
+  annotations:
+    netscope.io/role: tool
+  labels:
+    app: tool-gateway
+    tier: service
+  name: tool-gateway
+  namespace: apps
+spec:
+  automountServiceAccountToken: false
+  containers:
+  - image: data-only/not-executed
+    name: app
+    ports:
+    - containerPort: 8081
+      name: http
+      protocol: TCP
+---
+apiVersion: v1
+kind: Pod
+metadata:
+  annotations:
+    netscope.io/role: asset
+  labels:
+    app: database
+    tier: backend
+  name: database
+  namespace: data
+spec:
+  automountServiceAccountToken: false
+  containers:
+  - image: data-only/not-executed
+    name: app
+    ports:
+    - containerPort: 5432
+      name: db
+      protocol: TCP
+---
+apiVersion: v1
+kind: Pod
+metadata:
+  annotations:
+    netscope.io/role: workload
+  labels:
+    app: metrics
+    tier: service
+  name: metrics
+  namespace: ops
+spec:
+  automountServiceAccountToken: false
+  containers:
+  - image: data-only/not-executed
+    name: app
+    ports:
+    - containerPort: 9090
+      name: http
+      protocol: TCP
+---
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: db-ingress
+  namespace: data
+spec:
+  ingress:
+  - from:
+    - namespaceSelector:
+        matchLabels:
+          kubernetes.io/metadata.name: apps
+      podSelector:
+        matchLabels:
+          app: payments
+    - namespaceSelector:
+        matchLabels:
+          kubernetes.io/metadata.name: apps
+      podSelector:
+        matchLabels:
+          app: tool-gateway
+    ports:
+    - port: 5432
+      protocol: TCP
+  podSelector:
+    matchLabels:
+      app: database
+  policyTypes:
+  - Ingress
+---
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: agent-egress
+  namespace: apps
+spec:
+  egress:
+  - ports:
+    - port: 8081
+      protocol: TCP
+    to:
+    - namespaceSelector:
+        matchLabels:
+          kubernetes.io/metadata.name: apps
+      podSelector:
+        matchLabels:
+          app: tool-gateway
+  podSelector:
+    matchLabels:
+      app: agent
+  policyTypes:
+  - Egress
+---
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: gateway-egress
+  namespace: apps
+spec:
+  egress:
+  - ports:
+    - port: 9090
+      protocol: TCP
+    to:
+    - namespaceSelector:
+        matchLabels:
+          kubernetes.io/metadata.name: ops
+      podSelector:
+        matchLabels:
+          app: metrics
+  - ports:
+    - port: 5432
+      protocol: TCP
+    to:
+    - namespaceSelector: {}
+      podSelector:
+        matchLabels:
+          tier: backend
+  podSelector:
+    matchLabels:
+      app: tool-gateway
+  policyTypes:
+  - Egress
+---
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: gateway-ingress
+  namespace: apps
+spec:
+  ingress:
+  - from:
+    - namespaceSelector:
+        matchLabels:
+          kubernetes.io/metadata.name: apps
+      podSelector:
+        matchLabels:
+          app: agent
+    ports:
+    - port: 8081
+      protocol: TCP
+  podSelector:
+    matchLabels:
+      app: tool-gateway
+  policyTypes:
+  - Ingress
+---
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: unrelated-metrics-0
+  namespace: ops
+spec:
+  ingress:
+  - from:
+    - namespaceSelector:
+        matchLabels:
+          kubernetes.io/metadata.name: apps
+      podSelector:
+        matchLabels:
+          app: frontend
+    ports:
+    - port: 9090
+      protocol: TCP
+  podSelector:
+    matchLabels:
+      app: metrics
+  policyTypes:
+  - Ingress
+---
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: unrelated-metrics-1
+  namespace: ops
+spec:
+  ingress:
+  - from:
+    - namespaceSelector:
+        matchLabels:
+          kubernetes.io/metadata.name: apps
+      podSelector:
+        matchLabels:
+          app: frontend
+    ports:
+    - port: 9090
+      protocol: TCP
+  podSelector:
+    matchLabels:
+      app: metrics
+  policyTypes:
+  - Ingress
+---
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: unrelated-metrics-2
+  namespace: ops
+spec:
+  ingress:
+  - from:
+    - namespaceSelector:
+        matchLabels:
+          kubernetes.io/metadata.name: apps
+      podSelector:
+        matchLabels:
+          app: frontend
+    ports:
+    - port: 9090
+      protocol: TCP
+  podSelector:
+    matchLabels:
+      app: metrics
+  policyTypes:
+  - Ingress
+---
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: unrelated-metrics-3
+  namespace: ops
+spec:
+  ingress:
+  - from:
+    - namespaceSelector:
+        matchLabels:
+          kubernetes.io/metadata.name: apps
+      podSelector:
+        matchLabels:
+          app: frontend
+    ports:
+    - port: 9090
+      protocol: TCP
+  podSelector:
+    matchLabels:
+      app: metrics
+  policyTypes:
+  - Ingress
+---
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: unrelated-metrics-4
+  namespace: ops
+spec:
+  ingress:
+  - from:
+    - namespaceSelector:
+        matchLabels:
+          kubernetes.io/metadata.name: apps
+      podSelector:
+        matchLabels:
+          app: frontend
+    ports:
+    - port: 9090
+      protocol: TCP
+  podSelector:
+    matchLabels:
+      app: metrics
+  policyTypes:
+  - Ingress
+---
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: unrelated-metrics-5
+  namespace: ops
+spec:
+  ingress:
+  - from:
+    - namespaceSelector:
+        matchLabels:
+          kubernetes.io/metadata.name: apps
+      podSelector:
+        matchLabels:
+          app: frontend
+    ports:
+    - port: 9090
+      protocol: TCP
+  podSelector:
+    matchLabels:
+      app: metrics
+  policyTypes:
+  - Ingress

@@ -1,0 +1,33 @@
+{
+  "oracle": "network-config-analyzer",
+  "oracle_version": "NCA version 2.1.0",
+  "netscope_version": "1.1.0",
+  "seed": 303,
+  "generated_cases": 0,
+  "cases": 1,
+  "comparisons": 2,
+  "disagreement_count": 1,
+  "disagreements": [
+    {
+      "case": 0,
+      "phase": "candidate",
+      "source": "data/b",
+      "destination": "apps/b",
+      "protocol": "TCP",
+      "port": 8080,
+      "netscope": "Allow",
+      "oracle": "Deny"
+    }
+  ],
+  "results": [
+    {
+      "case": 0,
+      "name": "Independent analyzer disagreement \u2014 overlapping egress peers",
+      "comparisons": 2,
+      "oracle_allow": 1,
+      "oracle_deny": 1,
+      "project_sha256": "ef1c33ceab98b6a24d682e974084d3ba81d6194cf31b89a8376828388a4d2832"
+    }
+  ],
+  "scope": "Explicit JSON project fixture(s); both revisions, declared query scope. Selectors, additive rules, directional isolation, named ports, and endPort ranges. No external-IP, hostNetwork, vendor policy, or real-CNI claim. Agreement on these finite fixtures is not universal correctness or certification."
+}

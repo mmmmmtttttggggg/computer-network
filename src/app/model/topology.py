@@ -1,4 +1,5 @@
 """Simple typed topology model: namespaces, Pods, ports, and connection queries."""
+
 from __future__ import annotations
 
 from dataclasses import dataclass, field
@@ -43,6 +44,7 @@ class Pod:
     namespace: str
     labels: Dict[str, str] = field(default_factory=dict, hash=False)
     ports: Tuple[ContainerPort, ...] = ()
+    unsupported: bool = False
 
     def __post_init__(self) -> None:
         if not self.name or not self.namespace:
@@ -89,3 +91,30 @@ class Topology:
 
     def pods_in_namespace(self, namespace: str) -> Tuple[Pod, ...]:
         return tuple(p for p in self.pods.values() if p.namespace == namespace)
+
+
+@dataclass(frozen=True)
+class ExternalEndpoint:
+    """Declared external IP. Only the Pod-side policy direction is modelled."""
+
+    ip: str
+
+    @property
+    def namespace(self):
+        return "@external"
+
+    @property
+    def name(self):
+        return self.ip
+
+    @property
+    def key(self):
+        return (self.namespace, self.ip)
+
+    @property
+    def ports(self):
+        return ()
+
+    @property
+    def labels(self):
+        return {}

@@ -6,6 +6,7 @@ Pure Python; independent of FastAPI/UI. Decisions are three-valued:
   * Unknown - unsupported/ambiguous input could change the answer (and nothing is a definite Deny).
 Invalid policy documents raise PolicyError.
 """
+
 from __future__ import annotations
 
 import ipaddress
@@ -15,7 +16,7 @@ from enum import Enum
 from typing import Any, Iterable, List, Mapping, Optional, Tuple, Union
 
 from app.model.selectors import LabelSelector, SelectorError, matches, parse_selector
-from app.model.topology import ConnectionQuery, Pod, Protocol, Topology
+from app.model.topology import ConnectionQuery, Pod, Protocol, Topology, ExternalEndpoint
 
 API_VERSION = "networking.k8s.io/v1"
 KIND = "NetworkPolicy"
@@ -45,7 +46,8 @@ class PortSpec:
 class Peer:
     pod_selector: Optional[LabelSelector] = None
     namespace_selector: Optional[LabelSelector] = None
-    ip_block: Optional[str] = None  # validated CIDR; cannot be resolved for Pods
+    ip_block: Optional[str] = None  # Pod IP/NAT semantics remain unknown
+    exceptions: Tuple[str, ...] = ()
 
 
 @dataclass(frozen=True)
@@ -171,8 +173,11 @@ def _parse_peer(raw: Any, where: str) -> Peer:
     return Peer(
         pod_selector=_selector(m["podSelector"], f"{where}.podSelector") if "podSelector" in m else None,
         namespace_selector=(
-            _selector(m["namespaceSelector"], f"{where}.namespaceSelector") if "namespaceSelector" in m else None
+            _selector(m["namespaceSelector"], f"{where}.namespaceSelector")
+            if "namespaceSelector" in m
+            else None
         ),
+        exceptions=tuple(m.get("ipBlock", {}).get("except", [])),
         ip_block=_parse_ip_block(m["ipBlock"], f"{where}.ipBlock") if "ipBlock" in m else None,
     )
 
@@ -181,8 +186,12 @@ def _parse_rule(raw: Any, direction: str, where: str) -> Rule:
     m = _map(raw, where)
     peer_key = "from" if direction == INGRESS else "to"
     _check_keys(m, {peer_key, "ports"}, where)
-    peers = tuple(_parse_peer(p, f"{where}.{peer_key}[{i}]") for i, p in enumerate(_opt_list(m.get(peer_key), where)))
-    ports = tuple(_parse_port(p, f"{where}.ports[{i}]") for i, p in enumerate(_opt_list(m.get("ports"), where)))
+    peers = tuple(
+        _parse_peer(p, f"{where}.{peer_key}[{i}]") for i, p in enumerate(_opt_list(m.get(peer_key), where))
+    )
+    ports = tuple(
+        _parse_port(p, f"{where}.ports[{i}]") for i, p in enumerate(_opt_list(m.get("ports"), where))
+    )
     return Rule(peers, ports)
 
 
@@ -201,10 +210,12 @@ def parse_policy(doc: Any) -> NetworkPolicy:
     pod_selector = _selector(spec["podSelector"], f"{where}.spec.podSelector")
 
     ingress = tuple(
-        _parse_rule(r, INGRESS, f"{where}.ingress[{i}]") for i, r in enumerate(_opt_list(spec.get("ingress"), where))
+        _parse_rule(r, INGRESS, f"{where}.ingress[{i}]")
+        for i, r in enumerate(_opt_list(spec.get("ingress"), where))
     )
     egress = tuple(
-        _parse_rule(r, EGRESS, f"{where}.egress[{i}]") for i, r in enumerate(_opt_list(spec.get("egress"), where))
+        _parse_rule(r, EGRESS, f"{where}.egress[{i}]")
+        for i, r in enumerate(_opt_list(spec.get("egress"), where))
     )
 
     types_raw = _opt_list(spec.get("policyTypes"), f"{where}.spec.policyTypes")
@@ -267,6 +278,7 @@ class Evaluator:
         self.topology = topology
         self.policies: List[NetworkPolicy] = []
         self.unsupported: List[str] = []
+        self._selection_cache = {}
         seen = set()
         for doc in policies:
             d = _map(doc, "policy")
@@ -287,10 +299,24 @@ class Evaluator:
     def evaluate(self, q: ConnectionQuery) -> Decision:
         if self.unsupported:
             return Decision(Verdict.UNKNOWN, "unsupported-resource")
-        src = self.topology.pods.get(q.source.key)
-        dst = self.topology.pods.get(q.destination.key)
+        src = q.source if isinstance(q.source, ExternalEndpoint) else self.topology.pods.get(q.source.key)
+        dst = (
+            q.destination
+            if isinstance(q.destination, ExternalEndpoint)
+            else self.topology.pods.get(q.destination.key)
+        )
         if src is None or dst is None:
             return Decision(Verdict.UNKNOWN, "pod-not-in-topology")
+        if getattr(src, "unsupported", False) or getattr(dst, "unsupported", False):
+            return Decision(Verdict.UNKNOWN, "host-network-unsupported")
+        if isinstance(src, ExternalEndpoint) and isinstance(dst, ExternalEndpoint):
+            return Decision(Verdict.UNKNOWN, "external-to-external-unsupported")
+        if isinstance(src, ExternalEndpoint):
+            i = self._direction(INGRESS, dst, src, dst, q)
+            return Decision(i.verdict, "pod-side-ingress-only", ingress=i)
+        if isinstance(dst, ExternalEndpoint):
+            e = self._direction(EGRESS, src, dst, dst, q)
+            return Decision(e.verdict, "pod-side-egress-only", egress=e)
         if src.key == dst.key:
             return Decision(Verdict.UNKNOWN, "self-traffic-unsupported")
 
@@ -310,13 +336,20 @@ class Evaluator:
         return Decision(verdict, reason, egress, ingress)
 
     # endpoint: Pod whose policies apply; peer: the other end; dest: destination Pod (port resolution)
-    def _direction(self, direction: str, endpoint: Pod, peer: Pod, dest: Pod, q: ConnectionQuery) -> DirectionResult:
-        selecting = [
-            p for p in self.policies
-            if p.namespace == endpoint.namespace
-            and direction in p.policy_types
-            and matches(p.pod_selector, endpoint.labels)
-        ]
+    def _direction(
+        self, direction: str, endpoint: Pod, peer: Pod, dest: Pod, q: ConnectionQuery
+    ) -> DirectionResult:
+        cache_key = (direction, endpoint.key)
+        selecting = self._selection_cache.get(cache_key)
+        if selecting is None:
+            selecting = [
+                p
+                for p in self.policies
+                if p.namespace == endpoint.namespace
+                and direction in p.policy_types
+                and matches(p.pod_selector, endpoint.labels)
+            ]
+            self._selection_cache[cache_key] = selecting
         eid = _pod_id(endpoint)
         if not selecting:
             return DirectionResult(direction, eid, False, Verdict.ALLOW, "unisolated")
@@ -338,14 +371,24 @@ class Evaluator:
             verdict, reason = Verdict.DENY, "no-rule-match"
         return DirectionResult(direction, eid, True, verdict, reason, ids, tuple(matched))
 
-    def _rule_result(self, pol: NetworkPolicy, rule: Rule, peer: Pod, dest: Pod, q: ConnectionQuery) -> Optional[bool]:
+    def _rule_result(
+        self, pol: NetworkPolicy, rule: Rule, peer: Pod, dest: Pod, q: ConnectionQuery
+    ) -> Optional[bool]:
         peer_r = _any3(self._peer_result(pol, p, peer) for p in rule.peers) if rule.peers else True
         port_r = _any3(self._port_result(p, dest, q) for p in rule.ports) if rule.ports else True
         return _and3(peer_r, port_r)
 
     def _peer_result(self, pol: NetworkPolicy, peer: Peer, pod: Pod) -> Optional[bool]:
         if peer.ip_block is not None:
+            if isinstance(pod, ExternalEndpoint):
+                ip = ipaddress.ip_address(pod.ip)
+                net = ipaddress.ip_network(peer.ip_block, strict=False)
+                return ip in net and not any(
+                    ip in ipaddress.ip_network(x, strict=False) for x in peer.exceptions
+                )
             return None  # Pod IPs are not modelled; cannot decide
+        if isinstance(pod, ExternalEndpoint):
+            return False
         if peer.namespace_selector is not None:
             ns = self.topology.namespaces[pod.namespace]
             ns_labels = {**ns.labels, NS_NAME_LABEL: ns.name}
@@ -358,14 +401,17 @@ class Evaluator:
         return True
 
     @staticmethod
-    def _port_result(spec: PortSpec, dest: Pod, q: ConnectionQuery) -> bool:
+    def _port_result(spec: PortSpec, dest: Pod, q: ConnectionQuery) -> Optional[bool]:
         if spec.protocol != q.protocol:
             return False
         if spec.port is None:
             return True
         if isinstance(spec.port, str):  # named: resolve at destination Pod
+            if isinstance(dest, ExternalEndpoint):
+                return None
             return any(
-                cp.name == spec.port and cp.protocol == spec.protocol and cp.port == q.port for cp in dest.ports
+                cp.name == spec.port and cp.protocol == spec.protocol and cp.port == q.port
+                for cp in dest.ports
             )
         if spec.end_port is None:
             return q.port == spec.port

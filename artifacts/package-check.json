@@ -1,0 +1,14 @@
+{
+  "package": "networkpolicy-digital-twin",
+  "version": "1.2.0",
+  "wheel_sha256": "2958b6387b5654e8d2e16846063dc597bede4cfdcd35a79942c7e6cc45565e8c",
+  "checks": [
+    "wheel imported outside source tree",
+    "package/distribution/report versions agree",
+    "eight packaged examples",
+    "packaged advisor and label experiments execute",
+    "packaged HTTP dashboard and new assets respond",
+    "all packaged application files match final source bytes"
+  ],
+  "result": "passed"
+}

@@ -1,0 +1,221 @@
+{
+  "schema_version": 1,
+  "tool_version": "1.2.0",
+  "created_at": "2026-11-01T18:42:40.185827+00:00",
+  "name": "The cross-namespace check",
+  "description": "A two-Pod DoesNotExist selector case where independent static analyzers disagree. NetScope predicts Allow; use recorded CNI observations to investigate.",
+  "input_hash": "bbbb92601304c4975d1beddc17f36e281d4eecaebbab42f8f55afa10c5f2c52f",
+  "hashes": {
+    "baseline": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+    "candidate": "a583273cf971fea0b4aeea372c93f7d663a8c66a2a659ba60d836755edf522d5",
+    "topology": "9f6a818e474c0a7111c5d9740d1f942e4a62f1e4194cdb837af166ce175c4dbe"
+  },
+  "mode": "static",
+  "runtime_status": "NOT_VERIFIED",
+  "exit_code": 0,
+  "status": "PASS",
+  "gate_reasons": [],
+  "stats": {
+    "queries": 1,
+    "endpoints": 2,
+    "policies_baseline": 0,
+    "policies_candidate": 1,
+    "UNCHANGED": 1,
+    "NEWLY_ALLOWED": 0,
+    "NEWLY_BLOCKED": 0,
+    "UNKNOWN": 0,
+    "intent_pass": 1,
+    "intent_fail": 0,
+    "unapproved": 0,
+    "duration_ms": 0.58
+  },
+  "rows": [
+    {
+      "tuple_id": "t-009ab2630b760343",
+      "source": "data/b",
+      "destination": "apps/b",
+      "protocol": "TCP",
+      "port": 8080,
+      "baseline": "Allow",
+      "candidate": "Allow",
+      "change": "UNCHANGED",
+      "baseline_decision": {
+        "verdict": "Allow",
+        "reason": "allowed",
+        "egress": {
+          "direction": "Egress",
+          "endpoint": "data/b",
+          "isolated": false,
+          "verdict": "Allow",
+          "reason": "unisolated",
+          "selecting_policies": [],
+          "matched_rules": []
+        },
+        "ingress": {
+          "direction": "Ingress",
+          "endpoint": "apps/b",
+          "isolated": false,
+          "verdict": "Allow",
+          "reason": "unisolated",
+          "selecting_policies": [],
+          "matched_rules": []
+        }
+      },
+      "candidate_decision": {
+        "verdict": "Allow",
+        "reason": "allowed",
+        "egress": {
+          "direction": "Egress",
+          "endpoint": "data/b",
+          "isolated": true,
+          "verdict": "Allow",
+          "reason": "rule-match",
+          "selecting_policies": [
+            "data/p-2"
+          ],
+          "matched_rules": [
+            {
+              "policy": "data/p-2",
+              "rule_index": 0,
+              "certain": true
+            }
+          ]
+        },
+        "ingress": {
+          "direction": "Ingress",
+          "endpoint": "apps/b",
+          "isolated": false,
+          "verdict": "Allow",
+          "reason": "unisolated",
+          "selecting_policies": [],
+          "matched_rules": []
+        }
+      }
+    }
+  ],
+  "intents": [
+    {
+      "intent_id": "cross-namespace-allowed",
+      "expectation": "must_allow",
+      "matched_count": 1,
+      "matched_tuples": [
+        "t-009ab2630b760343"
+      ],
+      "baseline": {
+        "status": "PASS",
+        "violations": [],
+        "unknown": []
+      },
+      "candidate": {
+        "status": "PASS",
+        "violations": [],
+        "unknown": []
+      },
+      "problems": [],
+      "conflicting_tuples": [],
+      "existing_violations": [],
+      "new_violations": [],
+      "fixed_violations": []
+    }
+  ],
+  "unapproved": [],
+  "nodes": [
+    {
+      "id": "apps/b",
+      "name": "b",
+      "namespace": "apps",
+      "labels": {
+        "app": "b"
+      },
+      "ports": [
+        {
+          "port": 8081,
+          "protocol": "TCP",
+          "name": "web"
+        },
+        {
+          "port": 5353,
+          "protocol": "UDP",
+          "name": "dns"
+        }
+      ],
+      "origin": "Pod",
+      "hostNetwork": false,
+      "serviceAccount": "default",
+      "tokenAutomount": true,
+      "role": "workload"
+    },
+    {
+      "id": "data/b",
+      "name": "b",
+      "namespace": "data",
+      "labels": {
+        "app": "b"
+      },
+      "ports": [
+        {
+          "port": 8081,
+          "protocol": "TCP",
+          "name": "web"
+        },
+        {
+          "port": 5353,
+          "protocol": "UDP",
+          "name": "dns"
+        }
+      ],
+      "origin": "Pod",
+      "hostNetwork": false,
+      "serviceAccount": "default",
+      "tokenAutomount": true,
+      "role": "workload"
+    }
+  ],
+  "warnings": [],
+  "excluded_resources": [],
+  "threat": {
+    "enabled": false,
+    "entrypoints": [],
+    "pivots": [],
+    "assets": [],
+    "baseline": {
+      "paths": [],
+      "radius": {},
+      "reachable_pairs": 0
+    },
+    "candidate": {
+      "paths": [],
+      "radius": {},
+      "reachable_pairs": 0
+    },
+    "findings": [],
+    "scope": "Known Allow queries only; at most four hops; one shortest path per entrypoint/asset. Unqueried and Unknown edges are excluded, not proven blocked.",
+    "sensitivity_scope": "Each witness pivot is removed separately and all candidate routes within the same four-hop query scope are searched again. This changes a relay assumption, not network permissions. No path found is not a universal isolation proof.",
+    "listener_note": "Container ports are declarations, not evidence of a running listener. Missing declarations do not prove a port is closed. Policy-permitted edges are retained in either case.",
+    "warning": "Conditional exposure under declared relay/compromise assumptions, not a vulnerability or exploit claim. NetworkPolicies do not enforce transitive application authorization."
+  },
+  "posture": [],
+  "plan": {
+    "tuples": [
+      {
+        "tuple_id": "t-009ab2630b760343",
+        "source": "data/b",
+        "destination": "apps/b",
+        "protocol": "TCP",
+        "port": 8080,
+        "baseline": "Allow",
+        "candidate": "Allow"
+      }
+    ],
+    "hash": "9d80998f59f29c672ac79e213e706e7fade64c061e67327fded305188dde3d5f",
+    "count_per_phase": 1,
+    "unsupported": [],
+    "complete_supported": true,
+    "attempts": 3,
+    "timeout_seconds": 2,
+    "gap_seconds": 1,
+    "settle_seconds": 10,
+    "max_concurrent": 10,
+    "coverage_note": "All changed and intent tuples; no silent sampling."
+  }
+}

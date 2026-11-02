@@ -1,0 +1,1336 @@
+{
+  "schemaVersion": 1,
+  "name": "The parallel relay",
+  "description": "Two gateways can relay the same traffic. Removing one relay assumption leaves another path; inspect the alternative before claiming containment.",
+  "topology": [
+    {
+      "apiVersion": "v1",
+      "kind": "Namespace",
+      "metadata": {
+        "name": "apps",
+        "labels": {
+          "team": "apps"
+        }
+      }
+    },
+    {
+      "apiVersion": "v1",
+      "kind": "Namespace",
+      "metadata": {
+        "name": "data",
+        "labels": {
+          "team": "data"
+        }
+      }
+    },
+    {
+      "apiVersion": "v1",
+      "kind": "Namespace",
+      "metadata": {
+        "name": "ops",
+        "labels": {
+          "team": "ops"
+        }
+      }
+    },
+    {
+      "apiVersion": "v1",
+      "kind": "Pod",
+      "metadata": {
+        "name": "frontend",
+        "namespace": "apps",
+        "labels": {
+          "app": "frontend",
+          "tier": "service"
+        },
+        "annotations": {
+          "netscope.io/role": "workload"
+        }
+      },
+      "spec": {
+        "automountServiceAccountToken": false,
+        "containers": [
+          {
+            "name": "app",
+            "image": "data-only/not-executed",
+            "ports": [
+              {
+                "containerPort": 8080,
+                "name": "http",
+                "protocol": "TCP"
+              }
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "apiVersion": "v1",
+      "kind": "Pod",
+      "metadata": {
+        "name": "payments",
+        "namespace": "apps",
+        "labels": {
+          "app": "payments",
+          "tier": "service"
+        },
+        "annotations": {
+          "netscope.io/role": "workload"
+        }
+      },
+      "spec": {
+        "automountServiceAccountToken": false,
+        "containers": [
+          {
+            "name": "app",
+            "image": "data-only/not-executed",
+            "ports": [
+              {
+                "containerPort": 8080,
+                "name": "http",
+                "protocol": "TCP"
+              }
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "apiVersion": "v1",
+      "kind": "Pod",
+      "metadata": {
+        "name": "analytics",
+        "namespace": "apps",
+        "labels": {
+          "app": "analytics",
+          "tier": "service"
+        },
+        "annotations": {
+          "netscope.io/role": "workload"
+        }
+      },
+      "spec": {
+        "automountServiceAccountToken": false,
+        "containers": [
+          {
+            "name": "app",
+            "image": "data-only/not-executed",
+            "ports": [
+              {
+                "containerPort": 8082,
+                "name": "http",
+                "protocol": "TCP"
+              }
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "apiVersion": "v1",
+      "kind": "Pod",
+      "metadata": {
+        "name": "agent",
+        "namespace": "apps",
+        "labels": {
+          "app": "agent",
+          "tier": "service"
+        },
+        "annotations": {
+          "netscope.io/role": "agent"
+        }
+      },
+      "spec": {
+        "automountServiceAccountToken": false,
+        "containers": [
+          {
+            "name": "app",
+            "image": "data-only/not-executed",
+            "ports": [
+              {
+                "containerPort": 8090,
+                "name": "http",
+                "protocol": "TCP"
+              }
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "apiVersion": "v1",
+      "kind": "Pod",
+      "metadata": {
+        "name": "tool-gateway",
+        "namespace": "apps",
+        "labels": {
+          "app": "tool-gateway",
+          "tier": "service"
+        },
+        "annotations": {
+          "netscope.io/role": "tool"
+        }
+      },
+      "spec": {
+        "automountServiceAccountToken": false,
+        "containers": [
+          {
+            "name": "app",
+            "image": "data-only/not-executed",
+            "ports": [
+              {
+                "containerPort": 8081,
+                "name": "http",
+                "protocol": "TCP"
+              }
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "apiVersion": "v1",
+      "kind": "Pod",
+      "metadata": {
+        "name": "database",
+        "namespace": "data",
+        "labels": {
+          "app": "database",
+          "tier": "backend"
+        },
+        "annotations": {
+          "netscope.io/role": "asset"
+        }
+      },
+      "spec": {
+        "automountServiceAccountToken": false,
+        "containers": [
+          {
+            "name": "app",
+            "image": "data-only/not-executed",
+            "ports": [
+              {
+                "containerPort": 5432,
+                "name": "db",
+                "protocol": "TCP"
+              }
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "apiVersion": "v1",
+      "kind": "Pod",
+      "metadata": {
+        "name": "metrics",
+        "namespace": "ops",
+        "labels": {
+          "app": "metrics",
+          "tier": "service"
+        },
+        "annotations": {
+          "netscope.io/role": "workload"
+        }
+      },
+      "spec": {
+        "automountServiceAccountToken": false,
+        "containers": [
+          {
+            "name": "app",
+            "image": "data-only/not-executed",
+            "ports": [
+              {
+                "containerPort": 9090,
+                "name": "http",
+                "protocol": "TCP"
+              }
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "apiVersion": "v1",
+      "kind": "Pod",
+      "metadata": {
+        "name": "tool-gateway-2",
+        "namespace": "apps",
+        "labels": {
+          "app": "tool-gateway",
+          "tier": "service"
+        },
+        "annotations": {
+          "netscope.io/role": "tool"
+        }
+      },
+      "spec": {
+        "automountServiceAccountToken": false,
+        "containers": [
+          {
+            "name": "app",
+            "image": "data-only/not-executed",
+            "ports": [
+              {
+                "containerPort": 8081,
+                "name": "http",
+                "protocol": "TCP"
+              }
+            ]
+          }
+        ]
+      }
+    }
+  ],
+  "baseline": [
+    {
+      "apiVersion": "networking.k8s.io/v1",
+      "kind": "NetworkPolicy",
+      "metadata": {
+        "name": "db-ingress",
+        "namespace": "data"
+      },
+      "spec": {
+        "podSelector": {
+          "matchLabels": {
+            "app": "database"
+          }
+        },
+        "policyTypes": [
+          "Ingress"
+        ],
+        "ingress": [
+          {
+            "from": [
+              {
+                "namespaceSelector": {
+                  "matchLabels": {
+                    "kubernetes.io/metadata.name": "apps"
+                  }
+                },
+                "podSelector": {
+                  "matchLabels": {
+                    "app": "payments"
+                  }
+                }
+              },
+              {
+                "namespaceSelector": {
+                  "matchLabels": {
+                    "kubernetes.io/metadata.name": "apps"
+                  }
+                },
+                "podSelector": {
+                  "matchLabels": {
+                    "app": "tool-gateway"
+                  }
+                }
+              }
+            ],
+            "ports": [
+              {
+                "protocol": "TCP",
+                "port": 5432
+              }
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "apiVersion": "networking.k8s.io/v1",
+      "kind": "NetworkPolicy",
+      "metadata": {
+        "name": "agent-egress",
+        "namespace": "apps"
+      },
+      "spec": {
+        "podSelector": {
+          "matchLabels": {
+            "app": "agent"
+          }
+        },
+        "policyTypes": [
+          "Egress"
+        ],
+        "egress": [
+          {
+            "to": [
+              {
+                "namespaceSelector": {
+                  "matchLabels": {
+                    "kubernetes.io/metadata.name": "apps"
+                  }
+                },
+                "podSelector": {
+                  "matchLabels": {
+                    "app": "tool-gateway"
+                  }
+                }
+              }
+            ],
+            "ports": [
+              {
+                "protocol": "TCP",
+                "port": 8081
+              }
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "apiVersion": "networking.k8s.io/v1",
+      "kind": "NetworkPolicy",
+      "metadata": {
+        "name": "gateway-egress",
+        "namespace": "apps"
+      },
+      "spec": {
+        "podSelector": {
+          "matchLabels": {
+            "app": "tool-gateway"
+          }
+        },
+        "policyTypes": [
+          "Egress"
+        ],
+        "egress": [
+          {
+            "to": [
+              {
+                "namespaceSelector": {
+                  "matchLabels": {
+                    "kubernetes.io/metadata.name": "ops"
+                  }
+                },
+                "podSelector": {
+                  "matchLabels": {
+                    "app": "metrics"
+                  }
+                }
+              }
+            ],
+            "ports": [
+              {
+                "protocol": "TCP",
+                "port": 9090
+              }
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "apiVersion": "networking.k8s.io/v1",
+      "kind": "NetworkPolicy",
+      "metadata": {
+        "name": "gateway-ingress",
+        "namespace": "apps"
+      },
+      "spec": {
+        "podSelector": {
+          "matchLabels": {
+            "app": "tool-gateway"
+          }
+        },
+        "policyTypes": [
+          "Ingress"
+        ],
+        "ingress": [
+          {
+            "from": [
+              {
+                "namespaceSelector": {
+                  "matchLabels": {
+                    "kubernetes.io/metadata.name": "apps"
+                  }
+                },
+                "podSelector": {
+                  "matchLabels": {
+                    "app": "agent"
+                  }
+                }
+              }
+            ],
+            "ports": [
+              {
+                "protocol": "TCP",
+                "port": 8081
+              }
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "apiVersion": "networking.k8s.io/v1",
+      "kind": "NetworkPolicy",
+      "metadata": {
+        "name": "unrelated-metrics-0",
+        "namespace": "ops"
+      },
+      "spec": {
+        "podSelector": {
+          "matchLabels": {
+            "app": "metrics"
+          }
+        },
+        "policyTypes": [
+          "Ingress"
+        ],
+        "ingress": [
+          {
+            "from": [
+              {
+                "namespaceSelector": {
+                  "matchLabels": {
+                    "kubernetes.io/metadata.name": "apps"
+                  }
+                },
+                "podSelector": {
+                  "matchLabels": {
+                    "app": "frontend"
+                  }
+                }
+              }
+            ],
+            "ports": [
+              {
+                "protocol": "TCP",
+                "port": 9090
+              }
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "apiVersion": "networking.k8s.io/v1",
+      "kind": "NetworkPolicy",
+      "metadata": {
+        "name": "unrelated-metrics-1",
+        "namespace": "ops"
+      },
+      "spec": {
+        "podSelector": {
+          "matchLabels": {
+            "app": "metrics"
+          }
+        },
+        "policyTypes": [
+          "Ingress"
+        ],
+        "ingress": [
+          {
+            "from": [
+              {
+                "namespaceSelector": {
+                  "matchLabels": {
+                    "kubernetes.io/metadata.name": "apps"
+                  }
+                },
+                "podSelector": {
+                  "matchLabels": {
+                    "app": "frontend"
+                  }
+                }
+              }
+            ],
+            "ports": [
+              {
+                "protocol": "TCP",
+                "port": 9090
+              }
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "apiVersion": "networking.k8s.io/v1",
+      "kind": "NetworkPolicy",
+      "metadata": {
+        "name": "unrelated-metrics-2",
+        "namespace": "ops"
+      },
+      "spec": {
+        "podSelector": {
+          "matchLabels": {
+            "app": "metrics"
+          }
+        },
+        "policyTypes": [
+          "Ingress"
+        ],
+        "ingress": [
+          {
+            "from": [
+              {
+                "namespaceSelector": {
+                  "matchLabels": {
+                    "kubernetes.io/metadata.name": "apps"
+                  }
+                },
+                "podSelector": {
+                  "matchLabels": {
+                    "app": "frontend"
+                  }
+                }
+              }
+            ],
+            "ports": [
+              {
+                "protocol": "TCP",
+                "port": 9090
+              }
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "apiVersion": "networking.k8s.io/v1",
+      "kind": "NetworkPolicy",
+      "metadata": {
+        "name": "unrelated-metrics-3",
+        "namespace": "ops"
+      },
+      "spec": {
+        "podSelector": {
+          "matchLabels": {
+            "app": "metrics"
+          }
+        },
+        "policyTypes": [
+          "Ingress"
+        ],
+        "ingress": [
+          {
+            "from": [
+              {
+                "namespaceSelector": {
+                  "matchLabels": {
+                    "kubernetes.io/metadata.name": "apps"
+                  }
+                },
+                "podSelector": {
+                  "matchLabels": {
+                    "app": "frontend"
+                  }
+                }
+              }
+            ],
+            "ports": [
+              {
+                "protocol": "TCP",
+                "port": 9090
+              }
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "apiVersion": "networking.k8s.io/v1",
+      "kind": "NetworkPolicy",
+      "metadata": {
+        "name": "unrelated-metrics-4",
+        "namespace": "ops"
+      },
+      "spec": {
+        "podSelector": {
+          "matchLabels": {
+            "app": "metrics"
+          }
+        },
+        "policyTypes": [
+          "Ingress"
+        ],
+        "ingress": [
+          {
+            "from": [
+              {
+                "namespaceSelector": {
+                  "matchLabels": {
+                    "kubernetes.io/metadata.name": "apps"
+                  }
+                },
+                "podSelector": {
+                  "matchLabels": {
+                    "app": "frontend"
+                  }
+                }
+              }
+            ],
+            "ports": [
+              {
+                "protocol": "TCP",
+                "port": 9090
+              }
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "apiVersion": "networking.k8s.io/v1",
+      "kind": "NetworkPolicy",
+      "metadata": {
+        "name": "unrelated-metrics-5",
+        "namespace": "ops"
+      },
+      "spec": {
+        "podSelector": {
+          "matchLabels": {
+            "app": "metrics"
+          }
+        },
+        "policyTypes": [
+          "Ingress"
+        ],
+        "ingress": [
+          {
+            "from": [
+              {
+                "namespaceSelector": {
+                  "matchLabels": {
+                    "kubernetes.io/metadata.name": "apps"
+                  }
+                },
+                "podSelector": {
+                  "matchLabels": {
+                    "app": "frontend"
+                  }
+                }
+              }
+            ],
+            "ports": [
+              {
+                "protocol": "TCP",
+                "port": 9090
+              }
+            ]
+          }
+        ]
+      }
+    }
+  ],
+  "candidate": [
+    {
+      "apiVersion": "networking.k8s.io/v1",
+      "kind": "NetworkPolicy",
+      "metadata": {
+        "name": "db-ingress",
+        "namespace": "data"
+      },
+      "spec": {
+        "podSelector": {
+          "matchLabels": {
+            "app": "database"
+          }
+        },
+        "policyTypes": [
+          "Ingress"
+        ],
+        "ingress": [
+          {
+            "from": [
+              {
+                "namespaceSelector": {
+                  "matchLabels": {
+                    "kubernetes.io/metadata.name": "apps"
+                  }
+                },
+                "podSelector": {
+                  "matchLabels": {
+                    "app": "payments"
+                  }
+                }
+              },
+              {
+                "namespaceSelector": {
+                  "matchLabels": {
+                    "kubernetes.io/metadata.name": "apps"
+                  }
+                },
+                "podSelector": {
+                  "matchLabels": {
+                    "app": "tool-gateway"
+                  }
+                }
+              }
+            ],
+            "ports": [
+              {
+                "protocol": "TCP",
+                "port": 5432
+              }
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "apiVersion": "networking.k8s.io/v1",
+      "kind": "NetworkPolicy",
+      "metadata": {
+        "name": "agent-egress",
+        "namespace": "apps"
+      },
+      "spec": {
+        "podSelector": {
+          "matchLabels": {
+            "app": "agent"
+          }
+        },
+        "policyTypes": [
+          "Egress"
+        ],
+        "egress": [
+          {
+            "to": [
+              {
+                "namespaceSelector": {
+                  "matchLabels": {
+                    "kubernetes.io/metadata.name": "apps"
+                  }
+                },
+                "podSelector": {
+                  "matchLabels": {
+                    "app": "tool-gateway"
+                  }
+                }
+              }
+            ],
+            "ports": [
+              {
+                "protocol": "TCP",
+                "port": 8081
+              }
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "apiVersion": "networking.k8s.io/v1",
+      "kind": "NetworkPolicy",
+      "metadata": {
+        "name": "gateway-egress",
+        "namespace": "apps"
+      },
+      "spec": {
+        "podSelector": {
+          "matchLabels": {
+            "app": "tool-gateway"
+          }
+        },
+        "policyTypes": [
+          "Egress"
+        ],
+        "egress": [
+          {
+            "to": [
+              {
+                "namespaceSelector": {
+                  "matchLabels": {
+                    "kubernetes.io/metadata.name": "ops"
+                  }
+                },
+                "podSelector": {
+                  "matchLabels": {
+                    "app": "metrics"
+                  }
+                }
+              }
+            ],
+            "ports": [
+              {
+                "protocol": "TCP",
+                "port": 9090
+              }
+            ]
+          },
+          {
+            "to": [
+              {
+                "namespaceSelector": {},
+                "podSelector": {
+                  "matchLabels": {
+                    "tier": "backend"
+                  }
+                }
+              }
+            ],
+            "ports": [
+              {
+                "protocol": "TCP",
+                "port": 5432
+              }
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "apiVersion": "networking.k8s.io/v1",
+      "kind": "NetworkPolicy",
+      "metadata": {
+        "name": "gateway-ingress",
+        "namespace": "apps"
+      },
+      "spec": {
+        "podSelector": {
+          "matchLabels": {
+            "app": "tool-gateway"
+          }
+        },
+        "policyTypes": [
+          "Ingress"
+        ],
+        "ingress": [
+          {
+            "from": [
+              {
+                "namespaceSelector": {
+                  "matchLabels": {
+                    "kubernetes.io/metadata.name": "apps"
+                  }
+                },
+                "podSelector": {
+                  "matchLabels": {
+                    "app": "agent"
+                  }
+                }
+              }
+            ],
+            "ports": [
+              {
+                "protocol": "TCP",
+                "port": 8081
+              }
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "apiVersion": "networking.k8s.io/v1",
+      "kind": "NetworkPolicy",
+      "metadata": {
+        "name": "unrelated-metrics-0",
+        "namespace": "ops"
+      },
+      "spec": {
+        "podSelector": {
+          "matchLabels": {
+            "app": "metrics"
+          }
+        },
+        "policyTypes": [
+          "Ingress"
+        ],
+        "ingress": [
+          {
+            "from": [
+              {
+                "namespaceSelector": {
+                  "matchLabels": {
+                    "kubernetes.io/metadata.name": "apps"
+                  }
+                },
+                "podSelector": {
+                  "matchLabels": {
+                    "app": "frontend"
+                  }
+                }
+              }
+            ],
+            "ports": [
+              {
+                "protocol": "TCP",
+                "port": 9090
+              }
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "apiVersion": "networking.k8s.io/v1",
+      "kind": "NetworkPolicy",
+      "metadata": {
+        "name": "unrelated-metrics-1",
+        "namespace": "ops"
+      },
+      "spec": {
+        "podSelector": {
+          "matchLabels": {
+            "app": "metrics"
+          }
+        },
+        "policyTypes": [
+          "Ingress"
+        ],
+        "ingress": [
+          {
+            "from": [
+              {
+                "namespaceSelector": {
+                  "matchLabels": {
+                    "kubernetes.io/metadata.name": "apps"
+                  }
+                },
+                "podSelector": {
+                  "matchLabels": {
+                    "app": "frontend"
+                  }
+                }
+              }
+            ],
+            "ports": [
+              {
+                "protocol": "TCP",
+                "port": 9090
+              }
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "apiVersion": "networking.k8s.io/v1",
+      "kind": "NetworkPolicy",
+      "metadata": {
+        "name": "unrelated-metrics-2",
+        "namespace": "ops"
+      },
+      "spec": {
+        "podSelector": {
+          "matchLabels": {
+            "app": "metrics"
+          }
+        },
+        "policyTypes": [
+          "Ingress"
+        ],
+        "ingress": [
+          {
+            "from": [
+              {
+                "namespaceSelector": {
+                  "matchLabels": {
+                    "kubernetes.io/metadata.name": "apps"
+                  }
+                },
+                "podSelector": {
+                  "matchLabels": {
+                    "app": "frontend"
+                  }
+                }
+              }
+            ],
+            "ports": [
+              {
+                "protocol": "TCP",
+                "port": 9090
+              }
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "apiVersion": "networking.k8s.io/v1",
+      "kind": "NetworkPolicy",
+      "metadata": {
+        "name": "unrelated-metrics-3",
+        "namespace": "ops"
+      },
+      "spec": {
+        "podSelector": {
+          "matchLabels": {
+            "app": "metrics"
+          }
+        },
+        "policyTypes": [
+          "Ingress"
+        ],
+        "ingress": [
+          {
+            "from": [
+              {
+                "namespaceSelector": {
+                  "matchLabels": {
+                    "kubernetes.io/metadata.name": "apps"
+                  }
+                },
+                "podSelector": {
+                  "matchLabels": {
+                    "app": "frontend"
+                  }
+                }
+              }
+            ],
+            "ports": [
+              {
+                "protocol": "TCP",
+                "port": 9090
+              }
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "apiVersion": "networking.k8s.io/v1",
+      "kind": "NetworkPolicy",
+      "metadata": {
+        "name": "unrelated-metrics-4",
+        "namespace": "ops"
+      },
+      "spec": {
+        "podSelector": {
+          "matchLabels": {
+            "app": "metrics"
+          }
+        },
+        "policyTypes": [
+          "Ingress"
+        ],
+        "ingress": [
+          {
+            "from": [
+              {
+                "namespaceSelector": {
+                  "matchLabels": {
+                    "kubernetes.io/metadata.name": "apps"
+                  }
+                },
+                "podSelector": {
+                  "matchLabels": {
+                    "app": "frontend"
+                  }
+                }
+              }
+            ],
+            "ports": [
+              {
+                "protocol": "TCP",
+                "port": 9090
+              }
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "apiVersion": "networking.k8s.io/v1",
+      "kind": "NetworkPolicy",
+      "metadata": {
+        "name": "unrelated-metrics-5",
+        "namespace": "ops"
+      },
+      "spec": {
+        "podSelector": {
+          "matchLabels": {
+            "app": "metrics"
+          }
+        },
+        "policyTypes": [
+          "Ingress"
+        ],
+        "ingress": [
+          {
+            "from": [
+              {
+                "namespaceSelector": {
+                  "matchLabels": {
+                    "kubernetes.io/metadata.name": "apps"
+                  }
+                },
+                "podSelector": {
+                  "matchLabels": {
+                    "app": "frontend"
+                  }
+                }
+              }
+            ],
+            "ports": [
+              {
+                "protocol": "TCP",
+                "port": 9090
+              }
+            ]
+          }
+        ]
+      }
+    }
+  ],
+  "intents": [
+    {
+      "id": "frontend-to-payments",
+      "source": {
+        "namespaceSelector": {
+          "matchLabels": {
+            "kubernetes.io/metadata.name": "apps"
+          }
+        },
+        "podSelector": {
+          "matchLabels": {
+            "app": "frontend"
+          }
+        }
+      },
+      "destination": {
+        "namespaceSelector": {
+          "matchLabels": {
+            "kubernetes.io/metadata.name": "apps"
+          }
+        },
+        "podSelector": {
+          "matchLabels": {
+            "app": "payments"
+          }
+        }
+      },
+      "protocol": "TCP",
+      "port": 8080,
+      "expect": "must_allow"
+    },
+    {
+      "id": "payments-to-database",
+      "source": {
+        "namespaceSelector": {
+          "matchLabels": {
+            "kubernetes.io/metadata.name": "apps"
+          }
+        },
+        "podSelector": {
+          "matchLabels": {
+            "app": "payments"
+          }
+        }
+      },
+      "destination": {
+        "namespaceSelector": {
+          "matchLabels": {
+            "kubernetes.io/metadata.name": "data"
+          }
+        },
+        "podSelector": {
+          "matchLabels": {
+            "app": "database"
+          }
+        }
+      },
+      "protocol": "TCP",
+      "port": 5432,
+      "expect": "must_allow"
+    },
+    {
+      "id": "analytics-isolated",
+      "source": {
+        "namespaceSelector": {
+          "matchLabels": {
+            "kubernetes.io/metadata.name": "apps"
+          }
+        },
+        "podSelector": {
+          "matchLabels": {
+            "app": "analytics"
+          }
+        }
+      },
+      "destination": {
+        "namespaceSelector": {
+          "matchLabels": {
+            "kubernetes.io/metadata.name": "data"
+          }
+        },
+        "podSelector": {
+          "matchLabels": {
+            "app": "database"
+          }
+        }
+      },
+      "protocol": "TCP",
+      "port": 5432,
+      "expect": "must_deny"
+    },
+    {
+      "id": "agent-only-via-tool",
+      "source": {
+        "namespaceSelector": {
+          "matchLabels": {
+            "kubernetes.io/metadata.name": "apps"
+          }
+        },
+        "podSelector": {
+          "matchLabels": {
+            "app": "agent"
+          }
+        }
+      },
+      "destination": {
+        "namespaceSelector": {
+          "matchLabels": {
+            "kubernetes.io/metadata.name": "apps"
+          }
+        },
+        "podSelector": {
+          "matchLabels": {
+            "app": "tool-gateway"
+          }
+        }
+      },
+      "protocol": "TCP",
+      "port": 8081,
+      "expect": "must_allow"
+    },
+    {
+      "id": "agent-no-direct-db",
+      "source": {
+        "namespaceSelector": {
+          "matchLabels": {
+            "kubernetes.io/metadata.name": "apps"
+          }
+        },
+        "podSelector": {
+          "matchLabels": {
+            "app": "agent"
+          }
+        }
+      },
+      "destination": {
+        "namespaceSelector": {
+          "matchLabels": {
+            "kubernetes.io/metadata.name": "data"
+          }
+        },
+        "podSelector": {
+          "matchLabels": {
+            "app": "database"
+          }
+        }
+      },
+      "protocol": "TCP",
+      "port": 5432,
+      "expect": "must_deny"
+    }
+  ],
+  "threatModel": {
+    "entrypoints": [
+      "apps/agent"
+    ],
+    "pivots": [
+      "apps/tool-gateway",
+      "apps/tool-gateway-2"
+    ],
+    "assets": [
+      "data/database"
+    ],
+    "description": "Assume the agent is compromised and the gateway can relay requests. No application exploit is inferred."
+  }
+}

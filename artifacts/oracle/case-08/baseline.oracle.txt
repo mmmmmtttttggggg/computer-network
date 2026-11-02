@@ -1,0 +1,10 @@
+0.0.0.0-255.255.255.255 => apps/a : All connections
+0.0.0.0-255.255.255.255 => apps/b : All connections
+apps/a => 0.0.0.0-255.255.255.255 : All connections
+apps/a => apps/b : All connections
+apps/b => 0.0.0.0-255.255.255.255 : All connections
+apps/b => apps/a : All connections
+data/a => apps/a : All connections
+data/a => apps/b : All connections
+data/b => apps/a : All connections
+data/b => apps/b : All connections

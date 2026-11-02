@@ -1,0 +1,31 @@
+{
+  "tool_version": "1.2.0",
+  "type": "executed static feature demonstrations",
+  "draft_count": 4,
+  "training": {
+    "effective_faults": 14,
+    "caught_before": 8,
+    "caught_with_drafts": 14
+  },
+  "holdout": {
+    "effective_faults": 6,
+    "caught_before": 2,
+    "caught_with_drafts": 4
+  },
+  "budget_limited": false,
+  "label_agent": {
+    "changed_permissions": 20,
+    "new_asset_pairs": 0,
+    "shorter_asset_paths": 1,
+    "failing_or_invalid_intents": [
+      "agent-only-via-tool",
+      "agent-no-direct-db"
+    ]
+  },
+  "label_clean": {
+    "changed_permissions": 20,
+    "new_asset_pairs": 1
+  },
+  "runtime_verified": false,
+  "warning": "Review these drafts: they preserve reference candidate behaviour, not inferred security requirements. Holdout faults come from the same synthetic generator; coverage is not analyzer accuracy or independent validation."
+}

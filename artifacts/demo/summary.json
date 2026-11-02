@@ -1,0 +1,162 @@
+[
+  {
+    "scenario": "agent-escape",
+    "status": "FAIL",
+    "exit_code": 1,
+    "stats": {
+      "queries": 252,
+      "endpoints": 7,
+      "policies_baseline": 10,
+      "policies_candidate": 10,
+      "UNCHANGED": 251,
+      "NEWLY_ALLOWED": 1,
+      "NEWLY_BLOCKED": 0,
+      "UNKNOWN": 0,
+      "intent_pass": 5,
+      "intent_fail": 0,
+      "unapproved": 1,
+      "duration_ms": 15.77
+    },
+    "conditional_asset_paths": 1
+  },
+  {
+    "scenario": "checkout-regression",
+    "status": "FAIL",
+    "exit_code": 1,
+    "stats": {
+      "queries": 252,
+      "endpoints": 7,
+      "policies_baseline": 10,
+      "policies_candidate": 10,
+      "UNCHANGED": 250,
+      "NEWLY_ALLOWED": 1,
+      "NEWLY_BLOCKED": 1,
+      "UNKNOWN": 0,
+      "intent_pass": 3,
+      "intent_fail": 2,
+      "unapproved": 2,
+      "duration_ms": 17.81
+    },
+    "conditional_asset_paths": 0
+  },
+  {
+    "scenario": "clean-baseline",
+    "status": "PASS",
+    "exit_code": 0,
+    "stats": {
+      "queries": 252,
+      "endpoints": 7,
+      "policies_baseline": 10,
+      "policies_candidate": 10,
+      "UNCHANGED": 252,
+      "NEWLY_ALLOWED": 0,
+      "NEWLY_BLOCKED": 0,
+      "UNKNOWN": 0,
+      "intent_pass": 5,
+      "intent_fail": 0,
+      "unapproved": 0,
+      "duration_ms": 14.91
+    },
+    "conditional_asset_paths": 0
+  },
+  {
+    "scenario": "cross-namespace-check",
+    "status": "PASS",
+    "exit_code": 0,
+    "stats": {
+      "queries": 1,
+      "endpoints": 2,
+      "policies_baseline": 0,
+      "policies_candidate": 1,
+      "UNCHANGED": 1,
+      "NEWLY_ALLOWED": 0,
+      "NEWLY_BLOCKED": 0,
+      "UNKNOWN": 0,
+      "intent_pass": 1,
+      "intent_fail": 0,
+      "unapproved": 0,
+      "duration_ms": 0.58
+    },
+    "conditional_asset_paths": 0
+  },
+  {
+    "scenario": "last-policy-deleted",
+    "status": "FAIL",
+    "exit_code": 1,
+    "stats": {
+      "queries": 252,
+      "endpoints": 7,
+      "policies_baseline": 10,
+      "policies_candidate": 9,
+      "NEWLY_ALLOWED": 18,
+      "UNCHANGED": 234,
+      "NEWLY_BLOCKED": 0,
+      "UNKNOWN": 0,
+      "intent_pass": 5,
+      "intent_fail": 0,
+      "unapproved": 18,
+      "duration_ms": 14.1
+    },
+    "conditional_asset_paths": 0
+  },
+  {
+    "scenario": "parallel-relay",
+    "status": "FAIL",
+    "exit_code": 1,
+    "stats": {
+      "queries": 336,
+      "endpoints": 8,
+      "policies_baseline": 10,
+      "policies_candidate": 10,
+      "UNCHANGED": 334,
+      "NEWLY_ALLOWED": 2,
+      "NEWLY_BLOCKED": 0,
+      "UNKNOWN": 0,
+      "intent_pass": 5,
+      "intent_fail": 0,
+      "unapproved": 2,
+      "duration_ms": 19.13
+    },
+    "conditional_asset_paths": 1
+  },
+  {
+    "scenario": "selector-trap",
+    "status": "FAIL",
+    "exit_code": 1,
+    "stats": {
+      "queries": 252,
+      "endpoints": 7,
+      "policies_baseline": 10,
+      "policies_candidate": 10,
+      "UNCHANGED": 250,
+      "NEWLY_ALLOWED": 2,
+      "NEWLY_BLOCKED": 0,
+      "UNKNOWN": 0,
+      "intent_pass": 4,
+      "intent_fail": 1,
+      "unapproved": 2,
+      "duration_ms": 16.56
+    },
+    "conditional_asset_paths": 0
+  },
+  {
+    "scenario": "unsupported-policy",
+    "status": "INCOMPLETE",
+    "exit_code": 2,
+    "stats": {
+      "queries": 252,
+      "endpoints": 7,
+      "policies_baseline": 10,
+      "policies_candidate": 11,
+      "UNKNOWN": 252,
+      "NEWLY_ALLOWED": 0,
+      "NEWLY_BLOCKED": 0,
+      "UNCHANGED": 0,
+      "intent_pass": 0,
+      "intent_fail": 0,
+      "unapproved": 0,
+      "duration_ms": 21.96
+    },
+    "conditional_asset_paths": 0
+  }
+]

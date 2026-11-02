@@ -1,0 +1,289 @@
+{
+  "schemaVersion": 1,
+  "name": "seed-303-05",
+  "topology": [
+    {
+      "apiVersion": "v1",
+      "kind": "Namespace",
+      "metadata": {
+        "name": "apps",
+        "labels": {
+          "team": "apps"
+        }
+      }
+    },
+    {
+      "apiVersion": "v1",
+      "kind": "Namespace",
+      "metadata": {
+        "name": "data",
+        "labels": {
+          "team": "data"
+        }
+      }
+    },
+    {
+      "apiVersion": "v1",
+      "kind": "Pod",
+      "metadata": {
+        "name": "a",
+        "namespace": "apps",
+        "labels": {
+          "app": "a"
+        }
+      },
+      "spec": {
+        "containers": [
+          {
+            "name": "app",
+            "image": "data-only/not-executed",
+            "ports": [
+              {
+                "name": "web",
+                "containerPort": 8080,
+                "protocol": "TCP"
+              },
+              {
+                "name": "dns",
+                "containerPort": 5353,
+                "protocol": "UDP"
+              }
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "apiVersion": "v1",
+      "kind": "Pod",
+      "metadata": {
+        "name": "b",
+        "namespace": "apps",
+        "labels": {
+          "app": "b"
+        }
+      },
+      "spec": {
+        "containers": [
+          {
+            "name": "app",
+            "image": "data-only/not-executed",
+            "ports": [
+              {
+                "name": "web",
+                "containerPort": 8081,
+                "protocol": "TCP"
+              },
+              {
+                "name": "dns",
+                "containerPort": 5353,
+                "protocol": "UDP"
+              }
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "apiVersion": "v1",
+      "kind": "Pod",
+      "metadata": {
+        "name": "a",
+        "namespace": "data",
+        "labels": {
+          "app": "a"
+        }
+      },
+      "spec": {
+        "containers": [
+          {
+            "name": "app",
+            "image": "data-only/not-executed",
+            "ports": [
+              {
+                "name": "web",
+                "containerPort": 8080,
+                "protocol": "TCP"
+              },
+              {
+                "name": "dns",
+                "containerPort": 5353,
+                "protocol": "UDP"
+              }
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "apiVersion": "v1",
+      "kind": "Pod",
+      "metadata": {
+        "name": "b",
+        "namespace": "data",
+        "labels": {
+          "app": "b"
+        }
+      },
+      "spec": {
+        "containers": [
+          {
+            "name": "app",
+            "image": "data-only/not-executed",
+            "ports": [
+              {
+                "name": "web",
+                "containerPort": 8081,
+                "protocol": "TCP"
+              },
+              {
+                "name": "dns",
+                "containerPort": 5353,
+                "protocol": "UDP"
+              }
+            ]
+          }
+        ]
+      }
+    }
+  ],
+  "baseline": [
+    {
+      "apiVersion": "networking.k8s.io/v1",
+      "kind": "NetworkPolicy",
+      "metadata": {
+        "name": "p-0",
+        "namespace": "apps"
+      },
+      "spec": {
+        "podSelector": {
+          "matchLabels": {
+            "app": "a"
+          }
+        },
+        "policyTypes": [
+          "Egress"
+        ],
+        "egress": []
+      }
+    }
+  ],
+  "candidate": [
+    {
+      "apiVersion": "networking.k8s.io/v1",
+      "kind": "NetworkPolicy",
+      "metadata": {
+        "name": "p-0",
+        "namespace": "apps"
+      },
+      "spec": {
+        "podSelector": {
+          "matchLabels": {
+            "app": "a"
+          }
+        },
+        "policyTypes": [
+          "Ingress",
+          "Egress"
+        ],
+        "ingress": [
+          {
+            "from": [
+              {
+                "namespaceSelector": {}
+              },
+              {
+                "namespaceSelector": {},
+                "podSelector": {
+                  "matchExpressions": [
+                    {
+                      "key": "app",
+                      "operator": "In",
+                      "values": [
+                        "a",
+                        "b"
+                      ]
+                    }
+                  ]
+                }
+              },
+              {
+                "namespaceSelector": {
+                  "matchLabels": {
+                    "team": "apps"
+                  }
+                }
+              }
+            ],
+            "ports": [
+              {
+                "protocol": "UDP",
+                "port": 5353
+              },
+              {
+                "protocol": "UDP",
+                "port": 5353
+              }
+            ]
+          }
+        ],
+        "egress": [
+          {
+            "to": [
+              {
+                "namespaceSelector": {}
+              }
+            ],
+            "ports": [
+              {
+                "port": 8080,
+                "endPort": 8081
+              },
+              {
+                "port": 8080,
+                "endPort": 8081
+              }
+            ]
+          },
+          {
+            "to": [
+              {
+                "namespaceSelector": {}
+              },
+              {
+                "podSelector": {}
+              }
+            ]
+          }
+        ]
+      }
+    }
+  ],
+  "ports": [
+    {
+      "protocol": "TCP",
+      "port": 8079
+    },
+    {
+      "protocol": "TCP",
+      "port": 8080
+    },
+    {
+      "protocol": "TCP",
+      "port": 8081
+    },
+    {
+      "protocol": "TCP",
+      "port": 8082
+    },
+    {
+      "protocol": "UDP",
+      "port": 5353
+    },
+    {
+      "protocol": "UDP",
+      "port": 8080
+    }
+  ],
+  "intents": []
+}

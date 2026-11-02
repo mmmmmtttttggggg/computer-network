@@ -6,10 +6,11 @@ Validation behaviour:
   * Unknown top-level keys, unknown operators (case-sensitive), non-string
     labels/values, empty keys, and wrong `values` shapes raise SelectorError.
 """
+
 from __future__ import annotations
 
 from dataclasses import dataclass
-from typing import Any, Dict, Mapping, Tuple, Union
+from typing import Any, Mapping, Tuple, Union
 
 
 class SelectorError(ValueError):

@@ -39,22 +39,28 @@ def test_multiple_conditions_all_must_match():
 
 
 # --- In / NotIn ----------------------------------------------------------
-@pytest.mark.parametrize("labels,expected", [
-    ({"env": "prod"}, True),
-    ({"env": "stage"}, True),
-    ({"env": "dev"}, False),
-    ({}, False),  # missing key never matches In
-])
+@pytest.mark.parametrize(
+    "labels,expected",
+    [
+        ({"env": "prod"}, True),
+        ({"env": "stage"}, True),
+        ({"env": "dev"}, False),
+        ({}, False),  # missing key never matches In
+    ],
+)
 def test_in(labels, expected):
     assert matches(expr("env", "In", ["prod", "stage"]), labels) is expected
 
 
-@pytest.mark.parametrize("labels,expected", [
-    ({"env": "dev"}, True),
-    ({"env": "prod"}, False),
-    ({}, True),  # missing key matches NotIn
-    ({"other": "x"}, True),
-])
+@pytest.mark.parametrize(
+    "labels,expected",
+    [
+        ({"env": "dev"}, True),
+        ({"env": "prod"}, False),
+        ({}, True),  # missing key matches NotIn
+        ({"other": "x"}, True),
+    ],
+)
 def test_not_in(labels, expected):
     assert matches(expr("env", "NotIn", ["prod", "stage"]), labels) is expected
 
@@ -88,29 +94,32 @@ def test_parsed_selector_object_accepted():
 
 
 # --- Malformed selectors -------------------------------------------------
-@pytest.mark.parametrize("bad", [
-    None,
-    "app=payments",
-    ["app"],
-    {"matchlabels": {"app": "x"}},                 # wrong case / unknown field
-    {"matchLabels": ["app"]},
-    {"matchLabels": {"app": 5}},                   # non-string value
-    {"matchLabels": {"": "x"}},                    # empty key
-    {"matchExpressions": {"key": "a"}},            # not a list
-    {"matchExpressions": ["a"]},                   # entry not a mapping
-    {"matchExpressions": [{"operator": "Exists"}]},            # missing key
-    {"matchExpressions": [{"key": "a"}]},                      # missing operator
-    {"matchExpressions": [{"key": "a", "operator": "Exists", "extra": 1}]},
-    {"matchExpressions": [{"key": "", "operator": "Exists"}]},
-    {"matchExpressions": [{"key": "a", "operator": "Equals", "values": ["x"]}]},
-    {"matchExpressions": [{"key": "a", "operator": "in", "values": ["x"]}]},  # case-sensitive
-    {"matchExpressions": [{"key": "a", "operator": "In"}]},                   # no values
-    {"matchExpressions": [{"key": "a", "operator": "In", "values": []}]},
-    {"matchExpressions": [{"key": "a", "operator": "NotIn", "values": "x"}]},
-    {"matchExpressions": [{"key": "a", "operator": "In", "values": [1]}]},
-    {"matchExpressions": [{"key": "a", "operator": "Exists", "values": ["x"]}]},
-    {"matchExpressions": [{"key": "a", "operator": "DoesNotExist", "values": ["x"]}]},
-])
+@pytest.mark.parametrize(
+    "bad",
+    [
+        None,
+        "app=payments",
+        ["app"],
+        {"matchlabels": {"app": "x"}},  # wrong case / unknown field
+        {"matchLabels": ["app"]},
+        {"matchLabels": {"app": 5}},  # non-string value
+        {"matchLabels": {"": "x"}},  # empty key
+        {"matchExpressions": {"key": "a"}},  # not a list
+        {"matchExpressions": ["a"]},  # entry not a mapping
+        {"matchExpressions": [{"operator": "Exists"}]},  # missing key
+        {"matchExpressions": [{"key": "a"}]},  # missing operator
+        {"matchExpressions": [{"key": "a", "operator": "Exists", "extra": 1}]},
+        {"matchExpressions": [{"key": "", "operator": "Exists"}]},
+        {"matchExpressions": [{"key": "a", "operator": "Equals", "values": ["x"]}]},
+        {"matchExpressions": [{"key": "a", "operator": "in", "values": ["x"]}]},  # case-sensitive
+        {"matchExpressions": [{"key": "a", "operator": "In"}]},  # no values
+        {"matchExpressions": [{"key": "a", "operator": "In", "values": []}]},
+        {"matchExpressions": [{"key": "a", "operator": "NotIn", "values": "x"}]},
+        {"matchExpressions": [{"key": "a", "operator": "In", "values": [1]}]},
+        {"matchExpressions": [{"key": "a", "operator": "Exists", "values": ["x"]}]},
+        {"matchExpressions": [{"key": "a", "operator": "DoesNotExist", "values": ["x"]}]},
+    ],
+)
 def test_malformed_selector_raises(bad):
     with pytest.raises(SelectorError):
         parse_selector(bad)

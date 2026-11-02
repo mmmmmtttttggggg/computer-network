@@ -1,0 +1,6 @@
+Warning: Missing named port web in the pod ::-ffff:ffff:ffff:ffff:ffff:ffff:ffff:ffff. Ignoring the pod
+Warning: Missing named port web in the pod 0.0.0.0-255.255.255.255. Ignoring the pod
+global: cluster has 4 unique endpoints, 2 namespaces
+wrote query output to: /tmp/netscope-oracle-kulrn28z/connections.txt
+Total run time:   0.02 seconds
+/workspace/scratch/cd57bd2d222b/work/netpol/artifacts/oracle/case-11/candidate.yaml:111:9: Warning: A podSelector selects all pods in the current namespace; it should better be removed.

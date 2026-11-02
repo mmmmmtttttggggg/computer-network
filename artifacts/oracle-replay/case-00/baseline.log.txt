@@ -1,0 +1,3 @@
+global: cluster has 2 unique endpoints, 2 namespaces
+wrote query output to: /tmp/netscope-oracle-y264_33z/connections.txt
+Total run time:   0.00 seconds

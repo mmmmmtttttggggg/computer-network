@@ -1,0 +1,8 @@
+0.0.0.0-255.255.255.255 => apps/a : All connections
+0.0.0.0-255.255.255.255 => apps/b : All connections
+apps/a => 0.0.0.0-255.255.255.255 : {protocols:TCP,dst_ports:8080}
+apps/a => 0.0.0.0-255.255.255.255 : {protocols:UDP,dst_ports:5353}
+apps/a => apps/b : All connections
+apps/b => 0.0.0.0-255.255.255.255 : {protocols:TCP,dst_ports:8080}
+apps/b => 0.0.0.0-255.255.255.255 : {protocols:UDP,dst_ports:5353}
+apps/b => apps/a : All connections

@@ -1,0 +1,3263 @@
+{
+  "endpoint": "apps/agent",
+  "labels_before": {
+    "app": "agent",
+    "tier": "service"
+  },
+  "labels_after": {
+    "app": "payments",
+    "tier": "service"
+  },
+  "parent_input_hash": "6d147e39004f1ef3fa8690638406a839af20bd057436d520055a11092460a16a",
+  "input_hash": "b5a5e130957b4290e9862ddc13ac2e65647e0593d8fab81d8aa6923faf907de2",
+  "project": {
+    "schemaVersion": 1,
+    "name": "The indirect escape \u00b7 label experiment",
+    "description": "Direct agent isolation still passes. One gateway egress edit creates a conditional two-hop path to the database. Can you spot it before merging?",
+    "topology": [
+      {
+        "apiVersion": "v1",
+        "kind": "Namespace",
+        "metadata": {
+          "name": "apps",
+          "labels": {
+            "team": "apps"
+          }
+        }
+      },
+      {
+        "apiVersion": "v1",
+        "kind": "Namespace",
+        "metadata": {
+          "name": "data",
+          "labels": {
+            "team": "data"
+          }
+        }
+      },
+      {
+        "apiVersion": "v1",
+        "kind": "Namespace",
+        "metadata": {
+          "name": "ops",
+          "labels": {
+            "team": "ops"
+          }
+        }
+      },
+      {
+        "apiVersion": "v1",
+        "kind": "Pod",
+        "metadata": {
+          "name": "frontend",
+          "namespace": "apps",
+          "labels": {
+            "app": "frontend",
+            "tier": "service"
+          },
+          "annotations": {
+            "netscope.io/role": "workload"
+          }
+        },
+        "spec": {
+          "automountServiceAccountToken": false,
+          "containers": [
+            {
+              "name": "app",
+              "image": "data-only/not-executed",
+              "ports": [
+                {
+                  "containerPort": 8080,
+                  "name": "http",
+                  "protocol": "TCP"
+                }
+              ]
+            }
+          ]
+        }
+      },
+      {
+        "apiVersion": "v1",
+        "kind": "Pod",
+        "metadata": {
+          "name": "payments",
+          "namespace": "apps",
+          "labels": {
+            "app": "payments",
+            "tier": "service"
+          },
+          "annotations": {
+            "netscope.io/role": "workload"
+          }
+        },
+        "spec": {
+          "automountServiceAccountToken": false,
+          "containers": [
+            {
+              "name": "app",
+              "image": "data-only/not-executed",
+              "ports": [
+                {
+                  "containerPort": 8080,
+                  "name": "http",
+                  "protocol": "TCP"
+                }
+              ]
+            }
+          ]
+        }
+      },
+      {
+        "apiVersion": "v1",
+        "kind": "Pod",
+        "metadata": {
+          "name": "analytics",
+          "namespace": "apps",
+          "labels": {
+            "app": "analytics",
+            "tier": "service"
+          },
+          "annotations": {
+            "netscope.io/role": "workload"
+          }
+        },
+        "spec": {
+          "automountServiceAccountToken": false,
+          "containers": [
+            {
+              "name": "app",
+              "image": "data-only/not-executed",
+              "ports": [
+                {
+                  "containerPort": 8082,
+                  "name": "http",
+                  "protocol": "TCP"
+                }
+              ]
+            }
+          ]
+        }
+      },
+      {
+        "apiVersion": "v1",
+        "kind": "Pod",
+        "metadata": {
+          "name": "agent",
+          "namespace": "apps",
+          "labels": {
+            "app": "payments",
+            "tier": "service"
+          },
+          "annotations": {
+            "netscope.io/role": "agent"
+          }
+        },
+        "spec": {
+          "automountServiceAccountToken": false,
+          "containers": [
+            {
+              "name": "app",
+              "image": "data-only/not-executed",
+              "ports": [
+                {
+                  "containerPort": 8090,
+                  "name": "http",
+                  "protocol": "TCP"
+                }
+              ]
+            }
+          ]
+        }
+      },
+      {
+        "apiVersion": "v1",
+        "kind": "Pod",
+        "metadata": {
+          "name": "tool-gateway",
+          "namespace": "apps",
+          "labels": {
+            "app": "tool-gateway",
+            "tier": "service"
+          },
+          "annotations": {
+            "netscope.io/role": "tool"
+          }
+        },
+        "spec": {
+          "automountServiceAccountToken": false,
+          "containers": [
+            {
+              "name": "app",
+              "image": "data-only/not-executed",
+              "ports": [
+                {
+                  "containerPort": 8081,
+                  "name": "http",
+                  "protocol": "TCP"
+                }
+              ]
+            }
+          ]
+        }
+      },
+      {
+        "apiVersion": "v1",
+        "kind": "Pod",
+        "metadata": {
+          "name": "database",
+          "namespace": "data",
+          "labels": {
+            "app": "database",
+            "tier": "backend"
+          },
+          "annotations": {
+            "netscope.io/role": "asset"
+          }
+        },
+        "spec": {
+          "automountServiceAccountToken": false,
+          "containers": [
+            {
+              "name": "app",
+              "image": "data-only/not-executed",
+              "ports": [
+                {
+                  "containerPort": 5432,
+                  "name": "db",
+                  "protocol": "TCP"
+                }
+              ]
+            }
+          ]
+        }
+      },
+      {
+        "apiVersion": "v1",
+        "kind": "Pod",
+        "metadata": {
+          "name": "metrics",
+          "namespace": "ops",
+          "labels": {
+            "app": "metrics",
+            "tier": "service"
+          },
+          "annotations": {
+            "netscope.io/role": "workload"
+          }
+        },
+        "spec": {
+          "automountServiceAccountToken": false,
+          "containers": [
+            {
+              "name": "app",
+              "image": "data-only/not-executed",
+              "ports": [
+                {
+                  "containerPort": 9090,
+                  "name": "http",
+                  "protocol": "TCP"
+                }
+              ]
+            }
+          ]
+        }
+      }
+    ],
+    "baseline": [
+      {
+        "apiVersion": "networking.k8s.io/v1",
+        "kind": "NetworkPolicy",
+        "metadata": {
+          "name": "db-ingress",
+          "namespace": "data"
+        },
+        "spec": {
+          "podSelector": {
+            "matchLabels": {
+              "app": "database"
+            }
+          },
+          "policyTypes": [
+            "Ingress"
+          ],
+          "ingress": [
+            {
+              "from": [
+                {
+                  "namespaceSelector": {
+                    "matchLabels": {
+                      "kubernetes.io/metadata.name": "apps"
+                    }
+                  },
+                  "podSelector": {
+                    "matchLabels": {
+                      "app": "payments"
+                    }
+                  }
+                },
+                {
+                  "namespaceSelector": {
+                    "matchLabels": {
+                      "kubernetes.io/metadata.name": "apps"
+                    }
+                  },
+                  "podSelector": {
+                    "matchLabels": {
+                      "app": "tool-gateway"
+                    }
+                  }
+                }
+              ],
+              "ports": [
+                {
+                  "protocol": "TCP",
+                  "port": 5432
+                }
+              ]
+            }
+          ]
+        }
+      },
+      {
+        "apiVersion": "networking.k8s.io/v1",
+        "kind": "NetworkPolicy",
+        "metadata": {
+          "name": "agent-egress",
+          "namespace": "apps"
+        },
+        "spec": {
+          "podSelector": {
+            "matchLabels": {
+              "app": "agent"
+            }
+          },
+          "policyTypes": [
+            "Egress"
+          ],
+          "egress": [
+            {
+              "to": [
+                {
+                  "namespaceSelector": {
+                    "matchLabels": {
+                      "kubernetes.io/metadata.name": "apps"
+                    }
+                  },
+                  "podSelector": {
+                    "matchLabels": {
+                      "app": "tool-gateway"
+                    }
+                  }
+                }
+              ],
+              "ports": [
+                {
+                  "protocol": "TCP",
+                  "port": 8081
+                }
+              ]
+            }
+          ]
+        }
+      },
+      {
+        "apiVersion": "networking.k8s.io/v1",
+        "kind": "NetworkPolicy",
+        "metadata": {
+          "name": "gateway-egress",
+          "namespace": "apps"
+        },
+        "spec": {
+          "podSelector": {
+            "matchLabels": {
+              "app": "tool-gateway"
+            }
+          },
+          "policyTypes": [
+            "Egress"
+          ],
+          "egress": [
+            {
+              "to": [
+                {
+                  "namespaceSelector": {
+                    "matchLabels": {
+                      "kubernetes.io/metadata.name": "ops"
+                    }
+                  },
+                  "podSelector": {
+                    "matchLabels": {
+                      "app": "metrics"
+                    }
+                  }
+                }
+              ],
+              "ports": [
+                {
+                  "protocol": "TCP",
+                  "port": 9090
+                }
+              ]
+            }
+          ]
+        }
+      },
+      {
+        "apiVersion": "networking.k8s.io/v1",
+        "kind": "NetworkPolicy",
+        "metadata": {
+          "name": "gateway-ingress",
+          "namespace": "apps"
+        },
+        "spec": {
+          "podSelector": {
+            "matchLabels": {
+              "app": "tool-gateway"
+            }
+          },
+          "policyTypes": [
+            "Ingress"
+          ],
+          "ingress": [
+            {
+              "from": [
+                {
+                  "namespaceSelector": {
+                    "matchLabels": {
+                      "kubernetes.io/metadata.name": "apps"
+                    }
+                  },
+                  "podSelector": {
+                    "matchLabels": {
+                      "app": "agent"
+                    }
+                  }
+                }
+              ],
+              "ports": [
+                {
+                  "protocol": "TCP",
+                  "port": 8081
+                }
+              ]
+            }
+          ]
+        }
+      },
+      {
+        "apiVersion": "networking.k8s.io/v1",
+        "kind": "NetworkPolicy",
+        "metadata": {
+          "name": "unrelated-metrics-0",
+          "namespace": "ops"
+        },
+        "spec": {
+          "podSelector": {
+            "matchLabels": {
+              "app": "metrics"
+            }
+          },
+          "policyTypes": [
+            "Ingress"
+          ],
+          "ingress": [
+            {
+              "from": [
+                {
+                  "namespaceSelector": {
+                    "matchLabels": {
+                      "kubernetes.io/metadata.name": "apps"
+                    }
+                  },
+                  "podSelector": {
+                    "matchLabels": {
+                      "app": "frontend"
+                    }
+                  }
+                }
+              ],
+              "ports": [
+                {
+                  "protocol": "TCP",
+                  "port": 9090
+                }
+              ]
+            }
+          ]
+        }
+      },
+      {
+        "apiVersion": "networking.k8s.io/v1",
+        "kind": "NetworkPolicy",
+        "metadata": {
+          "name": "unrelated-metrics-1",
+          "namespace": "ops"
+        },
+        "spec": {
+          "podSelector": {
+            "matchLabels": {
+              "app": "metrics"
+            }
+          },
+          "policyTypes": [
+            "Ingress"
+          ],
+          "ingress": [
+            {
+              "from": [
+                {
+                  "namespaceSelector": {
+                    "matchLabels": {
+                      "kubernetes.io/metadata.name": "apps"
+                    }
+                  },
+                  "podSelector": {
+                    "matchLabels": {
+                      "app": "frontend"
+                    }
+                  }
+                }
+              ],
+              "ports": [
+                {
+                  "protocol": "TCP",
+                  "port": 9090
+                }
+              ]
+            }
+          ]
+        }
+      },
+      {
+        "apiVersion": "networking.k8s.io/v1",
+        "kind": "NetworkPolicy",
+        "metadata": {
+          "name": "unrelated-metrics-2",
+          "namespace": "ops"
+        },
+        "spec": {
+          "podSelector": {
+            "matchLabels": {
+              "app": "metrics"
+            }
+          },
+          "policyTypes": [
+            "Ingress"
+          ],
+          "ingress": [
+            {
+              "from": [
+                {
+                  "namespaceSelector": {
+                    "matchLabels": {
+                      "kubernetes.io/metadata.name": "apps"
+                    }
+                  },
+                  "podSelector": {
+                    "matchLabels": {
+                      "app": "frontend"
+                    }
+                  }
+                }
+              ],
+              "ports": [
+                {
+                  "protocol": "TCP",
+                  "port": 9090
+                }
+              ]
+            }
+          ]
+        }
+      },
+      {
+        "apiVersion": "networking.k8s.io/v1",
+        "kind": "NetworkPolicy",
+        "metadata": {
+          "name": "unrelated-metrics-3",
+          "namespace": "ops"
+        },
+        "spec": {
+          "podSelector": {
+            "matchLabels": {
+              "app": "metrics"
+            }
+          },
+          "policyTypes": [
+            "Ingress"
+          ],
+          "ingress": [
+            {
+              "from": [
+                {
+                  "namespaceSelector": {
+                    "matchLabels": {
+                      "kubernetes.io/metadata.name": "apps"
+                    }
+                  },
+                  "podSelector": {
+                    "matchLabels": {
+                      "app": "frontend"
+                    }
+                  }
+                }
+              ],
+              "ports": [
+                {
+                  "protocol": "TCP",
+                  "port": 9090
+                }
+              ]
+            }
+          ]
+        }
+      },
+      {
+        "apiVersion": "networking.k8s.io/v1",
+        "kind": "NetworkPolicy",
+        "metadata": {
+          "name": "unrelated-metrics-4",
+          "namespace": "ops"
+        },
+        "spec": {
+          "podSelector": {
+            "matchLabels": {
+              "app": "metrics"
+            }
+          },
+          "policyTypes": [
+            "Ingress"
+          ],
+          "ingress": [
+            {
+              "from": [
+                {
+                  "namespaceSelector": {
+                    "matchLabels": {
+                      "kubernetes.io/metadata.name": "apps"
+                    }
+                  },
+                  "podSelector": {
+                    "matchLabels": {
+                      "app": "frontend"
+                    }
+                  }
+                }
+              ],
+              "ports": [
+                {
+                  "protocol": "TCP",
+                  "port": 9090
+                }
+              ]
+            }
+          ]
+        }
+      },
+      {
+        "apiVersion": "networking.k8s.io/v1",
+        "kind": "NetworkPolicy",
+        "metadata": {
+          "name": "unrelated-metrics-5",
+          "namespace": "ops"
+        },
+        "spec": {
+          "podSelector": {
+            "matchLabels": {
+              "app": "metrics"
+            }
+          },
+          "policyTypes": [
+            "Ingress"
+          ],
+          "ingress": [
+            {
+              "from": [
+                {
+                  "namespaceSelector": {
+                    "matchLabels": {
+                      "kubernetes.io/metadata.name": "apps"
+                    }
+                  },
+                  "podSelector": {
+                    "matchLabels": {
+                      "app": "frontend"
+                    }
+                  }
+                }
+              ],
+              "ports": [
+                {
+                  "protocol": "TCP",
+                  "port": 9090
+                }
+              ]
+            }
+          ]
+        }
+      }
+    ],
+    "candidate": [
+      {
+        "apiVersion": "networking.k8s.io/v1",
+        "kind": "NetworkPolicy",
+        "metadata": {
+          "name": "db-ingress",
+          "namespace": "data"
+        },
+        "spec": {
+          "podSelector": {
+            "matchLabels": {
+              "app": "database"
+            }
+          },
+          "policyTypes": [
+            "Ingress"
+          ],
+          "ingress": [
+            {
+              "from": [
+                {
+                  "namespaceSelector": {
+                    "matchLabels": {
+                      "kubernetes.io/metadata.name": "apps"
+                    }
+                  },
+                  "podSelector": {
+                    "matchLabels": {
+                      "app": "payments"
+                    }
+                  }
+                },
+                {
+                  "namespaceSelector": {
+                    "matchLabels": {
+                      "kubernetes.io/metadata.name": "apps"
+                    }
+                  },
+                  "podSelector": {
+                    "matchLabels": {
+                      "app": "tool-gateway"
+                    }
+                  }
+                }
+              ],
+              "ports": [
+                {
+                  "protocol": "TCP",
+                  "port": 5432
+                }
+              ]
+            }
+          ]
+        }
+      },
+      {
+        "apiVersion": "networking.k8s.io/v1",
+        "kind": "NetworkPolicy",
+        "metadata": {
+          "name": "agent-egress",
+          "namespace": "apps"
+        },
+        "spec": {
+          "podSelector": {
+            "matchLabels": {
+              "app": "agent"
+            }
+          },
+          "policyTypes": [
+            "Egress"
+          ],
+          "egress": [
+            {
+              "to": [
+                {
+                  "namespaceSelector": {
+                    "matchLabels": {
+                      "kubernetes.io/metadata.name": "apps"
+                    }
+                  },
+                  "podSelector": {
+                    "matchLabels": {
+                      "app": "tool-gateway"
+                    }
+                  }
+                }
+              ],
+              "ports": [
+                {
+                  "protocol": "TCP",
+                  "port": 8081
+                }
+              ]
+            }
+          ]
+        }
+      },
+      {
+        "apiVersion": "networking.k8s.io/v1",
+        "kind": "NetworkPolicy",
+        "metadata": {
+          "name": "gateway-egress",
+          "namespace": "apps"
+        },
+        "spec": {
+          "podSelector": {
+            "matchLabels": {
+              "app": "tool-gateway"
+            }
+          },
+          "policyTypes": [
+            "Egress"
+          ],
+          "egress": [
+            {
+              "to": [
+                {
+                  "namespaceSelector": {
+                    "matchLabels": {
+                      "kubernetes.io/metadata.name": "ops"
+                    }
+                  },
+                  "podSelector": {
+                    "matchLabels": {
+                      "app": "metrics"
+                    }
+                  }
+                }
+              ],
+              "ports": [
+                {
+                  "protocol": "TCP",
+                  "port": 9090
+                }
+              ]
+            },
+            {
+              "to": [
+                {
+                  "namespaceSelector": {},
+                  "podSelector": {
+                    "matchLabels": {
+                      "tier": "backend"
+                    }
+                  }
+                }
+              ],
+              "ports": [
+                {
+                  "protocol": "TCP",
+                  "port": 5432
+                }
+              ]
+            }
+          ]
+        }
+      },
+      {
+        "apiVersion": "networking.k8s.io/v1",
+        "kind": "NetworkPolicy",
+        "metadata": {
+          "name": "gateway-ingress",
+          "namespace": "apps"
+        },
+        "spec": {
+          "podSelector": {
+            "matchLabels": {
+              "app": "tool-gateway"
+            }
+          },
+          "policyTypes": [
+            "Ingress"
+          ],
+          "ingress": [
+            {
+              "from": [
+                {
+                  "namespaceSelector": {
+                    "matchLabels": {
+                      "kubernetes.io/metadata.name": "apps"
+                    }
+                  },
+                  "podSelector": {
+                    "matchLabels": {
+                      "app": "agent"
+                    }
+                  }
+                }
+              ],
+              "ports": [
+                {
+                  "protocol": "TCP",
+                  "port": 8081
+                }
+              ]
+            }
+          ]
+        }
+      },
+      {
+        "apiVersion": "networking.k8s.io/v1",
+        "kind": "NetworkPolicy",
+        "metadata": {
+          "name": "unrelated-metrics-0",
+          "namespace": "ops"
+        },
+        "spec": {
+          "podSelector": {
+            "matchLabels": {
+              "app": "metrics"
+            }
+          },
+          "policyTypes": [
+            "Ingress"
+          ],
+          "ingress": [
+            {
+              "from": [
+                {
+                  "namespaceSelector": {
+                    "matchLabels": {
+                      "kubernetes.io/metadata.name": "apps"
+                    }
+                  },
+                  "podSelector": {
+                    "matchLabels": {
+                      "app": "frontend"
+                    }
+                  }
+                }
+              ],
+              "ports": [
+                {
+                  "protocol": "TCP",
+                  "port": 9090
+                }
+              ]
+            }
+          ]
+        }
+      },
+      {
+        "apiVersion": "networking.k8s.io/v1",
+        "kind": "NetworkPolicy",
+        "metadata": {
+          "name": "unrelated-metrics-1",
+          "namespace": "ops"
+        },
+        "spec": {
+          "podSelector": {
+            "matchLabels": {
+              "app": "metrics"
+            }
+          },
+          "policyTypes": [
+            "Ingress"
+          ],
+          "ingress": [
+            {
+              "from": [
+                {
+                  "namespaceSelector": {
+                    "matchLabels": {
+                      "kubernetes.io/metadata.name": "apps"
+                    }
+                  },
+                  "podSelector": {
+                    "matchLabels": {
+                      "app": "frontend"
+                    }
+                  }
+                }
+              ],
+              "ports": [
+                {
+                  "protocol": "TCP",
+                  "port": 9090
+                }
+              ]
+            }
+          ]
+        }
+      },
+      {
+        "apiVersion": "networking.k8s.io/v1",
+        "kind": "NetworkPolicy",
+        "metadata": {
+          "name": "unrelated-metrics-2",
+          "namespace": "ops"
+        },
+        "spec": {
+          "podSelector": {
+            "matchLabels": {
+              "app": "metrics"
+            }
+          },
+          "policyTypes": [
+            "Ingress"
+          ],
+          "ingress": [
+            {
+              "from": [
+                {
+                  "namespaceSelector": {
+                    "matchLabels": {
+                      "kubernetes.io/metadata.name": "apps"
+                    }
+                  },
+                  "podSelector": {
+                    "matchLabels": {
+                      "app": "frontend"
+                    }
+                  }
+                }
+              ],
+              "ports": [
+                {
+                  "protocol": "TCP",
+                  "port": 9090
+                }
+              ]
+            }
+          ]
+        }
+      },
+      {
+        "apiVersion": "networking.k8s.io/v1",
+        "kind": "NetworkPolicy",
+        "metadata": {
+          "name": "unrelated-metrics-3",
+          "namespace": "ops"
+        },
+        "spec": {
+          "podSelector": {
+            "matchLabels": {
+              "app": "metrics"
+            }
+          },
+          "policyTypes": [
+            "Ingress"
+          ],
+          "ingress": [
+            {
+              "from": [
+                {
+                  "namespaceSelector": {
+                    "matchLabels": {
+                      "kubernetes.io/metadata.name": "apps"
+                    }
+                  },
+                  "podSelector": {
+                    "matchLabels": {
+                      "app": "frontend"
+                    }
+                  }
+                }
+              ],
+              "ports": [
+                {
+                  "protocol": "TCP",
+                  "port": 9090
+                }
+              ]
+            }
+          ]
+        }
+      },
+      {
+        "apiVersion": "networking.k8s.io/v1",
+        "kind": "NetworkPolicy",
+        "metadata": {
+          "name": "unrelated-metrics-4",
+          "namespace": "ops"
+        },
+        "spec": {
+          "podSelector": {
+            "matchLabels": {
+              "app": "metrics"
+            }
+          },
+          "policyTypes": [
+            "Ingress"
+          ],
+          "ingress": [
+            {
+              "from": [
+                {
+                  "namespaceSelector": {
+                    "matchLabels": {
+                      "kubernetes.io/metadata.name": "apps"
+                    }
+                  },
+                  "podSelector": {
+                    "matchLabels": {
+                      "app": "frontend"
+                    }
+                  }
+                }
+              ],
+              "ports": [
+                {
+                  "protocol": "TCP",
+                  "port": 9090
+                }
+              ]
+            }
+          ]
+        }
+      },
+      {
+        "apiVersion": "networking.k8s.io/v1",
+        "kind": "NetworkPolicy",
+        "metadata": {
+          "name": "unrelated-metrics-5",
+          "namespace": "ops"
+        },
+        "spec": {
+          "podSelector": {
+            "matchLabels": {
+              "app": "metrics"
+            }
+          },
+          "policyTypes": [
+            "Ingress"
+          ],
+          "ingress": [
+            {
+              "from": [
+                {
+                  "namespaceSelector": {
+                    "matchLabels": {
+                      "kubernetes.io/metadata.name": "apps"
+                    }
+                  },
+                  "podSelector": {
+                    "matchLabels": {
+                      "app": "frontend"
+                    }
+                  }
+                }
+              ],
+              "ports": [
+                {
+                  "protocol": "TCP",
+                  "port": 9090
+                }
+              ]
+            }
+          ]
+        }
+      }
+    ],
+    "intents": [
+      {
+        "id": "frontend-to-payments",
+        "source": {
+          "namespaceSelector": {
+            "matchLabels": {
+              "kubernetes.io/metadata.name": "apps"
+            }
+          },
+          "podSelector": {
+            "matchLabels": {
+              "app": "frontend"
+            }
+          }
+        },
+        "destination": {
+          "namespaceSelector": {
+            "matchLabels": {
+              "kubernetes.io/metadata.name": "apps"
+            }
+          },
+          "podSelector": {
+            "matchLabels": {
+              "app": "payments"
+            }
+          }
+        },
+        "protocol": "TCP",
+        "port": 8080,
+        "expect": "must_allow"
+      },
+      {
+        "id": "payments-to-database",
+        "source": {
+          "namespaceSelector": {
+            "matchLabels": {
+              "kubernetes.io/metadata.name": "apps"
+            }
+          },
+          "podSelector": {
+            "matchLabels": {
+              "app": "payments"
+            }
+          }
+        },
+        "destination": {
+          "namespaceSelector": {
+            "matchLabels": {
+              "kubernetes.io/metadata.name": "data"
+            }
+          },
+          "podSelector": {
+            "matchLabels": {
+              "app": "database"
+            }
+          }
+        },
+        "protocol": "TCP",
+        "port": 5432,
+        "expect": "must_allow"
+      },
+      {
+        "id": "analytics-isolated",
+        "source": {
+          "namespaceSelector": {
+            "matchLabels": {
+              "kubernetes.io/metadata.name": "apps"
+            }
+          },
+          "podSelector": {
+            "matchLabels": {
+              "app": "analytics"
+            }
+          }
+        },
+        "destination": {
+          "namespaceSelector": {
+            "matchLabels": {
+              "kubernetes.io/metadata.name": "data"
+            }
+          },
+          "podSelector": {
+            "matchLabels": {
+              "app": "database"
+            }
+          }
+        },
+        "protocol": "TCP",
+        "port": 5432,
+        "expect": "must_deny"
+      },
+      {
+        "id": "agent-only-via-tool",
+        "source": {
+          "namespaceSelector": {
+            "matchLabels": {
+              "kubernetes.io/metadata.name": "apps"
+            }
+          },
+          "podSelector": {
+            "matchLabels": {
+              "app": "agent"
+            }
+          }
+        },
+        "destination": {
+          "namespaceSelector": {
+            "matchLabels": {
+              "kubernetes.io/metadata.name": "apps"
+            }
+          },
+          "podSelector": {
+            "matchLabels": {
+              "app": "tool-gateway"
+            }
+          }
+        },
+        "protocol": "TCP",
+        "port": 8081,
+        "expect": "must_allow"
+      },
+      {
+        "id": "agent-no-direct-db",
+        "source": {
+          "namespaceSelector": {
+            "matchLabels": {
+              "kubernetes.io/metadata.name": "apps"
+            }
+          },
+          "podSelector": {
+            "matchLabels": {
+              "app": "agent"
+            }
+          }
+        },
+        "destination": {
+          "namespaceSelector": {
+            "matchLabels": {
+              "kubernetes.io/metadata.name": "data"
+            }
+          },
+          "podSelector": {
+            "matchLabels": {
+              "app": "database"
+            }
+          }
+        },
+        "protocol": "TCP",
+        "port": 5432,
+        "expect": "must_deny"
+      }
+    ],
+    "threatModel": {
+      "entrypoints": [
+        "apps/agent"
+      ],
+      "pivots": [
+        "apps/tool-gateway"
+      ],
+      "assets": [
+        "data/database"
+      ],
+      "description": "Assume the agent is compromised and the gateway can relay requests. No application exploit is inferred."
+    },
+    "queries": [
+      {
+        "source": "apps/agent",
+        "destination": "apps/analytics",
+        "protocol": "TCP",
+        "port": 5432
+      },
+      {
+        "source": "apps/agent",
+        "destination": "apps/analytics",
+        "protocol": "TCP",
+        "port": 8080
+      },
+      {
+        "source": "apps/agent",
+        "destination": "apps/analytics",
+        "protocol": "TCP",
+        "port": 8081
+      },
+      {
+        "source": "apps/agent",
+        "destination": "apps/analytics",
+        "protocol": "TCP",
+        "port": 8082
+      },
+      {
+        "source": "apps/agent",
+        "destination": "apps/analytics",
+        "protocol": "TCP",
+        "port": 8090
+      },
+      {
+        "source": "apps/agent",
+        "destination": "apps/analytics",
+        "protocol": "TCP",
+        "port": 9090
+      },
+      {
+        "source": "apps/agent",
+        "destination": "apps/frontend",
+        "protocol": "TCP",
+        "port": 5432
+      },
+      {
+        "source": "apps/agent",
+        "destination": "apps/frontend",
+        "protocol": "TCP",
+        "port": 8080
+      },
+      {
+        "source": "apps/agent",
+        "destination": "apps/frontend",
+        "protocol": "TCP",
+        "port": 8081
+      },
+      {
+        "source": "apps/agent",
+        "destination": "apps/frontend",
+        "protocol": "TCP",
+        "port": 8082
+      },
+      {
+        "source": "apps/agent",
+        "destination": "apps/frontend",
+        "protocol": "TCP",
+        "port": 8090
+      },
+      {
+        "source": "apps/agent",
+        "destination": "apps/frontend",
+        "protocol": "TCP",
+        "port": 9090
+      },
+      {
+        "source": "apps/agent",
+        "destination": "apps/payments",
+        "protocol": "TCP",
+        "port": 5432
+      },
+      {
+        "source": "apps/agent",
+        "destination": "apps/payments",
+        "protocol": "TCP",
+        "port": 8080
+      },
+      {
+        "source": "apps/agent",
+        "destination": "apps/payments",
+        "protocol": "TCP",
+        "port": 8081
+      },
+      {
+        "source": "apps/agent",
+        "destination": "apps/payments",
+        "protocol": "TCP",
+        "port": 8082
+      },
+      {
+        "source": "apps/agent",
+        "destination": "apps/payments",
+        "protocol": "TCP",
+        "port": 8090
+      },
+      {
+        "source": "apps/agent",
+        "destination": "apps/payments",
+        "protocol": "TCP",
+        "port": 9090
+      },
+      {
+        "source": "apps/agent",
+        "destination": "apps/tool-gateway",
+        "protocol": "TCP",
+        "port": 5432
+      },
+      {
+        "source": "apps/agent",
+        "destination": "apps/tool-gateway",
+        "protocol": "TCP",
+        "port": 8080
+      },
+      {
+        "source": "apps/agent",
+        "destination": "apps/tool-gateway",
+        "protocol": "TCP",
+        "port": 8081
+      },
+      {
+        "source": "apps/agent",
+        "destination": "apps/tool-gateway",
+        "protocol": "TCP",
+        "port": 8082
+      },
+      {
+        "source": "apps/agent",
+        "destination": "apps/tool-gateway",
+        "protocol": "TCP",
+        "port": 8090
+      },
+      {
+        "source": "apps/agent",
+        "destination": "apps/tool-gateway",
+        "protocol": "TCP",
+        "port": 9090
+      },
+      {
+        "source": "apps/agent",
+        "destination": "data/database",
+        "protocol": "TCP",
+        "port": 5432
+      },
+      {
+        "source": "apps/agent",
+        "destination": "data/database",
+        "protocol": "TCP",
+        "port": 8080
+      },
+      {
+        "source": "apps/agent",
+        "destination": "data/database",
+        "protocol": "TCP",
+        "port": 8081
+      },
+      {
+        "source": "apps/agent",
+        "destination": "data/database",
+        "protocol": "TCP",
+        "port": 8082
+      },
+      {
+        "source": "apps/agent",
+        "destination": "data/database",
+        "protocol": "TCP",
+        "port": 8090
+      },
+      {
+        "source": "apps/agent",
+        "destination": "data/database",
+        "protocol": "TCP",
+        "port": 9090
+      },
+      {
+        "source": "apps/agent",
+        "destination": "ops/metrics",
+        "protocol": "TCP",
+        "port": 5432
+      },
+      {
+        "source": "apps/agent",
+        "destination": "ops/metrics",
+        "protocol": "TCP",
+        "port": 8080
+      },
+      {
+        "source": "apps/agent",
+        "destination": "ops/metrics",
+        "protocol": "TCP",
+        "port": 8081
+      },
+      {
+        "source": "apps/agent",
+        "destination": "ops/metrics",
+        "protocol": "TCP",
+        "port": 8082
+      },
+      {
+        "source": "apps/agent",
+        "destination": "ops/metrics",
+        "protocol": "TCP",
+        "port": 8090
+      },
+      {
+        "source": "apps/agent",
+        "destination": "ops/metrics",
+        "protocol": "TCP",
+        "port": 9090
+      },
+      {
+        "source": "apps/analytics",
+        "destination": "apps/agent",
+        "protocol": "TCP",
+        "port": 5432
+      },
+      {
+        "source": "apps/analytics",
+        "destination": "apps/agent",
+        "protocol": "TCP",
+        "port": 8080
+      },
+      {
+        "source": "apps/analytics",
+        "destination": "apps/agent",
+        "protocol": "TCP",
+        "port": 8081
+      },
+      {
+        "source": "apps/analytics",
+        "destination": "apps/agent",
+        "protocol": "TCP",
+        "port": 8082
+      },
+      {
+        "source": "apps/analytics",
+        "destination": "apps/agent",
+        "protocol": "TCP",
+        "port": 8090
+      },
+      {
+        "source": "apps/analytics",
+        "destination": "apps/agent",
+        "protocol": "TCP",
+        "port": 9090
+      },
+      {
+        "source": "apps/analytics",
+        "destination": "apps/frontend",
+        "protocol": "TCP",
+        "port": 5432
+      },
+      {
+        "source": "apps/analytics",
+        "destination": "apps/frontend",
+        "protocol": "TCP",
+        "port": 8080
+      },
+      {
+        "source": "apps/analytics",
+        "destination": "apps/frontend",
+        "protocol": "TCP",
+        "port": 8081
+      },
+      {
+        "source": "apps/analytics",
+        "destination": "apps/frontend",
+        "protocol": "TCP",
+        "port": 8082
+      },
+      {
+        "source": "apps/analytics",
+        "destination": "apps/frontend",
+        "protocol": "TCP",
+        "port": 8090
+      },
+      {
+        "source": "apps/analytics",
+        "destination": "apps/frontend",
+        "protocol": "TCP",
+        "port": 9090
+      },
+      {
+        "source": "apps/analytics",
+        "destination": "apps/payments",
+        "protocol": "TCP",
+        "port": 5432
+      },
+      {
+        "source": "apps/analytics",
+        "destination": "apps/payments",
+        "protocol": "TCP",
+        "port": 8080
+      },
+      {
+        "source": "apps/analytics",
+        "destination": "apps/payments",
+        "protocol": "TCP",
+        "port": 8081
+      },
+      {
+        "source": "apps/analytics",
+        "destination": "apps/payments",
+        "protocol": "TCP",
+        "port": 8082
+      },
+      {
+        "source": "apps/analytics",
+        "destination": "apps/payments",
+        "protocol": "TCP",
+        "port": 8090
+      },
+      {
+        "source": "apps/analytics",
+        "destination": "apps/payments",
+        "protocol": "TCP",
+        "port": 9090
+      },
+      {
+        "source": "apps/analytics",
+        "destination": "apps/tool-gateway",
+        "protocol": "TCP",
+        "port": 5432
+      },
+      {
+        "source": "apps/analytics",
+        "destination": "apps/tool-gateway",
+        "protocol": "TCP",
+        "port": 8080
+      },
+      {
+        "source": "apps/analytics",
+        "destination": "apps/tool-gateway",
+        "protocol": "TCP",
+        "port": 8081
+      },
+      {
+        "source": "apps/analytics",
+        "destination": "apps/tool-gateway",
+        "protocol": "TCP",
+        "port": 8082
+      },
+      {
+        "source": "apps/analytics",
+        "destination": "apps/tool-gateway",
+        "protocol": "TCP",
+        "port": 8090
+      },
+      {
+        "source": "apps/analytics",
+        "destination": "apps/tool-gateway",
+        "protocol": "TCP",
+        "port": 9090
+      },
+      {
+        "source": "apps/analytics",
+        "destination": "data/database",
+        "protocol": "TCP",
+        "port": 5432
+      },
+      {
+        "source": "apps/analytics",
+        "destination": "data/database",
+        "protocol": "TCP",
+        "port": 8080
+      },
+      {
+        "source": "apps/analytics",
+        "destination": "data/database",
+        "protocol": "TCP",
+        "port": 8081
+      },
+      {
+        "source": "apps/analytics",
+        "destination": "data/database",
+        "protocol": "TCP",
+        "port": 8082
+      },
+      {
+        "source": "apps/analytics",
+        "destination": "data/database",
+        "protocol": "TCP",
+        "port": 8090
+      },
+      {
+        "source": "apps/analytics",
+        "destination": "data/database",
+        "protocol": "TCP",
+        "port": 9090
+      },
+      {
+        "source": "apps/analytics",
+        "destination": "ops/metrics",
+        "protocol": "TCP",
+        "port": 5432
+      },
+      {
+        "source": "apps/analytics",
+        "destination": "ops/metrics",
+        "protocol": "TCP",
+        "port": 8080
+      },
+      {
+        "source": "apps/analytics",
+        "destination": "ops/metrics",
+        "protocol": "TCP",
+        "port": 8081
+      },
+      {
+        "source": "apps/analytics",
+        "destination": "ops/metrics",
+        "protocol": "TCP",
+        "port": 8082
+      },
+      {
+        "source": "apps/analytics",
+        "destination": "ops/metrics",
+        "protocol": "TCP",
+        "port": 8090
+      },
+      {
+        "source": "apps/analytics",
+        "destination": "ops/metrics",
+        "protocol": "TCP",
+        "port": 9090
+      },
+      {
+        "source": "apps/frontend",
+        "destination": "apps/agent",
+        "protocol": "TCP",
+        "port": 5432
+      },
+      {
+        "source": "apps/frontend",
+        "destination": "apps/agent",
+        "protocol": "TCP",
+        "port": 8080
+      },
+      {
+        "source": "apps/frontend",
+        "destination": "apps/agent",
+        "protocol": "TCP",
+        "port": 8081
+      },
+      {
+        "source": "apps/frontend",
+        "destination": "apps/agent",
+        "protocol": "TCP",
+        "port": 8082
+      },
+      {
+        "source": "apps/frontend",
+        "destination": "apps/agent",
+        "protocol": "TCP",
+        "port": 8090
+      },
+      {
+        "source": "apps/frontend",
+        "destination": "apps/agent",
+        "protocol": "TCP",
+        "port": 9090
+      },
+      {
+        "source": "apps/frontend",
+        "destination": "apps/analytics",
+        "protocol": "TCP",
+        "port": 5432
+      },
+      {
+        "source": "apps/frontend",
+        "destination": "apps/analytics",
+        "protocol": "TCP",
+        "port": 8080
+      },
+      {
+        "source": "apps/frontend",
+        "destination": "apps/analytics",
+        "protocol": "TCP",
+        "port": 8081
+      },
+      {
+        "source": "apps/frontend",
+        "destination": "apps/analytics",
+        "protocol": "TCP",
+        "port": 8082
+      },
+      {
+        "source": "apps/frontend",
+        "destination": "apps/analytics",
+        "protocol": "TCP",
+        "port": 8090
+      },
+      {
+        "source": "apps/frontend",
+        "destination": "apps/analytics",
+        "protocol": "TCP",
+        "port": 9090
+      },
+      {
+        "source": "apps/frontend",
+        "destination": "apps/payments",
+        "protocol": "TCP",
+        "port": 5432
+      },
+      {
+        "source": "apps/frontend",
+        "destination": "apps/payments",
+        "protocol": "TCP",
+        "port": 8080
+      },
+      {
+        "source": "apps/frontend",
+        "destination": "apps/payments",
+        "protocol": "TCP",
+        "port": 8081
+      },
+      {
+        "source": "apps/frontend",
+        "destination": "apps/payments",
+        "protocol": "TCP",
+        "port": 8082
+      },
+      {
+        "source": "apps/frontend",
+        "destination": "apps/payments",
+        "protocol": "TCP",
+        "port": 8090
+      },
+      {
+        "source": "apps/frontend",
+        "destination": "apps/payments",
+        "protocol": "TCP",
+        "port": 9090
+      },
+      {
+        "source": "apps/frontend",
+        "destination": "apps/tool-gateway",
+        "protocol": "TCP",
+        "port": 5432
+      },
+      {
+        "source": "apps/frontend",
+        "destination": "apps/tool-gateway",
+        "protocol": "TCP",
+        "port": 8080
+      },
+      {
+        "source": "apps/frontend",
+        "destination": "apps/tool-gateway",
+        "protocol": "TCP",
+        "port": 8081
+      },
+      {
+        "source": "apps/frontend",
+        "destination": "apps/tool-gateway",
+        "protocol": "TCP",
+        "port": 8082
+      },
+      {
+        "source": "apps/frontend",
+        "destination": "apps/tool-gateway",
+        "protocol": "TCP",
+        "port": 8090
+      },
+      {
+        "source": "apps/frontend",
+        "destination": "apps/tool-gateway",
+        "protocol": "TCP",
+        "port": 9090
+      },
+      {
+        "source": "apps/frontend",
+        "destination": "data/database",
+        "protocol": "TCP",
+        "port": 5432
+      },
+      {
+        "source": "apps/frontend",
+        "destination": "data/database",
+        "protocol": "TCP",
+        "port": 8080
+      },
+      {
+        "source": "apps/frontend",
+        "destination": "data/database",
+        "protocol": "TCP",
+        "port": 8081
+      },
+      {
+        "source": "apps/frontend",
+        "destination": "data/database",
+        "protocol": "TCP",
+        "port": 8082
+      },
+      {
+        "source": "apps/frontend",
+        "destination": "data/database",
+        "protocol": "TCP",
+        "port": 8090
+      },
+      {
+        "source": "apps/frontend",
+        "destination": "data/database",
+        "protocol": "TCP",
+        "port": 9090
+      },
+      {
+        "source": "apps/frontend",
+        "destination": "ops/metrics",
+        "protocol": "TCP",
+        "port": 5432
+      },
+      {
+        "source": "apps/frontend",
+        "destination": "ops/metrics",
+        "protocol": "TCP",
+        "port": 8080
+      },
+      {
+        "source": "apps/frontend",
+        "destination": "ops/metrics",
+        "protocol": "TCP",
+        "port": 8081
+      },
+      {
+        "source": "apps/frontend",
+        "destination": "ops/metrics",
+        "protocol": "TCP",
+        "port": 8082
+      },
+      {
+        "source": "apps/frontend",
+        "destination": "ops/metrics",
+        "protocol": "TCP",
+        "port": 8090
+      },
+      {
+        "source": "apps/frontend",
+        "destination": "ops/metrics",
+        "protocol": "TCP",
+        "port": 9090
+      },
+      {
+        "source": "apps/payments",
+        "destination": "apps/agent",
+        "protocol": "TCP",
+        "port": 5432
+      },
+      {
+        "source": "apps/payments",
+        "destination": "apps/agent",
+        "protocol": "TCP",
+        "port": 8080
+      },
+      {
+        "source": "apps/payments",
+        "destination": "apps/agent",
+        "protocol": "TCP",
+        "port": 8081
+      },
+      {
+        "source": "apps/payments",
+        "destination": "apps/agent",
+        "protocol": "TCP",
+        "port": 8082
+      },
+      {
+        "source": "apps/payments",
+        "destination": "apps/agent",
+        "protocol": "TCP",
+        "port": 8090
+      },
+      {
+        "source": "apps/payments",
+        "destination": "apps/agent",
+        "protocol": "TCP",
+        "port": 9090
+      },
+      {
+        "source": "apps/payments",
+        "destination": "apps/analytics",
+        "protocol": "TCP",
+        "port": 5432
+      },
+      {
+        "source": "apps/payments",
+        "destination": "apps/analytics",
+        "protocol": "TCP",
+        "port": 8080
+      },
+      {
+        "source": "apps/payments",
+        "destination": "apps/analytics",
+        "protocol": "TCP",
+        "port": 8081
+      },
+      {
+        "source": "apps/payments",
+        "destination": "apps/analytics",
+        "protocol": "TCP",
+        "port": 8082
+      },
+      {
+        "source": "apps/payments",
+        "destination": "apps/analytics",
+        "protocol": "TCP",
+        "port": 8090
+      },
+      {
+        "source": "apps/payments",
+        "destination": "apps/analytics",
+        "protocol": "TCP",
+        "port": 9090
+      },
+      {
+        "source": "apps/payments",
+        "destination": "apps/frontend",
+        "protocol": "TCP",
+        "port": 5432
+      },
+      {
+        "source": "apps/payments",
+        "destination": "apps/frontend",
+        "protocol": "TCP",
+        "port": 8080
+      },
+      {
+        "source": "apps/payments",
+        "destination": "apps/frontend",
+        "protocol": "TCP",
+        "port": 8081
+      },
+      {
+        "source": "apps/payments",
+        "destination": "apps/frontend",
+        "protocol": "TCP",
+        "port": 8082
+      },
+      {
+        "source": "apps/payments",
+        "destination": "apps/frontend",
+        "protocol": "TCP",
+        "port": 8090
+      },
+      {
+        "source": "apps/payments",
+        "destination": "apps/frontend",
+        "protocol": "TCP",
+        "port": 9090
+      },
+      {
+        "source": "apps/payments",
+        "destination": "apps/tool-gateway",
+        "protocol": "TCP",
+        "port": 5432
+      },
+      {
+        "source": "apps/payments",
+        "destination": "apps/tool-gateway",
+        "protocol": "TCP",
+        "port": 8080
+      },
+      {
+        "source": "apps/payments",
+        "destination": "apps/tool-gateway",
+        "protocol": "TCP",
+        "port": 8081
+      },
+      {
+        "source": "apps/payments",
+        "destination": "apps/tool-gateway",
+        "protocol": "TCP",
+        "port": 8082
+      },
+      {
+        "source": "apps/payments",
+        "destination": "apps/tool-gateway",
+        "protocol": "TCP",
+        "port": 8090
+      },
+      {
+        "source": "apps/payments",
+        "destination": "apps/tool-gateway",
+        "protocol": "TCP",
+        "port": 9090
+      },
+      {
+        "source": "apps/payments",
+        "destination": "data/database",
+        "protocol": "TCP",
+        "port": 5432
+      },
+      {
+        "source": "apps/payments",
+        "destination": "data/database",
+        "protocol": "TCP",
+        "port": 8080
+      },
+      {
+        "source": "apps/payments",
+        "destination": "data/database",
+        "protocol": "TCP",
+        "port": 8081
+      },
+      {
+        "source": "apps/payments",
+        "destination": "data/database",
+        "protocol": "TCP",
+        "port": 8082
+      },
+      {
+        "source": "apps/payments",
+        "destination": "data/database",
+        "protocol": "TCP",
+        "port": 8090
+      },
+      {
+        "source": "apps/payments",
+        "destination": "data/database",
+        "protocol": "TCP",
+        "port": 9090
+      },
+      {
+        "source": "apps/payments",
+        "destination": "ops/metrics",
+        "protocol": "TCP",
+        "port": 5432
+      },
+      {
+        "source": "apps/payments",
+        "destination": "ops/metrics",
+        "protocol": "TCP",
+        "port": 8080
+      },
+      {
+        "source": "apps/payments",
+        "destination": "ops/metrics",
+        "protocol": "TCP",
+        "port": 8081
+      },
+      {
+        "source": "apps/payments",
+        "destination": "ops/metrics",
+        "protocol": "TCP",
+        "port": 8082
+      },
+      {
+        "source": "apps/payments",
+        "destination": "ops/metrics",
+        "protocol": "TCP",
+        "port": 8090
+      },
+      {
+        "source": "apps/payments",
+        "destination": "ops/metrics",
+        "protocol": "TCP",
+        "port": 9090
+      },
+      {
+        "source": "apps/tool-gateway",
+        "destination": "apps/agent",
+        "protocol": "TCP",
+        "port": 5432
+      },
+      {
+        "source": "apps/tool-gateway",
+        "destination": "apps/agent",
+        "protocol": "TCP",
+        "port": 8080
+      },
+      {
+        "source": "apps/tool-gateway",
+        "destination": "apps/agent",
+        "protocol": "TCP",
+        "port": 8081
+      },
+      {
+        "source": "apps/tool-gateway",
+        "destination": "apps/agent",
+        "protocol": "TCP",
+        "port": 8082
+      },
+      {
+        "source": "apps/tool-gateway",
+        "destination": "apps/agent",
+        "protocol": "TCP",
+        "port": 8090
+      },
+      {
+        "source": "apps/tool-gateway",
+        "destination": "apps/agent",
+        "protocol": "TCP",
+        "port": 9090
+      },
+      {
+        "source": "apps/tool-gateway",
+        "destination": "apps/analytics",
+        "protocol": "TCP",
+        "port": 5432
+      },
+      {
+        "source": "apps/tool-gateway",
+        "destination": "apps/analytics",
+        "protocol": "TCP",
+        "port": 8080
+      },
+      {
+        "source": "apps/tool-gateway",
+        "destination": "apps/analytics",
+        "protocol": "TCP",
+        "port": 8081
+      },
+      {
+        "source": "apps/tool-gateway",
+        "destination": "apps/analytics",
+        "protocol": "TCP",
+        "port": 8082
+      },
+      {
+        "source": "apps/tool-gateway",
+        "destination": "apps/analytics",
+        "protocol": "TCP",
+        "port": 8090
+      },
+      {
+        "source": "apps/tool-gateway",
+        "destination": "apps/analytics",
+        "protocol": "TCP",
+        "port": 9090
+      },
+      {
+        "source": "apps/tool-gateway",
+        "destination": "apps/frontend",
+        "protocol": "TCP",
+        "port": 5432
+      },
+      {
+        "source": "apps/tool-gateway",
+        "destination": "apps/frontend",
+        "protocol": "TCP",
+        "port": 8080
+      },
+      {
+        "source": "apps/tool-gateway",
+        "destination": "apps/frontend",
+        "protocol": "TCP",
+        "port": 8081
+      },
+      {
+        "source": "apps/tool-gateway",
+        "destination": "apps/frontend",
+        "protocol": "TCP",
+        "port": 8082
+      },
+      {
+        "source": "apps/tool-gateway",
+        "destination": "apps/frontend",
+        "protocol": "TCP",
+        "port": 8090
+      },
+      {
+        "source": "apps/tool-gateway",
+        "destination": "apps/frontend",
+        "protocol": "TCP",
+        "port": 9090
+      },
+      {
+        "source": "apps/tool-gateway",
+        "destination": "apps/payments",
+        "protocol": "TCP",
+        "port": 5432
+      },
+      {
+        "source": "apps/tool-gateway",
+        "destination": "apps/payments",
+        "protocol": "TCP",
+        "port": 8080
+      },
+      {
+        "source": "apps/tool-gateway",
+        "destination": "apps/payments",
+        "protocol": "TCP",
+        "port": 8081
+      },
+      {
+        "source": "apps/tool-gateway",
+        "destination": "apps/payments",
+        "protocol": "TCP",
+        "port": 8082
+      },
+      {
+        "source": "apps/tool-gateway",
+        "destination": "apps/payments",
+        "protocol": "TCP",
+        "port": 8090
+      },
+      {
+        "source": "apps/tool-gateway",
+        "destination": "apps/payments",
+        "protocol": "TCP",
+        "port": 9090
+      },
+      {
+        "source": "apps/tool-gateway",
+        "destination": "data/database",
+        "protocol": "TCP",
+        "port": 5432
+      },
+      {
+        "source": "apps/tool-gateway",
+        "destination": "data/database",
+        "protocol": "TCP",
+        "port": 8080
+      },
+      {
+        "source": "apps/tool-gateway",
+        "destination": "data/database",
+        "protocol": "TCP",
+        "port": 8081
+      },
+      {
+        "source": "apps/tool-gateway",
+        "destination": "data/database",
+        "protocol": "TCP",
+        "port": 8082
+      },
+      {
+        "source": "apps/tool-gateway",
+        "destination": "data/database",
+        "protocol": "TCP",
+        "port": 8090
+      },
+      {
+        "source": "apps/tool-gateway",
+        "destination": "data/database",
+        "protocol": "TCP",
+        "port": 9090
+      },
+      {
+        "source": "apps/tool-gateway",
+        "destination": "ops/metrics",
+        "protocol": "TCP",
+        "port": 5432
+      },
+      {
+        "source": "apps/tool-gateway",
+        "destination": "ops/metrics",
+        "protocol": "TCP",
+        "port": 8080
+      },
+      {
+        "source": "apps/tool-gateway",
+        "destination": "ops/metrics",
+        "protocol": "TCP",
+        "port": 8081
+      },
+      {
+        "source": "apps/tool-gateway",
+        "destination": "ops/metrics",
+        "protocol": "TCP",
+        "port": 8082
+      },
+      {
+        "source": "apps/tool-gateway",
+        "destination": "ops/metrics",
+        "protocol": "TCP",
+        "port": 8090
+      },
+      {
+        "source": "apps/tool-gateway",
+        "destination": "ops/metrics",
+        "protocol": "TCP",
+        "port": 9090
+      },
+      {
+        "source": "data/database",
+        "destination": "apps/agent",
+        "protocol": "TCP",
+        "port": 5432
+      },
+      {
+        "source": "data/database",
+        "destination": "apps/agent",
+        "protocol": "TCP",
+        "port": 8080
+      },
+      {
+        "source": "data/database",
+        "destination": "apps/agent",
+        "protocol": "TCP",
+        "port": 8081
+      },
+      {
+        "source": "data/database",
+        "destination": "apps/agent",
+        "protocol": "TCP",
+        "port": 8082
+      },
+      {
+        "source": "data/database",
+        "destination": "apps/agent",
+        "protocol": "TCP",
+        "port": 8090
+      },
+      {
+        "source": "data/database",
+        "destination": "apps/agent",
+        "protocol": "TCP",
+        "port": 9090
+      },
+      {
+        "source": "data/database",
+        "destination": "apps/analytics",
+        "protocol": "TCP",
+        "port": 5432
+      },
+      {
+        "source": "data/database",
+        "destination": "apps/analytics",
+        "protocol": "TCP",
+        "port": 8080
+      },
+      {
+        "source": "data/database",
+        "destination": "apps/analytics",
+        "protocol": "TCP",
+        "port": 8081
+      },
+      {
+        "source": "data/database",
+        "destination": "apps/analytics",
+        "protocol": "TCP",
+        "port": 8082
+      },
+      {
+        "source": "data/database",
+        "destination": "apps/analytics",
+        "protocol": "TCP",
+        "port": 8090
+      },
+      {
+        "source": "data/database",
+        "destination": "apps/analytics",
+        "protocol": "TCP",
+        "port": 9090
+      },
+      {
+        "source": "data/database",
+        "destination": "apps/frontend",
+        "protocol": "TCP",
+        "port": 5432
+      },
+      {
+        "source": "data/database",
+        "destination": "apps/frontend",
+        "protocol": "TCP",
+        "port": 8080
+      },
+      {
+        "source": "data/database",
+        "destination": "apps/frontend",
+        "protocol": "TCP",
+        "port": 8081
+      },
+      {
+        "source": "data/database",
+        "destination": "apps/frontend",
+        "protocol": "TCP",
+        "port": 8082
+      },
+      {
+        "source": "data/database",
+        "destination": "apps/frontend",
+        "protocol": "TCP",
+        "port": 8090
+      },
+      {
+        "source": "data/database",
+        "destination": "apps/frontend",
+        "protocol": "TCP",
+        "port": 9090
+      },
+      {
+        "source": "data/database",
+        "destination": "apps/payments",
+        "protocol": "TCP",
+        "port": 5432
+      },
+      {
+        "source": "data/database",
+        "destination": "apps/payments",
+        "protocol": "TCP",
+        "port": 8080
+      },
+      {
+        "source": "data/database",
+        "destination": "apps/payments",
+        "protocol": "TCP",
+        "port": 8081
+      },
+      {
+        "source": "data/database",
+        "destination": "apps/payments",
+        "protocol": "TCP",
+        "port": 8082
+      },
+      {
+        "source": "data/database",
+        "destination": "apps/payments",
+        "protocol": "TCP",
+        "port": 8090
+      },
+      {
+        "source": "data/database",
+        "destination": "apps/payments",
+        "protocol": "TCP",
+        "port": 9090
+      },
+      {
+        "source": "data/database",
+        "destination": "apps/tool-gateway",
+        "protocol": "TCP",
+        "port": 5432
+      },
+      {
+        "source": "data/database",
+        "destination": "apps/tool-gateway",
+        "protocol": "TCP",
+        "port": 8080
+      },
+      {
+        "source": "data/database",
+        "destination": "apps/tool-gateway",
+        "protocol": "TCP",
+        "port": 8081
+      },
+      {
+        "source": "data/database",
+        "destination": "apps/tool-gateway",
+        "protocol": "TCP",
+        "port": 8082
+      },
+      {
+        "source": "data/database",
+        "destination": "apps/tool-gateway",
+        "protocol": "TCP",
+        "port": 8090
+      },
+      {
+        "source": "data/database",
+        "destination": "apps/tool-gateway",
+        "protocol": "TCP",
+        "port": 9090
+      },
+      {
+        "source": "data/database",
+        "destination": "ops/metrics",
+        "protocol": "TCP",
+        "port": 5432
+      },
+      {
+        "source": "data/database",
+        "destination": "ops/metrics",
+        "protocol": "TCP",
+        "port": 8080
+      },
+      {
+        "source": "data/database",
+        "destination": "ops/metrics",
+        "protocol": "TCP",
+        "port": 8081
+      },
+      {
+        "source": "data/database",
+        "destination": "ops/metrics",
+        "protocol": "TCP",
+        "port": 8082
+      },
+      {
+        "source": "data/database",
+        "destination": "ops/metrics",
+        "protocol": "TCP",
+        "port": 8090
+      },
+      {
+        "source": "data/database",
+        "destination": "ops/metrics",
+        "protocol": "TCP",
+        "port": 9090
+      },
+      {
+        "source": "ops/metrics",
+        "destination": "apps/agent",
+        "protocol": "TCP",
+        "port": 5432
+      },
+      {
+        "source": "ops/metrics",
+        "destination": "apps/agent",
+        "protocol": "TCP",
+        "port": 8080
+      },
+      {
+        "source": "ops/metrics",
+        "destination": "apps/agent",
+        "protocol": "TCP",
+        "port": 8081
+      },
+      {
+        "source": "ops/metrics",
+        "destination": "apps/agent",
+        "protocol": "TCP",
+        "port": 8082
+      },
+      {
+        "source": "ops/metrics",
+        "destination": "apps/agent",
+        "protocol": "TCP",
+        "port": 8090
+      },
+      {
+        "source": "ops/metrics",
+        "destination": "apps/agent",
+        "protocol": "TCP",
+        "port": 9090
+      },
+      {
+        "source": "ops/metrics",
+        "destination": "apps/analytics",
+        "protocol": "TCP",
+        "port": 5432
+      },
+      {
+        "source": "ops/metrics",
+        "destination": "apps/analytics",
+        "protocol": "TCP",
+        "port": 8080
+      },
+      {
+        "source": "ops/metrics",
+        "destination": "apps/analytics",
+        "protocol": "TCP",
+        "port": 8081
+      },
+      {
+        "source": "ops/metrics",
+        "destination": "apps/analytics",
+        "protocol": "TCP",
+        "port": 8082
+      },
+      {
+        "source": "ops/metrics",
+        "destination": "apps/analytics",
+        "protocol": "TCP",
+        "port": 8090
+      },
+      {
+        "source": "ops/metrics",
+        "destination": "apps/analytics",
+        "protocol": "TCP",
+        "port": 9090
+      },
+      {
+        "source": "ops/metrics",
+        "destination": "apps/frontend",
+        "protocol": "TCP",
+        "port": 5432
+      },
+      {
+        "source": "ops/metrics",
+        "destination": "apps/frontend",
+        "protocol": "TCP",
+        "port": 8080
+      },
+      {
+        "source": "ops/metrics",
+        "destination": "apps/frontend",
+        "protocol": "TCP",
+        "port": 8081
+      },
+      {
+        "source": "ops/metrics",
+        "destination": "apps/frontend",
+        "protocol": "TCP",
+        "port": 8082
+      },
+      {
+        "source": "ops/metrics",
+        "destination": "apps/frontend",
+        "protocol": "TCP",
+        "port": 8090
+      },
+      {
+        "source": "ops/metrics",
+        "destination": "apps/frontend",
+        "protocol": "TCP",
+        "port": 9090
+      },
+      {
+        "source": "ops/metrics",
+        "destination": "apps/payments",
+        "protocol": "TCP",
+        "port": 5432
+      },
+      {
+        "source": "ops/metrics",
+        "destination": "apps/payments",
+        "protocol": "TCP",
+        "port": 8080
+      },
+      {
+        "source": "ops/metrics",
+        "destination": "apps/payments",
+        "protocol": "TCP",
+        "port": 8081
+      },
+      {
+        "source": "ops/metrics",
+        "destination": "apps/payments",
+        "protocol": "TCP",
+        "port": 8082
+      },
+      {
+        "source": "ops/metrics",
+        "destination": "apps/payments",
+        "protocol": "TCP",
+        "port": 8090
+      },
+      {
+        "source": "ops/metrics",
+        "destination": "apps/payments",
+        "protocol": "TCP",
+        "port": 9090
+      },
+      {
+        "source": "ops/metrics",
+        "destination": "apps/tool-gateway",
+        "protocol": "TCP",
+        "port": 5432
+      },
+      {
+        "source": "ops/metrics",
+        "destination": "apps/tool-gateway",
+        "protocol": "TCP",
+        "port": 8080
+      },
+      {
+        "source": "ops/metrics",
+        "destination": "apps/tool-gateway",
+        "protocol": "TCP",
+        "port": 8081
+      },
+      {
+        "source": "ops/metrics",
+        "destination": "apps/tool-gateway",
+        "protocol": "TCP",
+        "port": 8082
+      },
+      {
+        "source": "ops/metrics",
+        "destination": "apps/tool-gateway",
+        "protocol": "TCP",
+        "port": 8090
+      },
+      {
+        "source": "ops/metrics",
+        "destination": "apps/tool-gateway",
+        "protocol": "TCP",
+        "port": 9090
+      },
+      {
+        "source": "ops/metrics",
+        "destination": "data/database",
+        "protocol": "TCP",
+        "port": 5432
+      },
+      {
+        "source": "ops/metrics",
+        "destination": "data/database",
+        "protocol": "TCP",
+        "port": 8080
+      },
+      {
+        "source": "ops/metrics",
+        "destination": "data/database",
+        "protocol": "TCP",
+        "port": 8081
+      },
+      {
+        "source": "ops/metrics",
+        "destination": "data/database",
+        "protocol": "TCP",
+        "port": 8082
+      },
+      {
+        "source": "ops/metrics",
+        "destination": "data/database",
+        "protocol": "TCP",
+        "port": 8090
+      },
+      {
+        "source": "ops/metrics",
+        "destination": "data/database",
+        "protocol": "TCP",
+        "port": 9090
+      }
+    ]
+  },
+  "changes": [
+    {
+      "source": "apps/agent",
+      "destination": "apps/analytics",
+      "protocol": "TCP",
+      "port": 5432,
+      "tuple_id": "t-dc9692a3a7e5319a",
+      "before": "Deny",
+      "after": "Allow",
+      "change": "NEWLY_ALLOWED"
+    },
+    {
+      "source": "apps/agent",
+      "destination": "apps/analytics",
+      "protocol": "TCP",
+      "port": 8080,
+      "tuple_id": "t-197dcf6a99a674fc",
+      "before": "Deny",
+      "after": "Allow",
+      "change": "NEWLY_ALLOWED"
+    },
+    {
+      "source": "apps/agent",
+      "destination": "apps/analytics",
+      "protocol": "TCP",
+      "port": 8081,
+      "tuple_id": "t-da1dbb00262bead8",
+      "before": "Deny",
+      "after": "Allow",
+      "change": "NEWLY_ALLOWED"
+    },
+    {
+      "source": "apps/agent",
+      "destination": "apps/analytics",
+      "protocol": "TCP",
+      "port": 8082,
+      "tuple_id": "t-a613e315a3b045f4",
+      "before": "Deny",
+      "after": "Allow",
+      "change": "NEWLY_ALLOWED"
+    },
+    {
+      "source": "apps/agent",
+      "destination": "apps/analytics",
+      "protocol": "TCP",
+      "port": 8090,
+      "tuple_id": "t-736f582f715ad1c1",
+      "before": "Deny",
+      "after": "Allow",
+      "change": "NEWLY_ALLOWED"
+    },
+    {
+      "source": "apps/agent",
+      "destination": "apps/analytics",
+      "protocol": "TCP",
+      "port": 9090,
+      "tuple_id": "t-5b39e832dd225b13",
+      "before": "Deny",
+      "after": "Allow",
+      "change": "NEWLY_ALLOWED"
+    },
+    {
+      "source": "apps/agent",
+      "destination": "apps/frontend",
+      "protocol": "TCP",
+      "port": 5432,
+      "tuple_id": "t-cffb2bee66ede090",
+      "before": "Deny",
+      "after": "Allow",
+      "change": "NEWLY_ALLOWED"
+    },
+    {
+      "source": "apps/agent",
+      "destination": "apps/frontend",
+      "protocol": "TCP",
+      "port": 8080,
+      "tuple_id": "t-1fabe8de2d93023e",
+      "before": "Deny",
+      "after": "Allow",
+      "change": "NEWLY_ALLOWED"
+    },
+    {
+      "source": "apps/agent",
+      "destination": "apps/frontend",
+      "protocol": "TCP",
+      "port": 8081,
+      "tuple_id": "t-e75acef65e011022",
+      "before": "Deny",
+      "after": "Allow",
+      "change": "NEWLY_ALLOWED"
+    },
+    {
+      "source": "apps/agent",
+      "destination": "apps/frontend",
+      "protocol": "TCP",
+      "port": 8082,
+      "tuple_id": "t-c17690657abe6291",
+      "before": "Deny",
+      "after": "Allow",
+      "change": "NEWLY_ALLOWED"
+    },
+    {
+      "source": "apps/agent",
+      "destination": "apps/frontend",
+      "protocol": "TCP",
+      "port": 8090,
+      "tuple_id": "t-07bb75764c236883",
+      "before": "Deny",
+      "after": "Allow",
+      "change": "NEWLY_ALLOWED"
+    },
+    {
+      "source": "apps/agent",
+      "destination": "apps/frontend",
+      "protocol": "TCP",
+      "port": 9090,
+      "tuple_id": "t-a0467f493b0c8678",
+      "before": "Deny",
+      "after": "Allow",
+      "change": "NEWLY_ALLOWED"
+    },
+    {
+      "source": "apps/agent",
+      "destination": "apps/payments",
+      "protocol": "TCP",
+      "port": 5432,
+      "tuple_id": "t-2924727cc6a558d0",
+      "before": "Deny",
+      "after": "Allow",
+      "change": "NEWLY_ALLOWED"
+    },
+    {
+      "source": "apps/agent",
+      "destination": "apps/payments",
+      "protocol": "TCP",
+      "port": 8080,
+      "tuple_id": "t-4d897c62f8c46960",
+      "before": "Deny",
+      "after": "Allow",
+      "change": "NEWLY_ALLOWED"
+    },
+    {
+      "source": "apps/agent",
+      "destination": "apps/payments",
+      "protocol": "TCP",
+      "port": 8081,
+      "tuple_id": "t-3be82079389ae191",
+      "before": "Deny",
+      "after": "Allow",
+      "change": "NEWLY_ALLOWED"
+    },
+    {
+      "source": "apps/agent",
+      "destination": "apps/payments",
+      "protocol": "TCP",
+      "port": 8082,
+      "tuple_id": "t-8282c00e89e90282",
+      "before": "Deny",
+      "after": "Allow",
+      "change": "NEWLY_ALLOWED"
+    },
+    {
+      "source": "apps/agent",
+      "destination": "apps/payments",
+      "protocol": "TCP",
+      "port": 8090,
+      "tuple_id": "t-402c9e1064fa420f",
+      "before": "Deny",
+      "after": "Allow",
+      "change": "NEWLY_ALLOWED"
+    },
+    {
+      "source": "apps/agent",
+      "destination": "apps/payments",
+      "protocol": "TCP",
+      "port": 9090,
+      "tuple_id": "t-a03a08b8e96ffdbb",
+      "before": "Deny",
+      "after": "Allow",
+      "change": "NEWLY_ALLOWED"
+    },
+    {
+      "source": "apps/agent",
+      "destination": "apps/tool-gateway",
+      "protocol": "TCP",
+      "port": 8081,
+      "tuple_id": "t-525923ddd5dbfe55",
+      "before": "Allow",
+      "after": "Deny",
+      "change": "NEWLY_BLOCKED"
+    },
+    {
+      "source": "apps/agent",
+      "destination": "data/database",
+      "protocol": "TCP",
+      "port": 5432,
+      "tuple_id": "t-5c425a71d6bc1ae5",
+      "before": "Deny",
+      "after": "Allow",
+      "change": "NEWLY_ALLOWED"
+    }
+  ],
+  "shared_queries": 252,
+  "additional_intent_queries": 0,
+  "targeting": {
+    "egress": {
+      "before": {
+        "isolated": true,
+        "policies": [
+          "apps/agent-egress"
+        ]
+      },
+      "after": {
+        "isolated": false,
+        "policies": []
+      }
+    },
+    "ingress": {
+      "before": {
+        "isolated": false,
+        "policies": []
+      },
+      "after": {
+        "isolated": false,
+        "policies": []
+      }
+    }
+  },
+  "intents": [
+    {
+      "intent_id": "frontend-to-payments",
+      "expectation": "must_allow",
+      "matched_count": 2,
+      "matched_tuples": [
+        "t-5f4953a99ae4c4db",
+        "t-90149807ea2a0a66"
+      ],
+      "baseline": {
+        "status": "PASS",
+        "violations": [],
+        "unknown": []
+      },
+      "candidate": {
+        "status": "PASS",
+        "violations": [],
+        "unknown": []
+      },
+      "problems": [],
+      "conflicting_tuples": [],
+      "existing_violations": [],
+      "new_violations": [],
+      "fixed_violations": []
+    },
+    {
+      "intent_id": "payments-to-database",
+      "expectation": "must_allow",
+      "matched_count": 2,
+      "matched_tuples": [
+        "t-5c425a71d6bc1ae5",
+        "t-95f35ba8c2a6fc34"
+      ],
+      "baseline": {
+        "status": "PASS",
+        "violations": [],
+        "unknown": []
+      },
+      "candidate": {
+        "status": "PASS",
+        "violations": [],
+        "unknown": []
+      },
+      "problems": [],
+      "conflicting_tuples": [],
+      "existing_violations": [],
+      "new_violations": [],
+      "fixed_violations": []
+    },
+    {
+      "intent_id": "analytics-isolated",
+      "expectation": "must_deny",
+      "matched_count": 1,
+      "matched_tuples": [
+        "t-fa2f092d3ae402b5"
+      ],
+      "baseline": {
+        "status": "PASS",
+        "violations": [],
+        "unknown": []
+      },
+      "candidate": {
+        "status": "PASS",
+        "violations": [],
+        "unknown": []
+      },
+      "problems": [],
+      "conflicting_tuples": [],
+      "existing_violations": [],
+      "new_violations": [],
+      "fixed_violations": []
+    },
+    {
+      "intent_id": "agent-only-via-tool",
+      "expectation": "must_allow",
+      "matched_count": 0,
+      "matched_tuples": [],
+      "baseline": {
+        "status": "INVALID",
+        "violations": [],
+        "unknown": []
+      },
+      "candidate": {
+        "status": "INVALID",
+        "violations": [],
+        "unknown": []
+      },
+      "problems": [
+        "zero-match"
+      ],
+      "conflicting_tuples": [],
+      "existing_violations": [],
+      "new_violations": [],
+      "fixed_violations": []
+    },
+    {
+      "intent_id": "agent-no-direct-db",
+      "expectation": "must_deny",
+      "matched_count": 0,
+      "matched_tuples": [],
+      "baseline": {
+        "status": "INVALID",
+        "violations": [],
+        "unknown": []
+      },
+      "candidate": {
+        "status": "INVALID",
+        "violations": [],
+        "unknown": []
+      },
+      "problems": [
+        "zero-match"
+      ],
+      "conflicting_tuples": [],
+      "existing_violations": [],
+      "new_violations": [],
+      "fixed_violations": []
+    }
+  ],
+  "review_status": "INCOMPLETE",
+  "new_asset_paths": [],
+  "shortened_asset_paths": [
+    {
+      "before": {
+        "entrypoint": "apps/agent",
+        "asset": "data/database",
+        "hops": [
+          {
+            "source": "apps/agent",
+            "destination": "apps/tool-gateway",
+            "protocol": "TCP",
+            "port": 8081,
+            "tuple_id": "t-525923ddd5dbfe55"
+          },
+          {
+            "source": "apps/tool-gateway",
+            "destination": "data/database",
+            "protocol": "TCP",
+            "port": 5432,
+            "tuple_id": "t-eb557989b5fa0d26"
+          }
+        ],
+        "assumptions": [
+          "apps/agent is compromised",
+          "apps/tool-gateway can relay or be pivoted through (declared assumption)"
+        ],
+        "kind": "conditional pivot path",
+        "new": true,
+        "assumption_checks": [
+          {
+            "pivot": "apps/tool-gateway",
+            "asset_still_reachable": false,
+            "alternative_hops": []
+          }
+        ],
+        "port_evidence": [
+          {
+            "tuple_id": "t-525923ddd5dbfe55",
+            "destination": "apps/tool-gateway",
+            "protocol": "TCP",
+            "port": 8081,
+            "declaration": "declared"
+          },
+          {
+            "tuple_id": "t-eb557989b5fa0d26",
+            "destination": "data/database",
+            "protocol": "TCP",
+            "port": 5432,
+            "declaration": "declared"
+          }
+        ]
+      },
+      "after": {
+        "entrypoint": "apps/agent",
+        "asset": "data/database",
+        "hops": [
+          {
+            "source": "apps/agent",
+            "destination": "data/database",
+            "protocol": "TCP",
+            "port": 5432,
+            "tuple_id": "t-5c425a71d6bc1ae5"
+          }
+        ],
+        "assumptions": [
+          "apps/agent is compromised"
+        ],
+        "kind": "direct exposure",
+        "new": false,
+        "assumption_checks": [],
+        "port_evidence": [
+          {
+            "tuple_id": "t-5c425a71d6bc1ae5",
+            "destination": "data/database",
+            "protocol": "TCP",
+            "port": 5432,
+            "declaration": "declared"
+          }
+        ]
+      }
+    }
+  ],
+  "scope": "Compare reference-candidate behaviour with the label-edited candidate on identical connection tuples. Extra intent queries are reported separately. Each review keeps one shared topology for its own policy comparison.",
+  "warning": "A configuration counterfactual, not proof an attacker can change labels. No RBAC/credential analysis or live deployment is performed. Zero-match intents remain invalid."
+}

@@ -1,0 +1,51 @@
+apiVersion: v1
+kind: Namespace
+metadata:
+  labels:
+    team: apps
+  name: apps
+---
+apiVersion: v1
+kind: Namespace
+metadata:
+  labels:
+    team: data
+  name: data
+---
+apiVersion: v1
+kind: Pod
+metadata:
+  labels:
+    app: b
+  name: b
+  namespace: apps
+spec:
+  containers:
+  - image: data-only/not-executed
+    name: app
+    ports:
+    - containerPort: 8081
+      name: web
+      protocol: TCP
+    - containerPort: 5353
+      name: dns
+      protocol: UDP
+---
+apiVersion: v1
+kind: Pod
+metadata:
+  labels:
+    app: b
+  name: b
+  namespace: data
+spec:
+  containers:
+  - image: data-only/not-executed
+    name: app
+    ports:
+    - containerPort: 8081
+      name: web
+      protocol: TCP
+    - containerPort: 5353
+      name: dns
+      protocol: UDP

@@ -1,0 +1,249 @@
+{
+  "oracle": "network-config-analyzer",
+  "oracle_version": "NCA version 2.1.0",
+  "netscope_version": "1.1.0",
+  "seed": 303,
+  "generated_cases": 24,
+  "cases": 28,
+  "comparisons": 5472,
+  "disagreement_count": 1,
+  "disagreements": [
+    {
+      "case": 8,
+      "phase": "candidate",
+      "source": "data/b",
+      "destination": "apps/b",
+      "protocol": "TCP",
+      "port": 8080,
+      "netscope": "Allow",
+      "oracle": "Deny"
+    }
+  ],
+  "results": [
+    {
+      "case": 0,
+      "name": "The indirect escape",
+      "comparisons": 504,
+      "oracle_allow": 211,
+      "oracle_deny": 293,
+      "project_sha256": "7dc84b0c58ce1bb428e4f2bbbb7ffa0491ab054982da18838b212f840ae110f8"
+    },
+    {
+      "case": 1,
+      "name": "The database switch",
+      "comparisons": 504,
+      "oracle_allow": 210,
+      "oracle_deny": 294,
+      "project_sha256": "243665405346f40fda25a38f4f93a442c6560b9968f49dcadad20b1dbc71aea6"
+    },
+    {
+      "case": 2,
+      "name": "The AND / OR trap",
+      "comparisons": 504,
+      "oracle_allow": 212,
+      "oracle_deny": 292,
+      "project_sha256": "38097d9d65a9818a5eabf22fa8db15376bb484fac0636d3b387192aec2c5978a"
+    },
+    {
+      "case": 3,
+      "name": "A clean baseline",
+      "comparisons": 504,
+      "oracle_allow": 210,
+      "oracle_deny": 294,
+      "project_sha256": "1df02d684e047c0fa92416a6ca6c73082752fc4e36e54eff7a24f4c9d4988be4"
+    },
+    {
+      "case": 4,
+      "name": "seed-303-00",
+      "comparisons": 144,
+      "oracle_allow": 90,
+      "oracle_deny": 54,
+      "project_sha256": "d3e478701032cb90517aa713a6d12a07535032824c692cb35b0214415925a8f4"
+    },
+    {
+      "case": 5,
+      "name": "seed-303-01",
+      "comparisons": 144,
+      "oracle_allow": 69,
+      "oracle_deny": 75,
+      "project_sha256": "3e98b2eec1f264cccd72309ac93c3a6b89f0723730ecb0649388547f552416d9"
+    },
+    {
+      "case": 6,
+      "name": "seed-303-02",
+      "comparisons": 144,
+      "oracle_allow": 81,
+      "oracle_deny": 63,
+      "project_sha256": "c9d85e03b09eb078b20224ce5ea2a87de7510557b0e089ad12bc21a58de00ceb"
+    },
+    {
+      "case": 7,
+      "name": "seed-303-03",
+      "comparisons": 144,
+      "oracle_allow": 66,
+      "oracle_deny": 78,
+      "project_sha256": "02d3093d02373b6f1c292381352ab23be7217451d303e9bc650b0889b66b4a75"
+    },
+    {
+      "case": 8,
+      "name": "seed-303-04",
+      "comparisons": 144,
+      "oracle_allow": 78,
+      "oracle_deny": 66,
+      "project_sha256": "717128783f8f976f738fd8e7e8feb3a8b356df45c8a0d8f4152fd25f12f19dd2"
+    },
+    {
+      "case": 9,
+      "name": "seed-303-05",
+      "comparisons": 144,
+      "oracle_allow": 111,
+      "oracle_deny": 33,
+      "project_sha256": "a0e01db65f9ef87bced8fa2f22cd77f22ce1a9f4bcb33fbc49ca35959ab18795"
+    },
+    {
+      "case": 10,
+      "name": "seed-303-06",
+      "comparisons": 144,
+      "oracle_allow": 50,
+      "oracle_deny": 94,
+      "project_sha256": "703143aa22e2d72d6b0b1fdb558a81c37ea1ab1188b336fc24c03e1bf58989d9"
+    },
+    {
+      "case": 11,
+      "name": "seed-303-07",
+      "comparisons": 144,
+      "oracle_allow": 86,
+      "oracle_deny": 58,
+      "project_sha256": "05a2a44e26918ed060082109baac1a3ee4f4e468dd315dcd349ac6878c78d3c8"
+    },
+    {
+      "case": 12,
+      "name": "seed-303-08",
+      "comparisons": 144,
+      "oracle_allow": 118,
+      "oracle_deny": 26,
+      "project_sha256": "9c56a155f094d56f9a28c93cdf7699ffda6ad6c8d59782b99c163db8d15194c6"
+    },
+    {
+      "case": 13,
+      "name": "seed-303-09",
+      "comparisons": 144,
+      "oracle_allow": 60,
+      "oracle_deny": 84,
+      "project_sha256": "db1eb68b0563875ab50cc8db43cb9a716a52d509f9dde8a9a9d4555e2d197595"
+    },
+    {
+      "case": 14,
+      "name": "seed-303-10",
+      "comparisons": 144,
+      "oracle_allow": 48,
+      "oracle_deny": 96,
+      "project_sha256": "3a86171766770c48799e2800e4821280fa90a1416859de6fad0306c42c82bdf9"
+    },
+    {
+      "case": 15,
+      "name": "seed-303-11",
+      "comparisons": 144,
+      "oracle_allow": 138,
+      "oracle_deny": 6,
+      "project_sha256": "b8a6aaf4192540acc6a82b2a913a2bf958c466e9303e043ae33bafd2f0f483c6"
+    },
+    {
+      "case": 16,
+      "name": "seed-303-12",
+      "comparisons": 144,
+      "oracle_allow": 84,
+      "oracle_deny": 60,
+      "project_sha256": "e1ad8dab2c66d87bbe01294109e7a1e1c0f6d6bd00d7697fdaa792e2967eff59"
+    },
+    {
+      "case": 17,
+      "name": "seed-303-13",
+      "comparisons": 144,
+      "oracle_allow": 96,
+      "oracle_deny": 48,
+      "project_sha256": "b05b6edfd55dd5e4fbaaada572f7381a149978fbd00215c4cc4d0d2be4db8e68"
+    },
+    {
+      "case": 18,
+      "name": "seed-303-14",
+      "comparisons": 144,
+      "oracle_allow": 54,
+      "oracle_deny": 90,
+      "project_sha256": "67a840eff317816a19ccfb6967a7d58333cabded4ec58bac133614d2aaa33ae7"
+    },
+    {
+      "case": 19,
+      "name": "seed-303-15",
+      "comparisons": 144,
+      "oracle_allow": 108,
+      "oracle_deny": 36,
+      "project_sha256": "dc745ac8c801359b902fecb53df30ab77a34a1126b69fc4db89513ea7da2f4d5"
+    },
+    {
+      "case": 20,
+      "name": "seed-303-16",
+      "comparisons": 144,
+      "oracle_allow": 129,
+      "oracle_deny": 15,
+      "project_sha256": "2bf6ecdfb5ce3845db235b89ecd6561189d1d626834d4db30a2122dcc9cfdcde"
+    },
+    {
+      "case": 21,
+      "name": "seed-303-17",
+      "comparisons": 144,
+      "oracle_allow": 108,
+      "oracle_deny": 36,
+      "project_sha256": "49fdc9734ffbdbce462241065af04725d54c06c83d13796b468d5b945c6ddbf1"
+    },
+    {
+      "case": 22,
+      "name": "seed-303-18",
+      "comparisons": 144,
+      "oracle_allow": 72,
+      "oracle_deny": 72,
+      "project_sha256": "6fd75effb244861575030a070c74090649db05284f47a635cf3b472ca921b3bc"
+    },
+    {
+      "case": 23,
+      "name": "seed-303-19",
+      "comparisons": 144,
+      "oracle_allow": 48,
+      "oracle_deny": 96,
+      "project_sha256": "33404f540ad192b74b7ced8299f16268b0464744b614817b975bbdf9cc0dfa82"
+    },
+    {
+      "case": 24,
+      "name": "seed-303-20",
+      "comparisons": 144,
+      "oracle_allow": 78,
+      "oracle_deny": 66,
+      "project_sha256": "18915af9e3301956817c2a86d562ca5ea4bbf996f30204e12a1ebcf68d999d7c"
+    },
+    {
+      "case": 25,
+      "name": "seed-303-21",
+      "comparisons": 144,
+      "oracle_allow": 74,
+      "oracle_deny": 70,
+      "project_sha256": "a663b2b9ef73aef6369bfa2f7b89caf47847f58968507c78a40fd3a6e7d5b504"
+    },
+    {
+      "case": 26,
+      "name": "seed-303-22",
+      "comparisons": 144,
+      "oracle_allow": 51,
+      "oracle_deny": 93,
+      "project_sha256": "5e8ef737cf40a1bc7ef302f2541e6de328d1d769dc33a5e6e958c29eaa8e7b31"
+    },
+    {
+      "case": 27,
+      "name": "seed-303-23",
+      "comparisons": 144,
+      "oracle_allow": 96,
+      "oracle_deny": 48,
+      "project_sha256": "ad18f0e042779bb21e9e5bd2cb54d1adc8b3e04c36498a4eeb00cf6296ffd136"
+    }
+  ],
+  "scope": "Four shipped examples plus seeded four-Pod/two-namespace fixtures; both revisions; all distinct Pod pairs and declared TCP/UDP ports. Selectors, additive rules, directional isolation, named ports, and endPort ranges. No external-IP, hostNetwork, vendor policy, or real-CNI claim. Agreement on these finite fixtures is not universal correctness or certification."
+}

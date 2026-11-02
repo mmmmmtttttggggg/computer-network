@@ -1,0 +1,41 @@
+{
+  "witness": "t-95f35ba8c2a6fc34",
+  "status": "1-minimal",
+  "reason": "No remaining paired policy can be individually removed while preserving this signature.",
+  "parent_input_hash": "136439c1236445438c062353671f98c1b6189aebabb1f7c998c080f9c84405a5",
+  "signature": [
+    "Allow",
+    "Deny",
+    [
+      false,
+      true,
+      false,
+      true
+    ],
+    [
+      "payments-to-database"
+    ]
+  ],
+  "policy_units_before": 10,
+  "policy_units_after": 1,
+  "reduction_percent": 90.0,
+  "removed": [
+    "apps/agent-egress",
+    "apps/gateway-egress",
+    "apps/gateway-ingress",
+    "ops/unrelated-metrics-0",
+    "ops/unrelated-metrics-1",
+    "ops/unrelated-metrics-2",
+    "ops/unrelated-metrics-3",
+    "ops/unrelated-metrics-4",
+    "ops/unrelated-metrics-5"
+  ],
+  "kept": [
+    "data/db-ingress"
+  ],
+  "calls": 16,
+  "duration_ms": 10.16,
+  "runtime_status": "NOT_VERIFIED",
+  "scope": "Only the selected tuple signature is preserved. Topology is unchanged. This is not a unique-cause or global-minimum claim.",
+  "bundle_hash": "92f7c1a883841bea1f7a23ef58995d345a2162e36e258005df37b59d209285e4"
+}

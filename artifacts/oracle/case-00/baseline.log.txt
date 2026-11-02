@@ -1,0 +1,4 @@
+global: cluster has 7 unique endpoints, 3 namespaces
+wrote query output to: /tmp/netscope-oracle-ouiu84bg/connections.txt
+Total run time:   0.02 seconds
+/workspace/scratch/cd57bd2d222b/work/netpol/artifacts/oracle/case-00/baseline.yaml:229:9: Warning: A podSelector selects all pods in the current namespace; it should better be removed.

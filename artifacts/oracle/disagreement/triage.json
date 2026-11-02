@@ -1,0 +1,51 @@
+{
+  "source": "data/b",
+  "destination": "apps/b",
+  "protocol": "TCP",
+  "port": 8080,
+  "netscope": "Allow",
+  "nca": "Deny",
+  "deletion_checks": [
+    {
+      "remove": "apps/p-0",
+      "netscope": "Allow",
+      "nca": "Deny"
+    },
+    {
+      "remove": "data/p-1",
+      "netscope": "Allow",
+      "nca": "Deny"
+    },
+    {
+      "remove": "data/p-2",
+      "netscope": "Allow",
+      "nca": "Allow"
+    },
+    {
+      "remove": "apps/p-3",
+      "netscope": "Allow",
+      "nca": "Deny"
+    },
+    {
+      "remove": "data/p-4",
+      "netscope": "Allow",
+      "nca": "Deny"
+    },
+    {
+      "remove": "apps/p-5",
+      "netscope": "Allow",
+      "nca": "Deny"
+    },
+    {
+      "remove": "data/p-6",
+      "netscope": "Allow",
+      "nca": "Deny"
+    },
+    {
+      "remove": "data/p-7",
+      "netscope": "Allow",
+      "nca": "Deny"
+    }
+  ],
+  "scope": "Single policy-deletion pass preserving disagreement. No real CNI result."
+}

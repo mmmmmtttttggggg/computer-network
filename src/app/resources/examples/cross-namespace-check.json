@@ -1,0 +1,191 @@
+{
+  "schemaVersion": 1,
+  "name": "The cross-namespace check",
+  "topology": [
+    {
+      "apiVersion": "v1",
+      "kind": "Namespace",
+      "metadata": {
+        "name": "apps",
+        "labels": {
+          "team": "apps"
+        }
+      }
+    },
+    {
+      "apiVersion": "v1",
+      "kind": "Namespace",
+      "metadata": {
+        "name": "data",
+        "labels": {
+          "team": "data"
+        }
+      }
+    },
+    {
+      "apiVersion": "v1",
+      "kind": "Pod",
+      "metadata": {
+        "name": "b",
+        "namespace": "apps",
+        "labels": {
+          "app": "b"
+        }
+      },
+      "spec": {
+        "containers": [
+          {
+            "name": "app",
+            "image": "data-only/not-executed",
+            "ports": [
+              {
+                "name": "web",
+                "containerPort": 8081,
+                "protocol": "TCP"
+              },
+              {
+                "name": "dns",
+                "containerPort": 5353,
+                "protocol": "UDP"
+              }
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "apiVersion": "v1",
+      "kind": "Pod",
+      "metadata": {
+        "name": "b",
+        "namespace": "data",
+        "labels": {
+          "app": "b"
+        }
+      },
+      "spec": {
+        "containers": [
+          {
+            "name": "app",
+            "image": "data-only/not-executed",
+            "ports": [
+              {
+                "name": "web",
+                "containerPort": 8081,
+                "protocol": "TCP"
+              },
+              {
+                "name": "dns",
+                "containerPort": 5353,
+                "protocol": "UDP"
+              }
+            ]
+          }
+        ]
+      }
+    }
+  ],
+  "baseline": [],
+  "candidate": [
+    {
+      "apiVersion": "networking.k8s.io/v1",
+      "kind": "NetworkPolicy",
+      "metadata": {
+        "name": "p-2",
+        "namespace": "data"
+      },
+      "spec": {
+        "podSelector": {},
+        "policyTypes": [
+          "Egress"
+        ],
+        "egress": [
+          {
+            "to": [
+              {
+                "namespaceSelector": {},
+                "podSelector": {
+                  "matchExpressions": [
+                    {
+                      "key": "absent",
+                      "operator": "DoesNotExist"
+                    }
+                  ]
+                }
+              }
+            ],
+            "ports": []
+          }
+        ]
+      }
+    }
+  ],
+  "ports": [
+    {
+      "protocol": "TCP",
+      "port": 8079
+    },
+    {
+      "protocol": "TCP",
+      "port": 8080
+    },
+    {
+      "protocol": "TCP",
+      "port": 8081
+    },
+    {
+      "protocol": "TCP",
+      "port": 8082
+    },
+    {
+      "protocol": "UDP",
+      "port": 5353
+    },
+    {
+      "protocol": "UDP",
+      "port": 8080
+    }
+  ],
+  "intents": [
+    {
+      "id": "cross-namespace-allowed",
+      "source": {
+        "namespaceSelector": {
+          "matchLabels": {
+            "kubernetes.io/metadata.name": "data"
+          }
+        },
+        "podSelector": {
+          "matchLabels": {
+            "app": "b"
+          }
+        }
+      },
+      "destination": {
+        "namespaceSelector": {
+          "matchLabels": {
+            "kubernetes.io/metadata.name": "apps"
+          }
+        },
+        "podSelector": {
+          "matchLabels": {
+            "app": "b"
+          }
+        }
+      },
+      "protocol": "TCP",
+      "port": 8080,
+      "expect": "must_allow"
+    }
+  ],
+  "queries": [
+    {
+      "source": "data/b",
+      "destination": "apps/b",
+      "protocol": "TCP",
+      "port": 8080
+    }
+  ],
+  "description": "A two-Pod DoesNotExist selector case where independent static analyzers disagree. NetScope predicts Allow; use recorded CNI observations to investigate.",
+  "threatModel": {}
+}

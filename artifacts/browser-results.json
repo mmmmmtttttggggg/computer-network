@@ -1,0 +1,27 @@
+{
+  "browser_workflows": "passed",
+  "viewports": [
+    1440,
+    1366,
+    390
+  ],
+  "console_page_errors": [],
+  "verified": [
+    "conditional path and evidence drawer",
+    "single-pivot counterfactual preserves policy decisions",
+    "parallel relay remains reachable after one assumption is removed",
+    "refresh restores review without duplicate history",
+    "presenter walkthrough",
+    "scoped repair opens a new passing review",
+    "reduction ZIP is a real archive",
+    "mutation suite",
+    "training-only regression drafts and held-out evaluation",
+    "draft check verification and JSON download",
+    "immutable label experiment shows shorter direct asset path",
+    "exact query beyond saved port scope and portable check download",
+    "observation matrix rendering with explicitly missing observations (presentation-only test)",
+    "keyboard row inspection",
+    "invalid input feedback",
+    "six views without horizontal overflow"
+  ]
+}

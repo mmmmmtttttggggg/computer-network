@@ -5,10 +5,19 @@ import pytest
 from app.model.evaluator import Evaluator, Verdict
 from app.model.topology import ConnectionQuery, Namespace, Pod, Protocol, Topology
 from app.review.comparison import (
-    Approval, Change, ReviewError, compare_revisions, tuple_id, unapproved_changes,
+    Approval,
+    Change,
+    ReviewError,
+    compare_revisions,
+    tuple_id,
+    unapproved_changes,
 )
 from app.review.intents import (
-    IntentError, IntentStatus, candidate_acceptable, check_intents, parse_intent,
+    IntentError,
+    IntentStatus,
+    candidate_acceptable,
+    check_intents,
+    parse_intent,
 )
 
 API = "networking.k8s.io/v1"
@@ -41,8 +50,12 @@ def policy(name, selector, ingress=None, ns="prod"):
     spec = {"podSelector": selector}
     if ingress is not None:
         spec["ingress"] = ingress
-    return {"apiVersion": API, "kind": "NetworkPolicy",
-            "metadata": {"name": name, "namespace": ns}, "spec": spec}
+    return {
+        "apiVersion": API,
+        "kind": "NetworkPolicy",
+        "metadata": {"name": name, "namespace": ns},
+        "spec": spec,
+    }
 
 
 FROM_FRONTEND = [{"podSelector": app("frontend")}]
@@ -54,7 +67,9 @@ def db_in(name, peers, port=5432):
     return policy(name, app("database"), [{"from": peers, "ports": [{"protocol": "TCP", "port": port}]}])
 
 
-PAY_IN = policy("pay-in", app("payments"), [{"from": FROM_FRONTEND, "ports": [{"protocol": "TCP", "port": 8080}]}])
+PAY_IN = policy(
+    "pay-in", app("payments"), [{"from": FROM_FRONTEND, "ports": [{"protocol": "TCP", "port": 8080}]}]
+)
 BASE = [db_in("db-in", FROM_PAYMENTS), PAY_IN]
 CAND = [db_in("db-in", FROM_ANALYTICS), PAY_IN]  # the accidental swap
 
@@ -73,7 +88,11 @@ def tid(src, dst, proto="TCP", port=5432):
     return "t-" + hashlib.sha256(key.encode()).hexdigest()[:16]
 
 
-SCENARIO_QUERIES = [q("frontend", "payments", TCP, 8080), q("payments", "database"), q("analytics", "database")]
+SCENARIO_QUERIES = [
+    q("frontend", "payments", TCP, 8080),
+    q("payments", "database"),
+    q("analytics", "database"),
+]
 
 
 def scenario():
@@ -85,9 +104,14 @@ def by_id(comparisons):
 
 
 def raw_intent(**over):
-    d = {"id": "i1", "source": {"podSelector": app("payments")},
-         "destination": {"podSelector": app("database")},
-         "protocol": "TCP", "port": 5432, "expect": "must_allow"}
+    d = {
+        "id": "i1",
+        "source": {"podSelector": app("payments")},
+        "destination": {"podSelector": app("database")},
+        "protocol": "TCP",
+        "port": 5432,
+        "expect": "must_allow",
+    }
     d.update(over)
     return d
 
@@ -116,25 +140,35 @@ def test_unchanged_frontend_to_payments():
     assert (c.source, c.destination, c.protocol, c.port) == ("prod/frontend", "prod/payments", TCP, 8080)
 
 
-@pytest.mark.parametrize("base,cand,expected", [
-    ([], [], ALLOW),                                         # allow -> allow
-    ([db_in("db-in", FROM_PAYMENTS)], [db_in("x", FROM_PAYMENTS)], DENY),  # deny -> deny (analytics)
-])
+@pytest.mark.parametrize(
+    "base,cand,expected",
+    [
+        ([], [], ALLOW),  # allow -> allow
+        ([db_in("db-in", FROM_PAYMENTS)], [db_in("x", FROM_PAYMENTS)], DENY),  # deny -> deny (analytics)
+    ],
+)
 def test_unchanged_both_known(base, cand, expected):
     (c,) = compare_revisions(ev(base), ev(cand), [q("analytics", "database")])
     assert c.change is Change.UNCHANGED and c.baseline is expected and c.candidate is expected
 
 
 IP_ONLY = policy("ip", app("database"), [{"from": [{"ipBlock": {"cidr": "10.0.0.0/8"}}]}])
-ANP = {"apiVersion": "policy.networking.k8s.io/v1alpha1", "kind": "AdminNetworkPolicy",
-       "metadata": {"name": "x"}, "spec": {}}
+ANP = {
+    "apiVersion": "policy.networking.k8s.io/v1alpha1",
+    "kind": "AdminNetworkPolicy",
+    "metadata": {"name": "x"},
+    "spec": {},
+}
 
 
-@pytest.mark.parametrize("base,cand,b_exp,c_exp", [
-    ([], [IP_ONLY], ALLOW, UNKNOWN),
-    ([ANP], [], UNKNOWN, ALLOW),
-    ([IP_ONLY], [IP_ONLY], UNKNOWN, UNKNOWN),
-])
+@pytest.mark.parametrize(
+    "base,cand,b_exp,c_exp",
+    [
+        ([], [IP_ONLY], ALLOW, UNKNOWN),
+        ([ANP], [], UNKNOWN, ALLOW),
+        ([IP_ONLY], [IP_ONLY], UNKNOWN, UNKNOWN),
+    ],
+)
 def test_unknown_decisions(base, cand, b_exp, c_exp):
     (c,) = compare_revisions(ev(base), ev(cand), [q("frontend", "database")])
     assert (c.baseline, c.candidate, c.change) == (b_exp, c_exp, Change.UNKNOWN)
@@ -145,7 +179,11 @@ def test_tuple_ids_are_stable_and_distinct():
     b = compare_revisions(ev([]), ev([]), [q("payments", "database")])[0]
     assert a.tuple_id == b.tuple_id == tid("payments", "database")  # same across runs/revisions
     assert tuple_id(q("payments", "database")) == tid("payments", "database")
-    others = {tid("database", "payments"), tid("payments", "database", "UDP"), tid("payments", "database", "TCP", 5433)}
+    others = {
+        tid("database", "payments"),
+        tid("payments", "database", "UDP"),
+        tid("payments", "database", "TCP", 5433),
+    }
     assert len(others | {a.tuple_id}) == 4
     assert tuple_id(q("payments", "database", UDP)) == tid("payments", "database", "UDP")
     relabelled = Pod("payments", "prod", {"other": "label"})
@@ -190,7 +228,9 @@ def test_required_connection_unexpectedly_denied():
 
 
 def test_forbidden_connection_unexpectedly_allowed():
-    intent = parse_intent(raw_intent(id="no-analytics", source={"podSelector": app("analytics")}, expect="must_deny"))
+    intent = parse_intent(
+        raw_intent(id="no-analytics", source={"podSelector": app("analytics")}, expect="must_deny")
+    )
     r = result_for(check_intents([intent], scenario(), TOPO), "no-analytics")
     assert r.baseline.status is IntentStatus.PASS
     assert r.candidate.status is IntentStatus.FAIL
@@ -198,18 +238,27 @@ def test_forbidden_connection_unexpectedly_allowed():
 
 
 def test_passing_intent_for_unchanged_connection():
-    intent = parse_intent(raw_intent(id="fe-pay", source={"podSelector": app("frontend")},
-                                     destination={"podSelector": app("payments")}, port=8080))
+    intent = parse_intent(
+        raw_intent(
+            id="fe-pay",
+            source={"podSelector": app("frontend")},
+            destination={"podSelector": app("payments")},
+            port=8080,
+        )
+    )
     r = check_intents([intent], scenario(), TOPO)[0]
     assert r.baseline.status is r.candidate.status is IntentStatus.PASS
     assert r.valid and r.candidate_passes
 
 
-@pytest.mark.parametrize("over", [
-    {"destination": {"podSelector": app("ghost")}},  # no such Pod
-    {"port": 9999},                                   # no query on that port
-    {"protocol": "UDP"},                              # no query with that protocol
-])
+@pytest.mark.parametrize(
+    "over",
+    [
+        {"destination": {"podSelector": app("ghost")}},  # no such Pod
+        {"port": 9999},  # no query on that port
+        {"protocol": "UDP"},  # no query with that protocol
+    ],
+)
 def test_zero_match_intent_never_passes(over):
     intent = parse_intent(raw_intent(id="z", **over))
     r = check_intents([intent], scenario(), TOPO)[0]
@@ -238,10 +287,17 @@ def test_definite_violation_outranks_unknown():
     front_locked = policy("front-lock", app("frontend"), [])  # isolates frontend ingress, no rules
     queries = [q("frontend", "database"), q("payments", "frontend")]
     comps = compare_revisions(ev([]), ev([IP_ONLY, front_locked]), queries)
-    intent = parse_intent(raw_intent(
-        id="any", source={},
-        destination={"podSelector": {"matchExpressions": [
-            {"key": "app", "operator": "In", "values": ["database", "frontend"]}]}}))
+    intent = parse_intent(
+        raw_intent(
+            id="any",
+            source={},
+            destination={
+                "podSelector": {
+                    "matchExpressions": [{"key": "app", "operator": "In", "values": ["database", "frontend"]}]
+                }
+            },
+        )
+    )
     r = check_intents([intent], comps, TOPO)[0]
     assert r.matched_count == 2
     assert r.baseline.status is IntentStatus.PASS
@@ -252,8 +308,8 @@ def test_definite_violation_outranks_unknown():
 
 def test_existing_versus_new_violations():
     # must_deny: nothing may reach the database on TCP/5432.
-    base = [db_in("db-in", FROM_ANALYTICS)]   # analytics allowed (existing violation)
-    cand = [db_in("db-in", FROM_FRONTEND)]    # frontend allowed (new), analytics fixed
+    base = [db_in("db-in", FROM_ANALYTICS)]  # analytics allowed (existing violation)
+    cand = [db_in("db-in", FROM_FRONTEND)]  # frontend allowed (new), analytics fixed
     comps = compare_revisions(ev(base), ev(cand), [q("frontend", "database"), q("analytics", "database")])
     intent = parse_intent(raw_intent(id="locked", source={}, expect="must_deny"))
     r = check_intents([intent], comps, TOPO)[0]
@@ -292,23 +348,26 @@ def test_duplicate_intent_id_rejected():
 MISSING = object()
 
 
-@pytest.mark.parametrize("bad", [
-    "not a mapping",
-    raw_intent(id=""),
-    raw_intent(id=5),
-    raw_intent(expect="maybe"),
-    raw_intent(protocol="ICMP"),
-    raw_intent(port=0),
-    raw_intent(port=70000),
-    raw_intent(port="5432"),
-    raw_intent(port=True),
-    raw_intent(source="payments"),
-    raw_intent(source={"labels": {}}),
-    raw_intent(source={"podSelector": {"matchLabels": {"a": 1}}}),
-    raw_intent(bogus=1),
-    {k: v for k, v in raw_intent().items() if k != "expect"},
-    {k: v for k, v in raw_intent().items() if k != "source"},
-])
+@pytest.mark.parametrize(
+    "bad",
+    [
+        "not a mapping",
+        raw_intent(id=""),
+        raw_intent(id=5),
+        raw_intent(expect="maybe"),
+        raw_intent(protocol="ICMP"),
+        raw_intent(port=0),
+        raw_intent(port=70000),
+        raw_intent(port="5432"),
+        raw_intent(port=True),
+        raw_intent(source="payments"),
+        raw_intent(source={"labels": {}}),
+        raw_intent(source={"podSelector": {"matchLabels": {"a": 1}}}),
+        raw_intent(bogus=1),
+        {k: v for k, v in raw_intent().items() if k != "expect"},
+        {k: v for k, v in raw_intent().items() if k != "source"},
+    ],
+)
 def test_invalid_intent_definitions_rejected(bad):
     with pytest.raises(IntentError):
         parse_intent(bad)
@@ -319,8 +378,10 @@ def test_approval_clears_review_gate_but_not_intent_violation():
     comps = scenario()
     intent = parse_intent(raw_intent(id="pay-db"))
     results = check_intents([intent], comps, TOPO)
-    approvals = [Approval(tid("payments", "database"), ALLOW, DENY),
-                 Approval(tid("analytics", "database"), DENY, ALLOW)]
+    approvals = [
+        Approval(tid("payments", "database"), ALLOW, DENY),
+        Approval(tid("analytics", "database"), DENY, ALLOW),
+    ]
     assert unapproved_changes(comps, []) != ()
     assert unapproved_changes(comps, approvals) == ()
     assert not candidate_acceptable(results, unapproved_changes(comps, approvals))
@@ -328,8 +389,10 @@ def test_approval_clears_review_gate_but_not_intent_violation():
 
 def test_approval_must_match_exactly():
     comps = scenario()
-    wrong = [Approval(tid("payments", "database"), ALLOW, UNKNOWN),   # wrong 'after' verdict
-             Approval(tid("analytics", "database"), DENY, ALLOW)]
+    wrong = [
+        Approval(tid("payments", "database"), ALLOW, UNKNOWN),  # wrong 'after' verdict
+        Approval(tid("analytics", "database"), DENY, ALLOW),
+    ]
     remaining = unapproved_changes(comps, wrong)
     assert [c.tuple_id for c in remaining] == [tid("payments", "database")]
 

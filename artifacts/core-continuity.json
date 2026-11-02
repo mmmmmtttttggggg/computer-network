@@ -1,0 +1,17 @@
+{
+  "reference_release": "1.1.0",
+  "current_release": "1.2.0",
+  "reference_zip_sha256": "a2034c37d28f80dc0cbc52e8dd935c063d097887c47e6f46718fdd94d1788eef",
+  "comparison": "byte equality of original evaluator/topology/selectors and review modules",
+  "unchanged_files": [
+    "src/app/model/__init__.py",
+    "src/app/model/evaluator.py",
+    "src/app/model/selectors.py",
+    "src/app/model/topology.py",
+    "src/app/review/__init__.py",
+    "src/app/review/comparison.py",
+    "src/app/review/intents.py"
+  ],
+  "all_listed_files_identical": true,
+  "note": "Historical performance/oracle measurements retain their original version; this comparison does not rerun them."
+}
