@@ -9,6 +9,7 @@ import argparse
 import json
 import shutil
 import subprocess
+import tempfile
 from pathlib import Path
 
 NAME = "netscope-lab"
@@ -105,7 +106,11 @@ def main():
     if not repo_digests:
         raise RuntimeError("Could not resolve fixture image digest")
     fixture = repo_digests[0]
-    call(["kind", "load", "docker-image", FIXTURE, "--name", NAME])
+    platform = call(["docker", "image", "inspect", FIXTURE, "--format", "{{.Os}}/{{.Architecture}}"]).strip()
+    with tempfile.TemporaryDirectory(prefix="netscope-fixture-") as directory:
+        archive = Path(directory) / "fixture.tar"
+        call(["docker", "save", "--platform", platform, "--output", str(archive), FIXTURE])
+        call(["kind", "load", "image-archive", str(archive), "--name", NAME])
     # Dedicated runner identity: no Secret reads, no workload exec outside the
     # explicit runtime guard, no CNI or RBAC writes. Namespace permission remains
     # cluster-wide because imported names are dynamic; this is a disposable lab.
