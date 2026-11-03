@@ -73,9 +73,12 @@ def main():
                 page.wait_for_selector(".metrics")
                 expect(page.locator("#run-fingerprint")).to_contain_text(initial_id[:8])
                 assert len(page.request.get(root + "/api/runs").json()) == len(initial_history)
-                page.locator(".demo-guide summary").click()
+                page.locator('#nav [data-view="examples"]').click()
                 expect(page.locator(".demo-guide")).to_contain_text("Make the regression portable")
-                page.locator('#nav [data-view="containment"]').click()
+                expect(page.locator(".example-card")).to_have_count(8)
+                expect(page.locator(".example-card.current")).to_contain_text("The indirect escape")
+                page.locator('.example-card.current [data-example="agent-escape"]').click()
+                expect(page.locator("#breadcrumb")).to_have_text("Containment")
                 expect(page.locator(".path-card")).to_have_count(1)
                 expect(page.locator(".sensitivity-check")).to_contain_text("No path to this asset")
                 if args.screenshots:
@@ -150,6 +153,7 @@ def main():
                 page.locator("#scenario").select_option("clean-baseline")
                 page.locator("#run-review").click()
                 expect(page.locator("h1")).to_have_text("A clean baseline")
+                page.locator("#more-experiments > summary").click()
                 page.locator("#mutate").click()
                 page.wait_for_selector(".mutant")
                 assert page.locator(".mutant").count() > 10
@@ -219,6 +223,7 @@ def main():
                     page.set_viewport_size({"width": width, "height": 1000 if width > 400 else 844})
                     for view in [
                         "overview",
+                        "examples",
                         "connections",
                         "containment",
                         "experiments",
@@ -246,7 +251,8 @@ def main():
                                 "single-pivot counterfactual preserves policy decisions",
                                 "parallel relay remains reachable after one assumption is removed",
                                 "refresh restores review without duplicate history",
-                                "presenter walkthrough",
+                                "examples gallery and presenter walkthrough",
+                                "example card opens its scenario on the target view",
                                 "scoped repair opens a new passing review",
                                 "reduction ZIP is a real archive",
                                 "mutation suite",
@@ -257,7 +263,7 @@ def main():
                                 "observation matrix rendering with explicitly missing observations (presentation-only test)",
                                 "keyboard row inspection",
                                 "invalid input feedback",
-                                "six views without horizontal overflow",
+                                "seven views without horizontal overflow",
                             ],
                         },
                         indent=2,

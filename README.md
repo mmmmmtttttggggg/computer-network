@@ -8,7 +8,7 @@
 | Automated tests | 287 passing in the recorded build-workspace run. Run them on your machine using the commands below. |
 | Browser workflows | Recorded Chromium checks at 1440, 1366, and 390 px, with no JavaScript page errors. |
 | Actual Kubernetes / Calico enforcement | Runner implemented; **real-cluster verification remains pending**. Scripted worker tests are not CNI evidence. |
-| GitHub Actions | Workflow supplied; successful remote CI is not claimed until a run completes. |
+| GitHub Actions | Runs on every push: tests on Python 3.10 and 3.12, plus the browser workflow. Passing on `main`. |
 
 The original final archive is available at **[releases/NetScope-1.2.zip](releases/NetScope-1.2.zip)**. The branch also contains the extracted project so its code and tests can be inspected directly. The archive preserves the release bytes; this branch README adds the GitHub handoff instructions.
 
@@ -147,7 +147,7 @@ The benchmark measures complete two-revision static review construction, includi
 
 An optional independent check against **Network Config Analyzer 2.1.0** compares 5,472 decisions across 28 finite fixtures. One cross-namespace selector disagreement is retained with a reduced reproducer; this is not a perfect-conformance claim. See [docs/ORACLE_CHECK.md](docs/ORACLE_CHECK.md). The oracle has its own environment and is not required to launch NetScope.
 
-The dashboard restores the last saved review after refresh. Its collapsible presenter guide and [docs/DEMO_SCRIPT.md](docs/DEMO_SCRIPT.md) provide a short, repeatable explanation.
+The dashboard restores the last saved review after refresh. The **Examples** page lists every bundled scenario with what to look for and opens each one on the page where its result appears. It also holds a five-minute walkthrough; [docs/DEMO_SCRIPT.md](docs/DEMO_SCRIPT.md) has the longer script.
 
 ## Real-cluster verification
 

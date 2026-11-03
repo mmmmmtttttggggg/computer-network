@@ -26,11 +26,14 @@ const state = {
   filter: { text: '', change: 'ALL', verdict: 'ALL' },
   limit: 60,
   busy: false,
+  examples: [],
+  moreExperimentsOpen: false,
 };
 const names = {
   overview: 'Overview',
+  examples: 'Examples',
   connections: 'Connections',
-  containment: 'Containment lab',
+  containment: 'Containment',
   experiments: 'Experiments',
   evidence: 'Evidence',
   inputs: 'Inputs & history',
@@ -123,7 +126,7 @@ const endpoint = (v) => {
   return `<span class="endpoint">${esc(parts.slice(1).join('/'))}<small>${esc(parts[0])}</small></span>`;
 };
 function metric(label, value, foot, color = '') {
-  return `<div class="metric ${color}"><div class="metric-label">${esc(label)}<span>↗</span></div><div class="metric-value">${esc(value)}</div><div class="metric-foot">${esc(foot)}</div></div>`;
+  return `<div class="metric ${color}"><div class="metric-label">${esc(label)}</div><div class="metric-value">${esc(value)}</div><div class="metric-foot">${esc(foot)}</div></div>`;
 }
 function formatDate(v) {
   return new Date(v).toLocaleString(undefined, {
@@ -157,7 +160,7 @@ async function runProject(raw) {
   state.history = await api('/api/runs');
   rememberRun(r.id);
   render();
-  toast(`Review complete · ${r.stats.queries} queries · ${r.status.toLowerCase()}`);
+  toast(`Review finished: ${r.stats.queries} connections, ${r.status.toLowerCase()}`);
 }
 async function openRun(id) {
   state.report = await api('/api/runs/' + id);
@@ -187,7 +190,7 @@ function render() {
   $('#run-fingerprint').textContent = `${r.id.slice(0, 8)} / SHA-256 ${r.input_hash.slice(0, 16)}`;
   $('#export-json').href = `/api/runs/${r.id}/report.json`;
   $('#export-html').href = `/api/runs/${r.id}/report.html`;
-  $('#view-container').innerHTML = { overview, connections, containment, experiments, evidence, inputs }[
+  $('#view-container').innerHTML = { overview, examples, connections, containment, experiments, evidence, inputs }[
     state.view
   ]();
   bindView();
@@ -235,7 +238,7 @@ function graph() {
         allowed = e[state.phase] === 'Allow',
         changed = e.change !== 'UNCHANGED',
         path = pathIDs.has(e.tuple_id) && state.phase === 'candidate';
-      const color = path ? '#eac67a' : allowed ? (changed ? '#64dcba' : '#387e79') : '#566478';
+      const color = path ? '#b7791f' : allowed ? (changed ? '#2f6b55' : '#7fa896') : '#b9b3a6';
       const sx = a.x + (a.x < b.x ? 59 : a.x > b.x ? -59 : 0),
         sy = a.y + (a.x === b.x ? (a.y < b.y ? 16 : -16) : 0),
         tx = b.x + (a.x < b.x ? -61 : a.x > b.x ? 61 : 0),
@@ -243,13 +246,13 @@ function graph() {
       const same = a.x === b.x;
       const midX = same ? Math.min(w - 20, a.x + 110 + (i % 3) * 12) : (sx + tx) / 2;
       const midY = (sy + ty) / 2 + (same ? 0 : ((i % 3) - 1) * 20);
-      return `<path d="M ${sx} ${sy} C ${midX} ${same ? sy : midY}, ${midX} ${same ? ty : midY}, ${tx} ${ty}" fill="none" stroke="${color}" stroke-width="${path ? 2.5 : 1.2}" ${allowed ? '' : 'stroke-dasharray="4 5"'} opacity="${path ? 1 : 0.65}" marker-end="url(#${path ? 'arrow-path' : allowed ? 'arrow-allow' : 'arrow-deny'})"><title>${esc(e.source)} → ${esc(e.destination)} ${e.protocol}/${e.port}: ${esc(e[state.phase])}</title></path>`;
+      return `<path d="M ${sx} ${sy} C ${midX} ${same ? sy : midY}, ${midX} ${same ? ty : midY}, ${tx} ${ty}" fill="none" stroke="${color}" stroke-width="${path ? 2.2 : 1.3}" ${allowed ? '' : 'stroke-dasharray="4 5"'} opacity="${path ? 1 : 0.85}" marker-end="url(#${path ? 'arrow-path' : allowed ? 'arrow-allow' : 'arrow-deny'})"><title>${esc(e.source)} → ${esc(e.destination)} ${e.protocol}/${e.port}: ${esc(e[state.phase])}</title></path>`;
     })
     .join('');
   const groupSVG = groups
     .map(
       (ns, i) =>
-        `<rect x="${col * (i + 1) - 77}" y="34" width="154" height="239" rx="10" fill="#101d2b" fill-opacity=".45" stroke="#26394b" stroke-dasharray="3 6"/><text x="${col * (i + 1)}" y="23" text-anchor="middle" fill="#6d94aa" font-family="monospace" font-size="9">${esc(ns.toUpperCase())} NAMESPACE</text>`,
+        `<rect x="${col * (i + 1) - 77}" y="34" width="154" height="239" rx="12" fill="#f4f1ea" stroke="#e3ded3"/><text x="${col * (i + 1)}" y="23" text-anchor="middle" fill="#8a8579" font-family="system-ui, sans-serif" font-size="10">${esc(ns)}</text>`,
     )
     .join('');
   const nodeSVG = nodes
@@ -257,20 +260,20 @@ function graph() {
       const { x, y } = positions[n.id];
       const type =
         n.role === 'agent'
-          ? 'AGENT'
+          ? 'agent'
           : n.role === 'asset'
-            ? 'DATA ASSET'
+            ? 'data asset'
             : n.role === 'tool'
-              ? 'TOOL'
-              : 'WORKLOAD';
-      const color = n.role === 'agent' ? '#64d8b1' : n.role === 'asset' ? '#dfc07f' : '#88aeca';
-      return `<g class="node" tabindex="0" role="button" data-node="${esc(n.id)}" aria-label="Inspect connections for ${esc(n.id)}"><rect x="${x - 59}" y="${y - 18}" width="118" height="36" rx="7" fill="#172a3a" stroke="${n.role === 'asset' ? '#62563a' : n.role === 'agent' ? '#326d5b' : '#314b61'}"/><circle cx="${x - 47}" cy="${y - 2}" r="3" fill="${color}"/><text x="${x - 37}" y="${y - 2}" fill="#dbe8f2" font-family="system-ui" font-size="10">${esc(n.name)}</text><text x="${x - 37}" y="${y + 10}" fill="${color}" font-family="monospace" font-size="6.5" letter-spacing="1">${type}</text></g>`;
+              ? 'tool'
+              : 'workload';
+      const color = n.role === 'agent' ? '#2f6b55' : n.role === 'asset' ? '#b7791f' : '#7d8ea3';
+      return `<g class="node" tabindex="0" role="button" data-node="${esc(n.id)}" aria-label="Inspect connections for ${esc(n.id)}"><rect x="${x - 59}" y="${y - 18}" width="118" height="36" rx="8" fill="#fffefb" stroke="${n.role === 'asset' ? '#e2c48f' : n.role === 'agent' ? '#a9c9b9' : '#d9d4c8'}"/><circle cx="${x - 47}" cy="${y}" r="3.5" fill="${color}"/><text x="${x - 37}" y="${y - 2}" fill="#2a2925" font-family="system-ui, sans-serif" font-size="10.5" font-weight="500">${esc(n.name)}</text><text x="${x - 37}" y="${y + 10}" fill="#8a8579" font-family="system-ui, sans-serif" font-size="8">${type}</text></g>`;
     })
     .join('');
-  return `<div class="panel graph-panel"><div class="graph-toolbar"><h2 style="font-size:13px">Connectivity map <span class="subtle">/ selected review paths</span></h2><div class="tabs"><button data-phase="baseline" class="${state.phase === 'baseline' ? 'active' : ''}">Baseline</button><button data-phase="candidate" class="${state.phase === 'candidate' ? 'active' : ''}">Candidate</button></div></div><div class="graph-wrap"><svg class="network" viewBox="0 0 ${w} ${h}" role="img" aria-label="${esc(state.phase)} network model. Selected intent, changed, and containment paths; use Connections for full scope."><defs>${[
-    ['allow', '#438e81'],
-    ['deny', '#657185'],
-    ['path', '#eac67a'],
+  return `<div class="panel graph-panel"><div class="graph-toolbar"><h2>Connectivity map</h2><div class="tabs"><button data-phase="baseline" class="${state.phase === 'baseline' ? 'active' : ''}">Baseline</button><button data-phase="candidate" class="${state.phase === 'candidate' ? 'active' : ''}">Candidate</button></div></div><div class="graph-wrap"><svg class="network" viewBox="0 0 ${w} ${h}" role="img" aria-label="${esc(state.phase)} network model. Selected intent, changed, and containment paths; use Connections for full scope."><defs>${[
+    ['allow', '#5f8f7b'],
+    ['deny', '#b9b3a6'],
+    ['path', '#b7791f'],
   ]
     .map(
       ([id, c]) =>
@@ -278,7 +281,7 @@ function graph() {
     )
     .join(
       '',
-    )}</defs>${groupSVG}${edgeSVG}${nodeSVG}</svg></div><div class="graph-legend"><span><i class="legend-line"></i>Allowed</span><span><i class="legend-line deny"></i>Denied</span><span><i class="legend-line path"></i>Conditional containment path</span><span>Known policy decisions · not live traffic</span></div></div>`;
+    )}</defs>${groupSVG}${edgeSVG}${nodeSVG}</svg></div><div class="graph-legend"><span><i class="legend-line"></i>Allowed</span><span><i class="legend-line deny"></i>Denied</span><span><i class="legend-line path"></i>Path to a sensitive asset</span><span class="legend-note">Policy decisions, not live traffic</span></div></div>`;
 }
 function overview() {
   const r = state.report,
@@ -286,43 +289,94 @@ function overview() {
     newPaths = r.threat.findings.filter((p) => p.new).length;
   const hero = newPaths
     ? {
-        title: s.intent_fail
-          ? 'An indirect asset path opens, too.'
-          : 'Direct checks pass. An indirect path opens.',
-        text: `${s.intent_pass} application intents pass; ${s.intent_fail} fail. Declared relay assumptions create ${newPaths} new sensitive-asset exposure(s). See every hop and the assumption behind it.`,
-        tag: 'THE CONSEQUENCE BEHIND THE CHANGE',
-        action: 'Inspect containment path →',
+        title: s.intent_fail ? 'An indirect path to a sensitive asset opens.' : 'Direct checks pass, but an indirect path opens.',
+        text: `${s.intent_pass} intents pass and ${s.intent_fail} fail. Under the declared relay assumptions, the change creates ${newPaths} new route(s) to a sensitive asset.`,
+        action: 'See the path',
         view: 'containment',
       }
     : s.intent_fail
       ? {
-          title: `${s.intent_fail} application intents are broken.`,
-          text: 'A small policy edit changed application behaviour. Inspect its rule trace, then export a smaller model-preserved reproduction.',
-          tag: 'REGRESSION DETECTED',
-          action: 'Open regression experiments →',
+          title: `${s.intent_fail} intent${s.intent_fail === 1 ? '' : 's'} now fail.`,
+          text: 'The policy change broke expected application behaviour. Open the rule trace, or shrink the change to a small replayable case.',
+          action: 'Open experiments',
           view: 'experiments',
         }
       : s.UNKNOWN
         ? {
-            title: 'Uncertainty is a result, too.',
-            text: 'An unsupported construct can influence these decisions. The model refuses to issue a complete pass.',
-            tag: 'HONEST COVERAGE',
-            action: 'Inspect query coverage →',
+            title: 'Some results are Unknown.',
+            text: 'A policy the model cannot fully read affects these connections, so NetScope does not claim a complete pass.',
+            action: 'See affected connections',
             view: 'connections',
           }
         : {
-            title: 'A clean review. Now challenge it.',
-            text: 'The declared candidate intents pass. Inject selector and port mistakes to find gaps in your intent suite.',
-            tag: 'FAULT-INJECTION READY',
-            action: 'Launch experiments →',
+            title: 'Everything declared passes.',
+            text: 'Try injecting small policy mistakes to see which ones your intents would catch.',
+            action: 'Open experiments',
             view: 'experiments',
           };
-  return `<div class="metrics">${metric('SEMANTIC CHANGES', s.NEWLY_ALLOWED + s.NEWLY_BLOCKED, `${s.NEWLY_ALLOWED} opened · ${s.NEWLY_BLOCKED} blocked`, 'green')}${metric('APPLICATION INTENTS', `${s.intent_pass} / ${r.intents.length}`, `${s.intent_fail} failed · candidate revision`, s.intent_fail ? 'red' : 'cyan')}${metric('CONTAINMENT PATHS', r.threat.findings.length, `${newPaths} new · under explicit assumptions`, 'amber')}${metric('REVIEW GATE', r.status, `Exit ${r.exit_code} · ${s.queries} declared queries`, r.exit_code === 0 ? 'green' : r.exit_code === 1 ? 'red' : 'amber')}</div>
- ${demoGuide()}<div class="grid-main"><div>${graph()}<div class="panel"><div class="section-line"><h2>What changed?</h2><button class="link-button" data-goto="connections">All connections ↗</button></div>${changedTable()}</div></div><div><div class="insight-card"><div class="eyebrow">${hero.tag}</div><h3>${hero.title}</h3><p>${hero.text}</p><button class="small-button" data-goto="${hero.view}">${hero.action}</button></div><div class="panel"><div class="section-line"><h2>Application intent</h2><span class="subtle">Candidate</span></div>${intentList()}</div></div></div>
- <div class="insights-row"><div class="panel"><div class="section-line"><h2>From change to evidence</h2><span class="pill neutral">REPEATABLE</span></div><div class="fact-row"><span class="fact-index">01</span><p><strong>Compare behaviour, not YAML text</strong>Order-only edits create no semantic delta.</p></div><div class="fact-row"><span class="fact-index">02</span><p><strong>Preserve a failure while removing context</strong>Reduce paired policies; keep the exact decision and isolation signature.</p></div><div class="fact-row"><span class="fact-index">03</span><p><strong>Verify in an isolated lab</strong>Healthy controls, fresh connections, and explicit incomplete results.</p></div></div><div class="panel"><h2 style="margin-bottom:15px">Run provenance</h2><div class="data-pair"><span>Input fingerprint</span><code>${r.input_hash.slice(0, 20)}…</code></div><div class="data-pair"><span>Modelled endpoints</span><strong>${s.endpoints} / ${[...new Set(r.nodes.map((n) => n.namespace))].length} namespaces</strong></div><div class="data-pair"><span>Analysis time</span><strong>${s.duration_ms} ms</strong></div><div class="data-pair"><span>Runtime evidence</span><strong class="warning-text">Not verified</strong></div><p class="help">${esc(r.gate_reasons.join(' · ') || 'All declared candidate checks pass. This is a static result.')}</p></div></div>`;
+  const gate = r.exit_code === 0 ? 'green' : r.exit_code === 1 ? 'red' : 'amber';
+  return `<div class="metrics">${metric('Changed connections', s.NEWLY_ALLOWED + s.NEWLY_BLOCKED, `${s.NEWLY_ALLOWED} opened, ${s.NEWLY_BLOCKED} blocked`)}${metric('Intents passing', `${s.intent_pass} of ${r.intents.length}`, s.intent_fail ? `${s.intent_fail} failing` : 'None failing', s.intent_fail ? 'red' : '')}${metric('Paths to sensitive assets', r.threat.findings.length, `${newPaths} new in this change`, newPaths ? 'amber' : '')}${metric('Review result', r.status, `${s.queries} connections checked`, gate)}</div>
+ <div class="grid-main"><div><div class="insight-card"><h3>${hero.title}</h3><p>${hero.text}</p><button class="small-button" data-goto="${hero.view}">${hero.action} →</button></div>${graph()}<div class="panel"><div class="section-line"><h2>What changed</h2><button class="link-button" data-goto="connections">All connections →</button></div>${changedTable()}</div></div><div><div class="panel"><div class="section-line"><h2>Intents</h2><span class="subtle">Candidate revision</span></div>${intentList()}</div><div class="panel side-note"><h3>New here?</h3><p>The Examples page has ${state.examples.length} small scenarios, each showing one idea in under a minute.</p><button class="small-button" data-goto="examples">Browse examples →</button></div></div></div>`;
 }
-function demoGuide() {
-  return `<details class="panel demo-guide"><summary>Presenter guide · a five-minute walkthrough</summary><ol><li><strong>Show the surprise.</strong> Load the agent example: five direct intents pass, but one conditional asset path opens. <button class="small-button" data-load="agent-escape">Load agent example</button></li><li><strong>Challenge the assumption.</strong> Open the containment lab, inspect each hop, then remove one relay assumption. Policy permissions stay the same. <button class="small-button" data-goto="containment">Inspect containment</button></li><li><strong>Find a constrained repair.</strong> Search small baseline reverts and open a fully re-evaluated proposal. <button class="small-button" data-goto="experiments">Open experiments</button></li><li><strong>Make the regression portable.</strong> Load the database switch, reduce a changed connection, and export its replay bundle. <button class="small-button" data-load="checkout-regression">Load regression</button></li></ol><p class="help">Say explicitly: these are finite static results; real Kubernetes/CNI enforcement remains unverified. See docs/DEMO_SCRIPT.md for questions and answers.</p></details>`;
+const showcase = {
+  'agent-escape': {
+    topic: 'Containment',
+    look: 'All five direct checks pass, yet the agent can now reach the database through the gateway.',
+    view: 'containment',
+  },
+  'parallel-relay': {
+    topic: 'Containment',
+    look: 'Remove one relay and a second gateway still carries the path. One fix is not enough.',
+    view: 'containment',
+  },
+  'checkout-regression': {
+    topic: 'Regression',
+    look: 'Two connections flip and two intents fail. Shrink the change to a one-policy replay.',
+    view: 'experiments',
+  },
+  'selector-trap': {
+    topic: 'Selectors',
+    look: 'One indentation change turns an AND into an OR and widens namespace access.',
+    view: 'connections',
+    change: 'NEWLY_ALLOWED',
+  },
+  'last-policy-deleted': {
+    topic: 'Regression',
+    look: 'Deleting a policy removes isolation, so more traffic is allowed rather than less.',
+    view: 'overview',
+  },
+  'unsupported-policy': {
+    topic: 'Coverage',
+    look: 'A vendor policy the model cannot read. Affected results are marked Unknown, not guessed.',
+    view: 'connections',
+    verdict: 'Unknown',
+  },
+  'clean-baseline': {
+    topic: 'Testing',
+    look: 'Nothing changed. Inject faults to find mistakes your intents would miss.',
+    view: 'experiments',
+  },
+  'cross-namespace-check': {
+    topic: 'Coverage',
+    look: 'NetScope predicts Allow. Only a real CNI run can settle which analyzer is right.',
+    view: 'connections',
+  },
+};
+function examples() {
+  const order = Object.keys(showcase);
+  const list = [...state.examples].sort(
+    (a, b) => (order.indexOf(a.id) + 1 || 99) - (order.indexOf(b.id) + 1 || 99),
+  );
+  const cards = list
+    .map((x) => {
+      const m = showcase[x.id] || { topic: 'Example', look: '', view: 'overview' };
+      const current = state.report?.name === x.name;
+      return `<article class="example-card ${current ? 'current' : ''}"><div class="example-topic">${esc(m.topic)}${current ? '<span class="current-tag">Open now</span>' : ''}</div><h3>${esc(x.name)}</h3><p>${esc(x.description)}</p>${m.look ? `<p class="example-look"><strong>Look for:</strong> ${esc(m.look)}</p>` : ''}<button data-example="${esc(x.id)}">${current ? 'Reopen' : 'Open example →'}</button></article>`;
+    })
+    .join('');
+  return `<div class="section-line"><div><h2>Examples</h2><p class="lead">Small, ready-made clusters, each built to show one idea. Opening one runs the review and takes you to the page where the result is.</p></div></div>
+ <section class="panel demo-guide"><h2>A five-minute walkthrough</h2><ol><li><strong>Show the surprise.</strong> Open the indirect escape: every direct check passes, but the agent can reach the database through a gateway. <button class="small-button" data-example="agent-escape">Open</button></li><li><strong>Challenge the assumption.</strong> On Containment, remove one relay and watch the path disappear while the policies stay the same.</li><li><strong>Find a small repair.</strong> On Experiments, search for the fewest policy reverts that restore safe behaviour.</li><li><strong>Make the regression portable.</strong> Open the database switch, reduce it to a single policy, and download the replay bundle. <button class="small-button" data-example="checkout-regression">Open</button></li></ol><p class="help">All results here are static. Real Kubernetes enforcement is not checked unless you run the live lab from Evidence. More detail is in docs/DEMO_SCRIPT.md.</p></section>
+ <div class="example-grid">${cards}</div>`;
 }
 function changedTable() {
   const rows = state.report.rows.filter((r) => r.change !== 'UNCHANGED');
@@ -348,7 +402,7 @@ function filteredRows() {
 }
 function connections() {
   const rows = filteredRows();
-  return `<div class="section-line"><div><h2>Every connection. Both directions.</h2><div class="subtle">Select a row for matching policy rules, isolation state, and endpoint labels.</div></div><span class="pill neutral">${state.report.stats.queries} QUERIES</span></div><div class="toolbar"><label class="sr-only" for="search">Filter by endpoint, protocol, port or tuple ID</label><input id="search" placeholder="Search endpoints, protocol, port…" value="${esc(state.filter.text)}"><select id="change-filter" aria-label="Change filter">${['ALL', 'NEWLY_ALLOWED', 'NEWLY_BLOCKED', 'UNCHANGED', 'UNKNOWN'].map((v) => `<option ${v === state.filter.change ? 'selected' : ''} value="${v}">${v === 'ALL' ? 'All changes' : v.toLowerCase().replaceAll('_', ' ')}</option>`).join('')}</select><select id="verdict-filter" aria-label="Candidate decision filter">${['ALL', 'Allow', 'Deny', 'Unknown'].map((v) => `<option ${v === state.filter.verdict ? 'selected' : ''} value="${v}">${v === 'ALL' ? 'All decisions' : v}</option>`).join('')}</select></div><div class="panel flush"><div class="table-wrap"><table><thead><tr><th>Source</th><th>Destination</th><th>Protocol / Port</th><th>Baseline</th><th>Candidate</th><th>Semantic delta</th></tr></thead><tbody id="connections-body">${connectionRows(rows)}</tbody></table></div><div class="table-footer"><span id="row-count">Showing ${Math.min(state.limit, rows.length)} of ${rows.length} matching queries</span><button class="small-button" id="more-rows" ${state.limit >= rows.length ? 'hidden' : ''}>Show 60 more</button></div></div><p class="help">Unknown and unqueried paths are never silently treated as Deny. All intent-matched tuples are added to the scope, even with an explicit query list.</p>${queryComposer()}`;
+  return `<div class="section-line"><div><h2>Connections</h2><p class="lead">Every checked connection under both revisions. Select a row to see which rules decided it.</p></div><span class="count-tag">${state.report.stats.queries} checked</span></div><div class="toolbar"><label class="sr-only" for="search">Filter by endpoint, protocol, port or tuple ID</label><input id="search" placeholder="Search endpoints, protocol, port…" value="${esc(state.filter.text)}"><select id="change-filter" aria-label="Change filter">${['ALL', 'NEWLY_ALLOWED', 'NEWLY_BLOCKED', 'UNCHANGED', 'UNKNOWN'].map((v) => `<option ${v === state.filter.change ? 'selected' : ''} value="${v}">${v === 'ALL' ? 'All changes' : v.toLowerCase().replaceAll('_', ' ')}</option>`).join('')}</select><select id="verdict-filter" aria-label="Candidate decision filter">${['ALL', 'Allow', 'Deny', 'Unknown'].map((v) => `<option ${v === state.filter.verdict ? 'selected' : ''} value="${v}">${v === 'ALL' ? 'All decisions' : v}</option>`).join('')}</select></div><div class="panel flush"><div class="table-wrap"><table><thead><tr><th>Source</th><th>Destination</th><th>Protocol / Port</th><th>Baseline</th><th>Candidate</th><th>Change</th></tr></thead><tbody id="connections-body">${connectionRows(rows)}</tbody></table></div><div class="table-footer"><span id="row-count">Showing ${Math.min(state.limit, rows.length)} of ${rows.length} matching queries</span><button class="small-button" id="more-rows" ${state.limit >= rows.length ? 'hidden' : ''}>Show 60 more</button></div></div><p class="help">Unknown and unqueried paths are never silently treated as Deny. All intent-matched tuples are added to the scope, even with an explicit query list.</p>${queryComposer()}`;
 }
 function connectionRows(rows) {
   return (
@@ -377,13 +431,13 @@ function assumptionEvidence(p) {
 function containment() {
   const t = state.report.threat;
   if (!t.enabled)
-    return `<div class="panel"><h2>Make the assumptions explicit.</h2><p class="subtle">This input has no threat model. Load “The indirect escape” to explore agent → gateway → database, or declare entrypoints, pivots, and assets in Inputs.</p><button class="primary" data-load="agent-escape">Load agent-containment scenario</button></div>`;
-  return `<div class="section-line"><div><h2>Could a compromised agent reach the asset?</h2><div class="subtle">An application-aware experiment beyond direct connectivity intent.</div></div><span class="pill warn">CONDITIONAL EXPOSURE</span></div><div class="alert">${esc(t.warning)}</div><div class="metrics">${metric('BASELINE REACHABLE', t.baseline.reachable_pairs, 'Entry-point / endpoint pairs', 'cyan')}${metric('CANDIDATE REACHABLE', t.candidate.reachable_pairs, 'Within four hops', 'amber')}${metric('SENSITIVE-ASSET PATHS', t.findings.length, 'Shortest witnessed paths', 'red')}${metric('DECLARED PIVOTS', t.pivots.length, 'No automatic exploitation assumption', 'green')}</div><div class="threat-grid"><div>${t.findings.length ? t.findings.map((p) => `<div class="path-card"><div class="section-line"><h3>${p.new ? 'New sensitive-asset exposure' : 'Existing sensitive-asset exposure'}</h3>${pill(p.new ? 'NEW PATH' : 'EXISTING')}</div><div class="path-flow"><span class="path-node">${esc(p.entrypoint)}</span>${p.hops.map((h) => `<span class="path-arrow">→<small>${h.protocol}/${h.port}</small></span><button class="path-node ${h.destination === p.asset ? 'asset' : ''}" data-row="${h.tuple_id}">${esc(h.destination)}</button>`).join('')}</div><div class="assumptions"><strong>Conditions behind this path</strong><ul>${p.assumptions.map((a) => `<li>${esc(a)}</li>`).join('')}</ul></div><p class="help">Each edge has a known Allow decision. Click a hop to inspect both policy directions.</p>${assumptionEvidence(p)}</div>`).join('') : '<div class="panel"><h3>No asset path found within this model.</h3><p class="subtle">This does not prove that omitted endpoints, credentials, or unqueried traffic are safe.</p></div>'}<div class="panel"><h2>What if none of the workloads can relay?</h2><p class="help">This changes the declared pivot assumption in a new run. It does not change NetworkPolicy permissions.</p><button id="no-pivots">Re-evaluate without pivot assumptions →</button></div></div><div><div class="panel"><h2>Blast-radius comparison</h2>${t.entrypoints
+    return `<div class="panel"><h2>No containment model in this review</h2><p class="subtle">This input has no threat model. Load “The indirect escape” to explore agent → gateway → database, or declare entrypoints, pivots, and assets in Inputs.</p><button class="primary" data-load="agent-escape">Load agent-containment scenario</button></div>`;
+  return `<div class="section-line"><div><h2>Could a compromised agent reach the asset?</h2><p class="lead">Follows allowed connections through workloads you have marked as possible relays, up to four hops.</p></div></div><div class="alert">${esc(t.warning)}</div><div class="metrics">${metric('Reachable before', t.baseline.reachable_pairs, 'Entry point to workload pairs')}${metric('Reachable after', t.candidate.reachable_pairs, 'Within four hops', t.candidate.reachable_pairs > t.baseline.reachable_pairs ? 'amber' : '')}${metric('Paths to sensitive assets', t.findings.length, 'Shortest path for each', t.findings.length ? 'red' : '')}${metric('Declared relays', t.pivots.length, 'Workloads assumed able to forward')}</div><div class="threat-grid"><div>${t.findings.length ? t.findings.map((p) => `<div class="path-card"><div class="section-line"><h3>${p.new ? 'New path to a sensitive asset' : 'Existing path to a sensitive asset'}</h3>${pill(p.new ? 'New' : 'Existing')}</div><div class="path-flow"><span class="path-node">${esc(p.entrypoint)}</span>${p.hops.map((h) => `<span class="path-arrow">→<small>${h.protocol}/${h.port}</small></span><button class="path-node ${h.destination === p.asset ? 'asset' : ''}" data-row="${h.tuple_id}">${esc(h.destination)}</button>`).join('')}</div><div class="assumptions"><strong>Conditions behind this path</strong><ul>${p.assumptions.map((a) => `<li>${esc(a)}</li>`).join('')}</ul></div><p class="help">Each edge has a known Allow decision. Click a hop to inspect both policy directions.</p>${assumptionEvidence(p)}</div>`).join('') : '<div class="panel"><h3>No asset path found within this model.</h3><p class="subtle">This does not prove that omitted endpoints, credentials, or unqueried traffic are safe.</p></div>'}<div class="panel"><h2>What if none of the workloads can relay?</h2><p class="help">This changes the declared pivot assumption in a new run. It does not change NetworkPolicy permissions.</p><button id="no-pivots">Re-evaluate without pivot assumptions →</button></div></div><div><div class="panel"><h2>Reach of each entry point</h2>${t.entrypoints
     .map((e) => {
       const b = t.baseline.radius[e]?.length || 0,
         c = t.candidate.radius[e]?.length || 0,
         max = Math.max(1, state.report.nodes.length - 1);
-      return `<p class="mono" style="margin-top:18px">${esc(e)}</p><div class="data-pair"><span>Baseline</span><strong>${b} endpoints</strong></div><div class="radius-bar"><span style="width:${(100 * b) / max}%;background:#5b93b0"></span></div><div class="data-pair"><span>Candidate</span><strong>${c} endpoints</strong></div><div class="radius-bar"><span style="width:${(100 * c) / max}%;background:#edc276"></span></div>`;
+      return `<p class="mono" style="margin-top:18px">${esc(e)}</p><div class="data-pair"><span>Baseline</span><strong>${b} endpoints</strong></div><div class="radius-bar"><span style="width:${(100 * b) / max}%;background:#9bb3c7"></span></div><div class="data-pair"><span>Candidate</span><strong>${c} endpoints</strong></div><div class="radius-bar"><span style="width:${(100 * c) / max}%;background:#d9a54e"></span></div>`;
     })
     .join(
       '',
@@ -391,7 +445,7 @@ function containment() {
 }
 function experiments() {
   const changed = state.report.rows.filter((r) => ['NEWLY_ALLOWED', 'NEWLY_BLOCKED'].includes(r.change));
-  return `<div class="section-line"><div><h2>Small experiments. Defensible conclusions.</h2><div class="subtle">Every proposal stays local. No experiment deploys or edits your saved review.</div></div></div><div class="experiment-grid"><div class="panel"><div class="experiment-head"><div class="experiment-icon">⇣</div><div><h2>Regression reducer</h2><p>Turn a large policy change into a replayable case.</p></div></div><p class="experiment-body">Remove policies from both revisions while preserving the selected before/after decisions, isolation flags, and failing candidate intents. Fixed topology; no global-minimum claim.</p><select class="reducer-select" id="witness" aria-label="Connection to reduce">${changed.map((r) => `<option value="${r.tuple_id}">${esc(r.source)} → ${esc(r.destination)} · ${r.protocol}/${r.port}</option>`).join('') || '<option>No supported changed connection</option>'}</select><button class="primary" id="reduce" ${changed.length ? '' : 'disabled'}>Reduce this regression</button><div id="reduction-result">${reductionResult()}</div></div><div class="panel"><div class="experiment-head"><div class="experiment-icon blue">↶</div><div><h2>Counterfactual repair</h2><p>Which policy reverts restore declared behaviour?</p></div></div><p class="experiment-body">Test small sets of changed policy reverts against every declared intent and query. Preserve known decisions and remove new entrypoint → asset exposures under your pivot assumptions.</p><p class="help">Bounded search: up to 3 changed identities, 64 evaluations / 10 seconds. Proposals require human review.</p><button id="repair" class="primary">Find scoped repair proposals</button><div id="repair-result">${repairResult()}</div></div></div><div class="panel"><div class="section-line"><div class="experiment-head" style="margin-bottom:0"><div class="experiment-icon blue">⚗</div><div><h2>Fault-injection lab</h2><p>How sensitive is your intent suite to policy mistakes?</p></div></div><button id="mutate">Inject controlled policy faults</button></div><p class="help">Namespace+Pod AND → OR, wrong ports, removed allow rules, selector typos, and unrestricted rules. Use the clean baseline for a meaningful new-failure experiment. This measures intent sensitivity, not analyzer accuracy.</p><div id="mutation-result">${mutationResult()}</div></div>${robustnessPanel()}`;
+  return `<div class="section-line"><div><h2>Experiments</h2><p class="lead">Everything here runs locally. Nothing is deployed, and the saved review is never edited.</p></div></div><div class="experiment-grid"><div class="panel"><div class="experiment-head"><div><h2>Shrink a regression</h2><p>Turn a large policy change into a small replayable case.</p></div></div><p class="experiment-body">Removes policies from both revisions while keeping the chosen connection's before/after result, its isolation, and any failing intents. The result is small, though not guaranteed to be the smallest possible.</p><select class="reducer-select" id="witness" aria-label="Connection to reduce">${changed.map((r) => `<option value="${r.tuple_id}">${esc(r.source)} → ${esc(r.destination)} · ${r.protocol}/${r.port}</option>`).join('') || '<option>No supported changed connection</option>'}</select><button class="primary" id="reduce" ${changed.length ? '' : 'disabled'}>Shrink this regression</button><div id="reduction-result">${reductionResult()}</div></div><div class="panel"><div class="experiment-head"><div><h2>Find a repair</h2><p>Which policy reverts restore the expected behaviour?</p></div></div><p class="experiment-body">Tries reverting small sets of changed policies and re-checks every intent and connection. A proposal must keep known results and remove any new route to a sensitive asset.</p><p class="help">Searches up to 3 policies, 64 evaluations or 10 seconds. Proposals still need a human review.</p><button id="repair" class="primary">Find repair proposals</button><div id="repair-result">${repairResult()}</div></div></div><details class="more-experiments" id="more-experiments" ${state.moreExperimentsOpen ? 'open' : ''}><summary>More experiments <span>Fault injection, missing checks, label changes</span></summary><div class="panel"><div class="section-line"><div class="experiment-head" style="margin-bottom:0"><div><h2>Fault injection</h2><p>How many policy mistakes would your intents catch?</p></div></div><button id="mutate">Inject policy faults</button></div><p class="help">Swaps AND for OR, changes ports, removes allow rules, introduces selector typos and adds unrestricted rules. The clean baseline example gives the clearest result. This measures your intents, not the analyzer.</p><div id="mutation-result">${mutationResult()}</div></div>${robustnessPanel()}</details>`;
 }
 function reductionResult() {
   const r = state.reduction;
@@ -406,19 +460,19 @@ function repairResult() {
 function mutationResult() {
   const r = state.mutation;
   if (!r) return '';
-  return `<div class="result-box"><div class="metrics">${metric('INJECTED', r.total, 'Unique deterministic edits', 'cyan')}${metric('EFFECTIVE', r.effective_on_scope, 'Changed a declared decision', 'amber')}${metric('NEWLY CAUGHT', r.newly_caught, 'Introduced an intent failure', 'green')}${metric('INTENT GAPS', r.effective_on_scope - r.newly_caught, 'Effective faults without a new failure', 'red')}</div>${r.mutations.map((m, i) => `<div class="mutant"><div><strong>${esc(m.mutation)}</strong><small>${esc(m.policy)} · ${m.changed_tuples} affected queries · ${m.new_intent_failures.length} new intent failures</small></div>${pill(m.equivalent_on_scope ? 'EQUIVALENT' : m.caught_by_intents ? 'CAUGHT' : 'INTENT GAP')}<button class="small-button" data-mutant-open="${i}">Inspect →</button></div>`).join('')}</div>`;
+  return `<div class="result-box"><div class="metrics">${metric('Faults injected', r.total, 'Deterministic edits')}${metric('Had an effect', r.effective_on_scope, 'Changed a checked connection')}${metric('Caught', r.newly_caught, 'Made an intent fail', 'green')}${metric('Missed', r.effective_on_scope - r.newly_caught, 'Had an effect, no intent failed', 'red')}</div>${r.mutations.map((m, i) => `<div class="mutant"><div><strong>${esc(m.mutation)}</strong><small>${esc(m.policy)} · ${m.changed_tuples} affected queries · ${m.new_intent_failures.length} new intent failures</small></div>${pill(m.equivalent_on_scope ? 'No effect' : m.caught_by_intents ? 'Caught' : 'Missed')}<button class="small-button" data-mutant-open="${i}">Inspect →</button></div>`).join('')}</div>`;
 }
 function evidence() {
   const r = state.report,
     p = r.plan;
-  return `<div class="section-line"><div><h2>Evidence, with its boundaries attached.</h2><div class="subtle">Static predictions and real network observations remain separate.</div></div>${pill('NOT_VERIFIED')}</div><div class="split"><div class="panel"><h2>Live verification plan</h2><div class="data-pair"><span>Required tuples per revision</span><strong>${p.count_per_phase} / 300 limit</strong></div><div class="data-pair"><span>Attempts per tuple</span><strong>3 fresh connections</strong></div><div class="data-pair"><span>Timeout / interval</span><strong>2 seconds / 1 second</strong></div><div class="data-pair"><span>Policy settle delay</span><strong>10 seconds (not a guarantee)</strong></div><div class="data-pair"><span>Unsupported plan tuples</span><strong>${p.unsupported.length}</strong></div><div class="data-pair"><span>Plan fingerprint</span><code>${p.hash.slice(0, 16)}…</code></div><p class="help">${esc(p.coverage_note)} IPv4 Pod-to-Pod TCP/UDP only. Templates, external IPs, SCTP, or privileged-port fixtures cannot receive complete live verification in this release.</p><div class="alert">A timeout is not proof of policy denial. Failed health controls or changed Pod/policy identity make results inconclusive.</div></div><div class="panel"><h2>Run a disposable lab</h2>${
+  return `<div class="section-line"><div><h2>Evidence</h2><p class="lead">What this review is based on, and how to check it against a real cluster. Model predictions and live observations are kept separate.</p></div>${pill('NOT_VERIFIED')}</div><div class="panel"><h2>About this review</h2><div class="data-pair"><span>Input fingerprint</span><code>${r.input_hash.slice(0, 20)}…</code></div><div class="data-pair"><span>Workloads modelled</span><strong>${r.stats.endpoints} in ${[...new Set(r.nodes.map((n) => n.namespace))].length} namespaces</strong></div><div class="data-pair"><span>Analysis time</span><strong>${r.stats.duration_ms} ms</strong></div><div class="data-pair"><span>Checked on a live cluster</span><strong class="warning-text">No</strong></div><p class="help">${esc(r.gate_reasons.join(' · ') || 'All declared candidate checks pass. This is a static result.')}</p></div><div class="split"><div class="panel"><h2>Live verification plan</h2><div class="data-pair"><span>Required tuples per revision</span><strong>${p.count_per_phase} / 300 limit</strong></div><div class="data-pair"><span>Attempts per tuple</span><strong>3 fresh connections</strong></div><div class="data-pair"><span>Timeout / interval</span><strong>2 seconds / 1 second</strong></div><div class="data-pair"><span>Policy settle delay</span><strong>10 seconds (not a guarantee)</strong></div><div class="data-pair"><span>Unsupported plan tuples</span><strong>${p.unsupported.length}</strong></div><div class="data-pair"><span>Plan fingerprint</span><code>${p.hash.slice(0, 16)}…</code></div><p class="help">${esc(p.coverage_note)} IPv4 Pod-to-Pod TCP/UDP only. Templates, external IPs, SCTP, or privileged-port fixtures cannot receive complete live verification in this release.</p><div class="alert">A timeout is not proof of policy denial. Failed health controls or changed Pod/policy identity make results inconclusive.</div></div><div class="panel"><h2>Check on a throwaway cluster</h2>${
     state.config.contexts.length
       ? `<p class="help">Only explicitly allowlisted context/server pairs can be used. This creates trusted fixtures and policies, then deletes only run-owned namespaces.</p><div class="field"><label for="context">Allowlisted context</label><select id="context">${state.config.contexts.map((c) => `<option>${esc(c)}</option>`).join('')}</select></div><button id="preview-plan">Preview exact mutations</button><div id="live-confirm"></div>`
       : `<p class="help">No live cluster is configured. Your review is fully usable in static mode; no runtime evidence is fabricated.</p><div class="code">make lab-up
 # Bind the actual disposable context to its server:
 export NETSCOPE_ALLOWED_CONTEXTS='{&quot;kind-netscope-lab&quot;:&quot;https://127.0.0.1:PORT&quot;}'
 make serve</div><p class="help">See docs/LIVE_LAB.md. Docker, kind, kubectl, and an enforcing CNI are required on your machine.</p>`
-  }<div id="job-result">${jobResult()}</div></div></div><div class="panel"><h2>Recorded static evidence</h2><div class="timeline"><div class="timeline-item"><small>${esc(formatDate(r.created_at))}</small>Input snapshot validated · SHA-256 ${r.input_hash.slice(0, 20)}…</div><div class="timeline-item">${r.stats.queries} queries evaluated under both revisions · ${r.stats.duration_ms} ms</div><div class="timeline-item">${r.intents.length} application intents checked independently of the change gate</div><div class="timeline-item">${r.stats.UNKNOWN} Unknown queries · ${r.plan.count_per_phase} required live tuples · runtime not verified</div></div><div class="subnav-action"><a class="text-link" href="/api/runs/${r.id}/report.json">↓ Full JSON evidence</a><a class="text-link" href="/api/runs/${r.id}/report.html">↓ Standalone HTML report</a></div></div>`;
+  }<div id="job-result">${jobResult()}</div></div></div><div class="panel"><h2>Record</h2><div class="timeline"><div class="timeline-item"><small>${esc(formatDate(r.created_at))}</small>Input snapshot validated · SHA-256 ${r.input_hash.slice(0, 20)}…</div><div class="timeline-item">${r.stats.queries} queries evaluated under both revisions · ${r.stats.duration_ms} ms</div><div class="timeline-item">${r.intents.length} application intents checked independently of the change gate</div><div class="timeline-item">${r.stats.UNKNOWN} Unknown queries · ${r.plan.count_per_phase} required live tuples · runtime not verified</div></div><div class="subnav-action"><a class="text-link" href="/api/runs/${r.id}/report.json">↓ Full JSON evidence</a><a class="text-link" href="/api/runs/${r.id}/report.html">↓ Standalone HTML report</a></div></div>`;
 }
 function jobResult() {
   const j = state.job;
@@ -434,7 +488,7 @@ function jobResult() {
     )}</div>${r.leftovers?.length ? `<div class="alert">${r.leftovers.length} cleanup leftovers. Inspect job JSON.</div>` : ''}${liveMatrix(r)}<button id="download-job" class="small-button">↓ Evidence JSON</button></div>`;
 }
 function inputs() {
-  return `<div class="section-line"><div><h2>Inspectable inputs. Reproducible reviews.</h2><div class="subtle">Edit JSON or load a JSON/YAML project file. Imported images and commands are never executed.</div></div><button class="primary" id="run-editor">Run these inputs →</button></div><div class="split inputs-grid"><div class="panel"><div class="section-line"><h3>Project source</h3><input type="file" id="file-input" class="file-input" accept=".json,.yaml,.yml" aria-label="Load project file"></div><label class="sr-only" for="editor">Project YAML or JSON source</label><textarea id="editor" spellcheck="false">${esc(JSON.stringify(state.project, null, 2))}</textarea><div class="subnav-action" style="margin-top:13px"><button id="download-project" class="small-button">↓ Current project</button><span class="help">5 MiB / 30 endpoints / 17,400 query limit</span></div></div><div><div class="panel"><h2>Review history</h2><p class="help">Saved locally across restarts. Exact input fingerprints remain attached.</p>${state.history
+  return `<div class="section-line"><div><h2>Inputs &amp; history</h2><p class="lead">Edit the project JSON, or load a JSON/YAML file. Nothing in the file is executed.</p></div><button class="primary" id="run-editor">Run these inputs →</button></div><div class="split inputs-grid"><div class="panel"><div class="section-line"><h3>Project source</h3><input type="file" id="file-input" class="file-input" accept=".json,.yaml,.yml" aria-label="Load project file"></div><label class="sr-only" for="editor">Project YAML or JSON source</label><textarea id="editor" spellcheck="false">${esc(JSON.stringify(state.project, null, 2))}</textarea><div class="subnav-action" style="margin-top:13px"><button id="download-project" class="small-button">↓ Current project</button><span class="help">5 MiB / 30 endpoints / 17,400 query limit</span></div></div><div><div class="panel"><h2>Review history</h2><p class="help">Saved locally across restarts. Exact input fingerprints remain attached.</p>${state.history
     .slice(0, 12)
     .map(
       (h) =>
@@ -519,6 +573,19 @@ async function loadExample(id) {
 function bindView() {
   $$('[data-goto]').forEach((b) => (b.onclick = () => goto(b.dataset.goto)));
   $$('[data-load]').forEach((b) => (b.onclick = () => task(b, () => loadExample(b.dataset.load))));
+  $$('[data-example]').forEach(
+    (b) =>
+      (b.onclick = () =>
+        task(b, async () => {
+          const m = showcase[b.dataset.example] || { view: 'overview' };
+          state.filter = { text: '', change: m.change || 'ALL', verdict: m.verdict || 'ALL' };
+          state.view = m.view;
+          location.hash = m.view;
+          await loadExample(b.dataset.example);
+          scrollTo(0, 0);
+        })),
+  );
+  $('#more-experiments')?.addEventListener('toggle', (e) => (state.moreExperimentsOpen = e.target.open));
   $$('[data-phase]').forEach(
     (b) =>
       (b.onclick = () => {
@@ -769,6 +836,7 @@ window.addEventListener('hashchange', () => {
     state.config = await api('/api/config');
     $('#version').textContent = 'v' + state.config.version;
     const examples = await api('/api/examples');
+    state.examples = examples;
     $('#scenario').innerHTML = examples
       .map((x) => `<option value="${x.id}">${esc(x.name)}</option>`)
       .join('');
@@ -781,6 +849,6 @@ window.addEventListener('hashchange', () => {
   } catch (e) {
     notice(e);
     $('#view-container').innerHTML =
-      '<div class="empty-state"><h2>The lab could not initialize.</h2><p>Check the error above and the server terminal.</p></div>';
+      '<div class="empty-state"><h2>NetScope could not start.</h2><p>Check the error above and the server terminal.</p></div>';
   }
 })();
