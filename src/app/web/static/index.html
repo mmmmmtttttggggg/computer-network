@@ -26,7 +26,8 @@
         ><button data-view="containment">Containment</button
         ><button data-view="experiments">Experiments</button
         ><button data-view="evidence">Evidence</button
-        ><button data-view="inputs">Inputs &amp; history</button>
+        ><button data-view="inputs">Inputs &amp; history</button
+        ><button data-view="guide">Guide</button>
       </nav>
       <div class="sidebar-foot">
         <p>Static NetworkPolicy model. Runs locally; nothing leaves this machine.</p>
@@ -35,7 +36,10 @@
     </aside>
     <div class="shell">
       <header class="topbar">
-        <div class="crumb"><strong id="breadcrumb">Overview</strong></div>
+        <div class="crumb">
+          <strong id="breadcrumb">Overview</strong
+          ><button class="link-button page-help" id="page-help">How this page works</button>
+        </div>
         <div class="top-right">
           <a id="export-json" href="#" class="text-link">Export JSON</a
           ><a id="export-html" href="#" class="text-link">HTML report</a>
@@ -43,7 +47,8 @@
       </header>
       <main id="main" tabindex="-1">
         <div class="project-bar">
-          <div>
+          <div class="project-title">
+            <span class="eyebrow">Current review</span>
             <h1 id="project-name">NetScope</h1>
             <p id="project-description">Review a NetworkPolicy change before it ships.</p>
           </div>
@@ -52,12 +57,12 @@
             ><select id="scenario" aria-label="Example scenario"></select
             ><button class="primary" id="run-review">Run review</button>
           </div>
+          <div id="runtime-strip" class="runtime-strip">
+            <span>Static model · not checked against a live cluster</span
+            ><span class="strip-right" id="run-fingerprint">No review loaded</span>
+          </div>
         </div>
         <div id="notice" class="notice" role="status" aria-live="polite" hidden></div>
-        <div id="runtime-strip" class="runtime-strip">
-          <span>Static model · not checked against a live cluster</span
-          ><span class="strip-right" id="run-fingerprint">No review loaded</span>
-        </div>
         <div id="view-container">
           <div class="empty-state">
             <div class="loading-orbit"></div>

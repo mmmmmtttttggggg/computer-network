@@ -73,7 +73,12 @@ def main():
                 page.wait_for_selector(".metrics")
                 expect(page.locator("#run-fingerprint")).to_contain_text(initial_id[:8])
                 assert len(page.request.get(root + "/api/runs").json()) == len(initial_history)
-                page.locator('#nav [data-view="examples"]').click()
+                page.locator("#page-help").click()
+                expect(page.locator("#breadcrumb")).to_have_text("Guide")
+                expect(page.locator("#guide-overview")).to_be_visible()
+                expect(page.locator(".guide-row")).to_have_count(7)
+                page.locator('#guide-examples [data-goto="examples"]').click()
+                expect(page.locator("#breadcrumb")).to_have_text("Examples")
                 expect(page.locator(".demo-guide")).to_contain_text("Make the regression portable")
                 expect(page.locator(".example-card")).to_have_count(8)
                 expect(page.locator(".example-card.current")).to_contain_text("The indirect escape")
@@ -229,6 +234,7 @@ def main():
                         "experiments",
                         "evidence",
                         "inputs",
+                        "guide",
                     ]:
                         page.locator(f'#nav [data-view="{view}"]').click()
                         assert not page.evaluate("document.documentElement.scrollWidth > innerWidth"), (
@@ -253,6 +259,7 @@ def main():
                                 "refresh restores review without duplicate history",
                                 "examples gallery and presenter walkthrough",
                                 "example card opens its scenario on the target view",
+                                "in-app guide reachable from every page",
                                 "scoped repair opens a new passing review",
                                 "reduction ZIP is a real archive",
                                 "mutation suite",
@@ -263,7 +270,7 @@ def main():
                                 "observation matrix rendering with explicitly missing observations (presentation-only test)",
                                 "keyboard row inspection",
                                 "invalid input feedback",
-                                "seven views without horizontal overflow",
+                                "eight views without horizontal overflow",
                             ],
                         },
                         indent=2,

@@ -67,11 +67,10 @@ h3 {
 }
 h1 {
   font-weight: var(--dp-typography-display);
-  font-size: clamp(64px, 7.4cqw, 120px);
-  line-height: 0.9;
-  letter-spacing: -0.045em;
+  font-size: 26px;
+  line-height: 1.1;
+  letter-spacing: -0.025em;
   overflow-wrap: anywhere;
-  margin: 0 0 18px;
 }
 h2 {
   font-size: var(--dp-typography-item-title);
@@ -343,8 +342,20 @@ nav em {
   padding: 0 var(--dp-spacing-gutter);
   border-bottom: var(--rule);
 }
+.crumb {
+  display: flex;
+  align-items: baseline;
+  gap: 18px;
+}
 .crumb strong {
   font-weight: var(--dp-typography-strong);
+}
+.page-help,
+.page-help:hover {
+  font-size: var(--dp-typography-metadata);
+  font-weight: var(--dp-typography-regular);
+  letter-spacing: 0;
+  text-transform: none;
 }
 .top-right {
   display: flex;
@@ -354,43 +365,53 @@ nav em {
 }
 main {
   max-width: 1480px;
-  padding: 40px var(--dp-spacing-gutter) 72px;
+  padding: 24px var(--dp-spacing-gutter) 72px;
   outline: none;
 }
+/* Scenario bar: what is loaded, and the controls to change it, in one band */
 .project-bar {
   display: grid;
-  grid-template-columns: repeat(12, minmax(0, 1fr));
+  grid-template-columns: minmax(0, 1fr) auto;
   column-gap: var(--dp-spacing-gutter);
+  row-gap: 14px;
   align-items: end;
+  border: var(--rule);
+  padding: 16px 20px 0;
   margin-bottom: 28px;
 }
-.project-bar > div:first-child {
-  grid-column: 1 / span 9;
+.project-title {
+  min-width: 0;
+}
+.project-title .eyebrow {
+  display: block;
+  color: var(--ink-3);
+  margin-bottom: 4px;
 }
 .project-bar p {
-  font-size: var(--dp-typography-lead);
+  font-size: var(--dp-typography-metadata);
   color: var(--ink-2);
-  max-width: 60ch;
+  margin-top: 4px;
+  max-width: 90ch;
 }
 .project-actions {
-  grid-column: 10 / span 3;
-  display: grid;
+  display: flex;
   gap: 8px;
 }
 .project-actions select {
-  max-width: none;
-  width: 100%;
+  width: 300px;
+  max-width: 100%;
 }
 .runtime-strip {
+  grid-column: 1 / -1;
   display: flex;
   align-items: center;
   gap: 12px;
-  font-size: var(--dp-typography-metadata);
+  font-size: 13px;
   color: var(--ink-2);
-  padding: 10px 0;
-  border-top: var(--rule);
-  border-bottom: 1px solid var(--dp-color-ink);
-  margin-bottom: 40px;
+  padding: 9px 20px;
+  margin: 0 -20px;
+  border-top: 1px solid var(--dp-color-ink);
+  background: var(--dp-color-surface);
 }
 .runtime-strip::before {
   content: '';
@@ -413,33 +434,20 @@ main {
   margin-bottom: 20px;
 }
 
-/* View heading on the index rail: heading in columns 1–3, reading from column 4 */
+/* View heading: one compact row, title and a single sentence */
 #view-container > .section-line {
-  display: grid;
-  grid-template-columns: repeat(12, minmax(0, 1fr));
-  column-gap: var(--dp-spacing-gutter);
-  align-items: start;
-  border-top: var(--rule);
-  padding-top: 16px;
-  margin-bottom: 32px;
-}
-#view-container > .section-line > div:first-child {
-  display: contents;
+  align-items: center;
+  margin-bottom: 24px;
 }
 #view-container > .section-line h2 {
-  grid-column: 1 / span 3;
-  font-size: 30px;
+  font-size: var(--dp-typography-item-title);
   font-weight: var(--dp-typography-display);
-  letter-spacing: -0.035em;
-  line-height: 1;
+  letter-spacing: -0.02em;
+  line-height: 1.1;
 }
 #view-container > .section-line .lead {
-  grid-column: 4 / span 7;
-  margin: 0;
-}
-#view-container > .section-line > :not(div:first-child) {
-  grid-column: 11 / span 2;
-  justify-self: end;
+  font-size: 15px;
+  margin-top: 4px;
 }
 
 /* Generic building blocks: ruled sections, not floating cards */
@@ -653,23 +661,137 @@ main {
 }
 
 /* Overview */
-.insight-card {
-  border-top: 6px solid var(--dp-color-ink);
-  padding: 16px 0 30px;
+/* Main finding: one ruled line under the summary numbers */
+.finding {
+  display: grid;
+  grid-template-columns: 12px minmax(0, 1fr) auto;
+  align-items: center;
+  column-gap: 14px;
+  border: var(--rule);
+  padding: 12px 16px;
+  margin: -2px 0 32px;
 }
-.insight-card h3 {
-  font-size: 34px;
-  font-weight: var(--dp-typography-display);
-  letter-spacing: -0.035em;
-  line-height: 1.02;
-  margin-bottom: 12px;
-  max-width: 22ch;
+.finding-mark {
+  width: 12px;
+  height: 12px;
+  background: var(--dp-color-ink);
 }
-.insight-card p {
-  font-size: var(--dp-typography-lead);
+.finding-red .finding-mark,
+.finding-amber .finding-mark {
+  background: var(--dp-color-accent);
+}
+.finding p {
+  font-size: 15px;
   color: var(--ink-2);
-  margin-bottom: 18px;
-  max-width: 60ch;
+}
+.finding strong {
+  color: var(--dp-color-ink);
+}
+.button-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+/* Guide */
+.guide-steps {
+  list-style: none;
+  counter-reset: gstep;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 1px;
+  background: var(--dp-color-ink);
+  border: 1px solid var(--dp-color-ink);
+}
+.guide-steps li {
+  counter-increment: gstep;
+  background: var(--dp-color-ground);
+  padding: 14px 16px 18px;
+  display: grid;
+  align-content: start;
+  gap: 6px;
+}
+.guide-steps li::before {
+  content: counter(gstep, decimal-leading-zero);
+  font-size: 28px;
+  font-weight: var(--dp-typography-display);
+  line-height: 1;
+  letter-spacing: -0.03em;
+  color: var(--dp-color-accent);
+}
+.guide-steps span,
+.guide-text,
+.guide-list {
+  font-size: 15px;
+  color: var(--ink-2);
+}
+.guide-row {
+  display: grid;
+  grid-template-columns: 40px minmax(0, 3fr) minmax(0, 6fr) 180px;
+  column-gap: 20px;
+  align-items: start;
+  padding: 16px 0;
+  border-bottom: 1px solid var(--dp-color-ink);
+  scroll-margin-top: 16px;
+}
+.guide-row:last-child {
+  border-bottom: 0;
+}
+.guide-row > button {
+  justify-self: end;
+}
+.guide-index {
+  font-weight: var(--dp-typography-display);
+  font-size: 15px;
+  color: var(--ink-3);
+}
+.guide-row p {
+  font-size: 15px;
+  color: var(--ink-2);
+}
+.guide-row .guide-use {
+  color: var(--dp-color-ink);
+  margin-top: 4px;
+}
+.guide-row:target,
+.guide-row:focus-within {
+  background: var(--dp-color-surface);
+}
+.guide-terms {
+  display: grid;
+  grid-template-columns: minmax(140px, 1fr) minmax(0, 2fr);
+  margin: 0;
+}
+.guide-terms dt,
+.guide-terms dd {
+  padding: 10px 0;
+  border-bottom: 1px solid var(--hair);
+  margin: 0;
+  font-size: 15px;
+}
+.guide-terms dt {
+  font-weight: var(--dp-typography-strong);
+  padding-right: 16px;
+}
+.guide-terms dd {
+  color: var(--ink-2);
+}
+.guide-cli {
+  display: grid;
+  grid-template-columns: max-content minmax(0, 1fr);
+  column-gap: 16px;
+  row-gap: 8px;
+  margin-top: 12px;
+  font-size: 14px;
+  align-items: baseline;
+}
+.guide-list {
+  margin: 0;
+  padding-left: 18px;
+  display: grid;
+  gap: 6px;
 }
 .side-note {
   background: var(--dp-color-surface);
@@ -1346,13 +1468,18 @@ details[open] > summary::before {
 
 /* 1050px: steps become a vertical sequence, matrices halve */
 @media (max-width: 1050px) {
-  .project-bar > div:first-child {
-    grid-column: 1 / -1;
+  .project-bar {
+    grid-template-columns: minmax(0, 1fr);
   }
-  .project-actions {
-    grid-column: 1 / span 6;
-    grid-template-columns: minmax(0, 1fr) auto;
-    margin-top: 6px;
+  .guide-steps {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+  .guide-row {
+    grid-template-columns: 40px minmax(0, 1fr) auto;
+    row-gap: 8px;
+  }
+  .guide-row > p {
+    grid-column: 2 / -1;
   }
   .metrics,
   .example-grid {
@@ -1438,31 +1565,66 @@ details[open] > summary::before {
 /* 700px: stacked grids, facts as rows, smaller gutters */
 @media (max-width: 700px) {
   h1 {
-    font-size: clamp(42px, 12cqw, 64px);
+    font-size: 22px;
   }
   main {
-    padding-top: 28px;
+    padding-top: 16px;
+  }
+  .project-bar {
+    padding: 14px 14px 0;
+  }
+  .runtime-strip {
+    padding: 8px 14px;
+    margin: 0 -14px;
   }
   .project-actions {
-    grid-column: 1 / -1;
+    flex-direction: column;
   }
   .project-actions select {
-    max-width: 100%;
+    width: 100%;
   }
-  #view-container > .section-line,
+  .page-help {
+    display: none;
+  }
   .demo-guide {
     grid-template-columns: minmax(0, 1fr);
     row-gap: 10px;
   }
-  #view-container > .section-line h2,
-  #view-container > .section-line .lead,
   .demo-guide > h2,
   .demo-guide ol,
   .demo-guide > .help {
     grid-column: 1 / -1;
   }
-  #view-container > .section-line > :not(div:first-child) {
-    grid-column: 1 / -1;
+  .guide-steps,
+  .guide-terms,
+  .guide-cli {
+    grid-template-columns: minmax(0, 1fr);
+  }
+  .guide-cli {
+    row-gap: 2px;
+  }
+  .guide-cli code {
+    overflow-wrap: anywhere;
+    margin-top: 8px;
+  }
+  .guide-terms dt {
+    border-bottom: 0;
+    padding-bottom: 0;
+  }
+  .guide-row {
+    grid-template-columns: 32px minmax(0, 1fr);
+  }
+  .guide-row > p,
+  .guide-row > button {
+    grid-column: 2;
+    justify-self: start;
+  }
+  .finding {
+    grid-template-columns: 12px minmax(0, 1fr);
+    row-gap: 10px;
+  }
+  .finding > button {
+    grid-column: 2;
     justify-self: start;
   }
   .demo-guide > h2 {
@@ -1513,9 +1675,6 @@ details[open] > summary::before {
   .top-right {
     gap: 14px;
     font-size: 13px;
-  }
-  .insight-card h3 {
-    font-size: 28px;
   }
 }
 

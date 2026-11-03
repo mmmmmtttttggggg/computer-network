@@ -28,6 +28,7 @@ const state = {
   busy: false,
   examples: [],
   moreExperimentsOpen: false,
+  guideFocus: null,
 };
 const names = {
   overview: 'Overview',
@@ -37,6 +38,7 @@ const names = {
   experiments: 'Experiments',
   evidence: 'Evidence',
   inputs: 'Inputs & history',
+  guide: 'Guide',
 };
 // Remember only the saved review ID. Inputs and credentials stay on the server.
 function rememberRun(id) {
@@ -192,10 +194,22 @@ function render() {
   $('#run-fingerprint').textContent = `${r.id.slice(0, 8)} / SHA-256 ${r.input_hash.slice(0, 16)}`;
   $('#export-json').href = `/api/runs/${r.id}/report.json`;
   $('#export-html').href = `/api/runs/${r.id}/report.html`;
-  $('#view-container').innerHTML = { overview, examples, connections, containment, experiments, evidence, inputs }[
-    state.view
-  ]();
+  $('#page-help').hidden = state.view === 'guide';
+  $('#view-container').innerHTML = {
+    overview,
+    examples,
+    connections,
+    containment,
+    experiments,
+    evidence,
+    inputs,
+    guide,
+  }[state.view]();
   bindView();
+  if (state.view === 'guide' && state.guideFocus) {
+    $(`#guide-${state.guideFocus}`)?.scrollIntoView({ block: 'start' });
+    state.guideFocus = null;
+  }
   bindExtraExperiments();
   if (state.labelResult && $('#label-editor'))
     $('#label-editor').value = JSON.stringify(state.labelResult.labels_after, null, 2);
@@ -318,7 +332,8 @@ function overview() {
           };
   const gate = r.exit_code === 0 ? 'green' : r.exit_code === 1 ? 'red' : 'amber';
   return `<div class="metrics">${metric('Changed connections', s.NEWLY_ALLOWED + s.NEWLY_BLOCKED, `${s.NEWLY_ALLOWED} opened, ${s.NEWLY_BLOCKED} blocked`)}${metric('Intents passing', `${s.intent_pass} of ${r.intents.length}`, s.intent_fail ? `${s.intent_fail} failing` : 'None failing', s.intent_fail ? 'red' : '')}${metric('Paths to sensitive assets', r.threat.findings.length, `${newPaths} new in this change`, newPaths ? 'amber' : '')}${metric('Review result', r.status, `${s.queries} connections checked`, gate)}</div>
- <div class="grid-main"><div><div class="insight-card"><h3>${hero.title}</h3><p>${hero.text}</p><button class="small-button" data-goto="${hero.view}">${hero.action} →</button></div>${graph()}<div class="panel"><div class="section-line"><h2>What changed</h2><button class="link-button" data-goto="connections">All connections →</button></div>${changedTable()}</div></div><div><div class="panel"><div class="section-line"><h2>Intents</h2><span class="subtle">Candidate revision</span></div>${intentList()}</div><div class="panel side-note"><h3>New here?</h3><p>The Examples page has ${state.examples.length} small scenarios, each showing one idea in under a minute.</p><button class="small-button" data-goto="examples">Browse examples →</button></div></div></div>`;
+ <div class="finding finding-${gate}"><span class="finding-mark" aria-hidden="true"></span><p><strong>${hero.title}</strong> ${hero.text}</p><button class="small-button" data-goto="${hero.view}">${hero.action} →</button></div>
+ <div class="grid-main"><div>${graph()}<div class="panel"><div class="section-line"><h2>What changed</h2><button class="link-button" data-goto="connections">All connections →</button></div>${changedTable()}</div></div><div><div class="panel"><div class="section-line"><h2>Intents</h2><span class="subtle">Candidate revision</span></div>${intentList()}</div><div class="panel side-note"><h3>New here?</h3><p>The Guide explains every page and term. The Examples page has ${state.examples.length} ready-made scenarios, each showing one idea.</p><div class="button-row"><button class="small-button" data-goto="guide">Read the guide</button><button class="small-button" data-goto="examples">Browse examples</button></div></div></div></div>`;
 }
 const showcase = {
   'agent-escape': {
@@ -379,6 +394,79 @@ function examples() {
   return `<div class="section-line"><div><h2>Examples</h2><p class="lead">Small, ready-made clusters, each built to show one idea. Opening one runs the review and takes you to the page where the result is.</p></div></div>
  <section class="panel demo-guide"><h2>A five-minute walkthrough</h2><ol><li><strong>Show the surprise.</strong> Open the indirect escape: every direct check passes, but the agent can reach the database through a gateway. <button class="small-button" data-example="agent-escape">Open</button></li><li><strong>Challenge the assumption.</strong> On Containment, remove one relay and watch the path disappear while the policies stay the same.</li><li><strong>Find a small repair.</strong> On Experiments, search for the fewest policy reverts that restore safe behaviour.</li><li><strong>Make the regression portable.</strong> Open the database switch, reduce it to a single policy, and download the replay bundle. <button class="small-button" data-example="checkout-regression">Open</button></li></ol><p class="help">All results here are static. Real Kubernetes enforcement is not checked unless you run the live lab from Evidence. More detail is in docs/DEMO_SCRIPT.md.</p></section>
  <div class="example-grid">${cards}</div>`;
+}
+const guidePages = [
+  [
+    'overview',
+    'See the outcome of a review at a glance.',
+    'The top row counts changed connections, passing intents, paths to sensitive assets and the overall result. The line below it states the main finding and links to where it is explained. The graph and the "What changed" list show the connections that differ between the two revisions.',
+  ],
+  [
+    'examples',
+    'Learn the tool with ready-made scenarios.',
+    'Each card says what to look for. Opening one runs its review and takes you to the page where the result appears. The walkthrough at the top is a five-minute demonstration.',
+  ],
+  [
+    'connections',
+    'Inspect every connection the review checked.',
+    'Search by workload, protocol or port, and filter by change or decision. Select a row, or focus it and press Enter, to see which policies and rules decided it in each direction. "Ask about another connection" checks a connection outside the saved review and can export it as a reusable test.',
+  ],
+  [
+    'containment',
+    'Check whether a compromised workload could reach a sensitive asset.',
+    'Paths follow allowed connections through workloads declared as relays, up to four hops. Click any hop to see its rules. Remove a relay to test whether the path depends on it; this creates a new review and leaves the original untouched.',
+  ],
+  [
+    'experiments',
+    'Turn a finding into something you can act on.',
+    'Shrink a regression reduces a change to the fewest policies that still reproduce it and exports a replay bundle. Find a repair searches for small policy reverts that remove the problem. Under More experiments, fault injection measures how many policy mistakes your intents would catch, suggested checks drafts tests for the ones they miss, and label changes show the effect of editing one Pod\'s labels.',
+  ],
+  [
+    'evidence',
+    'See what the result is based on.',
+    'Shows the input fingerprint, analysis time and the plan for checking the same connections on a real cluster. Live checks are optional and run only on a disposable kind/Calico lab that you start yourself.',
+  ],
+  [
+    'inputs',
+    'Review your own policies and reopen past reviews.',
+    'Edit the project JSON, or load a JSON or YAML file, then choose "Run these inputs". A project contains the namespaces and Pods, the baseline and candidate policies, your intents and an optional threat model. The bundled examples are complete templates. Past reviews are saved on this machine and can be reopened or deleted.',
+  ],
+];
+const guideTerms = [
+  ['Baseline / candidate', 'The policies before and after the change under review.'],
+  [
+    'Allow / Deny',
+    'Whether NetworkPolicy permits the connection. Pod-to-Pod traffic needs the source\'s egress and the destination\'s ingress to both allow it.',
+  ],
+  [
+    'Unknown',
+    'The model cannot decide, for example because an unsupported policy type applies. Unknown is never counted as Deny.',
+  ],
+  ['Newly allowed / blocked', 'The decision for this connection differs between baseline and candidate.'],
+  ['Intent', 'A rule you expect to hold, such as "payments must reach the database on TCP 5432".'],
+  [
+    'Review result',
+    'PASS when every intent holds and every change is approved. FAIL when an intent breaks or a change is unapproved. INCOMPLETE when something could not be decided.',
+  ],
+  ['Entry point', 'A workload assumed to be compromised, such as an AI agent.'],
+  ['Relay', 'A workload assumed able to forward traffic onwards. Containment paths may only pass through relays.'],
+  ['Sensitive asset', 'A workload that must not be reachable from an entry point.'],
+];
+function guide() {
+  const pages = guidePages
+    .map(
+      ([id, use, how], i) =>
+        `<div class="guide-row" id="guide-${id}"><span class="guide-index">${String(i + 1).padStart(2, '0')}</span><div><h3>${esc(names[id])}</h3><p class="guide-use">${esc(use)}</p></div><p>${esc(how)}</p><button class="small-button" data-goto="${id}">Open ${esc(names[id])}</button></div>`,
+    )
+    .join('');
+  const terms = guideTerms.map(([k, v]) => `<dt>${esc(k)}</dt><dd>${esc(v)}</dd>`).join('');
+  return `<div class="section-line"><div><h2>Guide</h2><p class="lead">How to use NetScope, page by page. Everything runs on this machine; nothing is deployed to a cluster.</p></div></div>
+ <section class="panel"><h2>Get started</h2><ol class="guide-steps"><li><strong>Choose a scenario</strong><span>Use the list in the bar at the top, or load your own file on Inputs &amp; history.</span></li><li><strong>Run review</strong><span>NetScope evaluates every connection under the baseline and candidate policies.</span></li><li><strong>Read the overview</strong><span>The summary shows what changed, which intents fail and whether a sensitive asset became reachable.</span></li><li><strong>Follow a finding</strong><span>Open a connection to see the exact rules behind it, then use Experiments to shrink or repair it.</span></li></ol></section>
+ <section class="panel"><h2>Pages</h2><div class="guide-pages">${pages}</div></section>
+ <div class="split"><section class="panel"><h2>Reading results</h2><dl class="guide-terms">${terms}</dl></section>
+ <div><section class="panel"><h2>Saving and sharing</h2><p class="guide-text">"Export JSON" and "HTML report" in the top bar save the current review. Experiments can export replay bundles, repair proposals and test files. Every review keeps a fingerprint of its inputs so a result can be matched to the exact files.</p></section>
+ <section class="panel"><h2>Command line</h2><p class="guide-text">The same analysis runs from a terminal, for scripts and CI.</p><div class="guide-cli"><code>netscope serve</code><span>Start this dashboard</span><code>netscope review project.json</code><span>Review; exit 0 pass, 1 fail, 2 incomplete</span><code>netscope repair project.json</code><span>Search for repairs</span><code>netscope reduce project.json --tuple-id ID</code><span>Shrink a regression to one connection</span><code>netscope mutate project.json</code><span>Inject policy faults</span></div></section>
+ <section class="panel"><h2>Limits</h2><ul class="guide-list"><li>Results are a static model of NetworkPolicy. Allow means the policy permits traffic, not that a service is listening or safe.</li><li>Up to 30 workloads, 5 namespaces and 100 policies per revision.</li><li>RBAC, application authentication and vulnerabilities are out of scope.</li></ul></section></div></div>`;
 }
 function changedTable() {
   const rows = state.report.rows.filter((r) => r.change !== 'UNCHANGED');
@@ -808,6 +896,10 @@ $('#nav').addEventListener('click', (e) => {
 $('#run-review').onclick = (e) => task(e.target, () => loadExample($('#scenario').value));
 $('#scenario').onchange = () => {
   toast('Scenario selected. Run review to analyze it.');
+};
+$('#page-help').onclick = () => {
+  state.guideFocus = state.view;
+  goto('guide');
 };
 $('#close-drawer').onclick = closeDrawer;
 $('#drawer-backdrop').onclick = closeDrawer;
