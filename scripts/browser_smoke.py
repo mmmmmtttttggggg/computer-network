@@ -79,7 +79,6 @@ def main():
                 expect(page.locator(".guide-row")).to_have_count(7)
                 page.locator('#guide-examples [data-goto="examples"]').click()
                 expect(page.locator("#breadcrumb")).to_have_text("Examples")
-                expect(page.locator(".demo-guide")).to_contain_text("Make the regression portable")
                 expect(page.locator(".example-card")).to_have_count(8)
                 expect(page.locator(".example-card.current")).to_contain_text("The indirect escape")
                 page.locator('.example-card.current [data-example="agent-escape"]').click()
@@ -257,7 +256,7 @@ def main():
                                 "single-pivot counterfactual preserves policy decisions",
                                 "parallel relay remains reachable after one assumption is removed",
                                 "refresh restores review without duplicate history",
-                                "examples gallery and presenter walkthrough",
+                                "examples table",
                                 "example card opens its scenario on the target view",
                                 "in-app guide reachable from every page",
                                 "scoped repair opens a new passing review",

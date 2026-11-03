@@ -38,7 +38,7 @@ netscope serve
 3. Click any connection to see the exact policies and rules that decided it.
 4. Use **Experiments** to shrink a regression or search for a repair.
 
-The **Guide** page in the dashboard explains every page and term, and **How this page works** in the top bar opens the relevant section. The **Examples** page has eight ready-made scenarios and a five-minute walkthrough.
+The **Guide** page in the dashboard explains every page and term, and **How this page works** in the top bar opens the relevant section. The **Examples** page lists eight bundled projects that cover each feature.
 
 To review your own policies, open **Inputs & history** and load a JSON or YAML project file. The format is described in [docs/PROJECT_FORMAT.md](docs/PROJECT_FORMAT.md), and the files in `src/app/resources/examples/` are complete templates.
 
@@ -47,7 +47,7 @@ To review your own policies, open **Inputs & history** and load a JSON or YAML p
 | Page | What it does |
 |---|---|
 | Overview | Summary of the review, the main finding, a connectivity map and the list of changed connections. |
-| Examples | Eight scenarios, each showing one idea, plus a guided walkthrough. |
+| Examples | Eight bundled projects, each opening on the page where its result appears. |
 | Connections | Every checked connection under both revisions, with search, filters and a rule-by-rule explanation of each decision. Lets you check a new connection and export it as a test. |
 | Containment | Paths from an assumed-compromised workload (for example an AI agent) to sensitive assets through declared relays, up to four hops. Test whether a path depends on a relay. |
 | Experiments | Shrink a regression to the fewest policies that reproduce it, search for small policy repairs, inject policy faults to measure your intents, draft missing checks and test label changes. |

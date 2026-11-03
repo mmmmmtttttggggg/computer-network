@@ -254,7 +254,7 @@ function graph() {
         allowed = e[state.phase] === 'Allow',
         changed = e.change !== 'UNCHANGED',
         path = pathIDs.has(e.tuple_id) && state.phase === 'candidate';
-      const color = path ? '#c90000' : allowed ? (changed ? '#000000' : '#7a7a7a') : '#bdbdbd';
+      const color = path ? '#c25450' : allowed ? (changed ? '#3b4757' : '#9aa5b1') : '#cbd2d9';
       const sx = a.x + (a.x < b.x ? 59 : a.x > b.x ? -59 : 0),
         sy = a.y + (a.x === b.x ? (a.y < b.y ? 16 : -16) : 0),
         tx = b.x + (a.x < b.x ? -61 : a.x > b.x ? 61 : 0),
@@ -268,7 +268,7 @@ function graph() {
   const groupSVG = groups
     .map(
       (ns, i) =>
-        `<rect x="${col * (i + 1) - 77}" y="34" width="154" height="239" fill="#f0f0f0"/><text x="${col * (i + 1) - 77}" y="24" fill="#000000" font-family="SwissMinimalistHost, Arial, sans-serif" font-size="9" font-weight="700" letter-spacing="1.1">${esc(ns.toUpperCase())}</text>`,
+        `<rect x="${col * (i + 1) - 77}" y="34" width="154" height="239" rx="6" fill="#f5f6f8" stroke="#e1e4e8"/><text x="${col * (i + 1) - 77}" y="24" fill="#7b8794" font-family="SwissMinimalistHost, Arial, sans-serif" font-size="9" font-weight="600" letter-spacing="0.8">${esc(ns.toUpperCase())}</text>`,
     )
     .join('');
   const nodeSVG = nodes
@@ -282,14 +282,14 @@ function graph() {
             : n.role === 'tool'
               ? 'tool'
               : 'workload';
-      const color = n.role === 'asset' ? '#c90000' : n.role === 'agent' ? '#000000' : '#9a9a9a';
-      return `<g class="node" tabindex="0" role="button" data-node="${esc(n.id)}" aria-label="Inspect connections for ${esc(n.id)}"><rect x="${x - 59}" y="${y - 18}" width="118" height="36" fill="#ffffff" stroke="#000000" stroke-width="${n.role === 'asset' ? 2 : 1}"/><rect x="${x - 50}" y="${y - 3.5}" width="7" height="7" fill="${color}"/><text x="${x - 37}" y="${y - 2}" fill="#000000" font-family="SwissMinimalistHost, Arial, sans-serif" font-size="10.5" font-weight="700">${esc(n.name)}</text><text x="${x - 37}" y="${y + 10}" fill="#5c5c5c" font-family="SwissMinimalistHost, Arial, sans-serif" font-size="8">${type}</text></g>`;
+      const color = n.role === 'asset' ? '#c25450' : n.role === 'agent' ? '#3b4757' : '#9aa5b1';
+      return `<g class="node" tabindex="0" role="button" data-node="${esc(n.id)}" aria-label="Inspect connections for ${esc(n.id)}"><rect x="${x - 59}" y="${y - 18}" width="118" height="36" rx="5" fill="#ffffff" stroke="${n.role === 'asset' ? '#e3aaa7' : '#cbd2d9'}" stroke-width="1"/><circle cx="${x - 46}" cy="${y}" r="3.5" fill="${color}"/><text x="${x - 37}" y="${y - 2}" fill="#1f2933" font-family="SwissMinimalistHost, Arial, sans-serif" font-size="10.5" font-weight="600">${esc(n.name)}</text><text x="${x - 37}" y="${y + 10}" fill="#7b8794" font-family="SwissMinimalistHost, Arial, sans-serif" font-size="8">${type}</text></g>`;
     })
     .join('');
   return `<div class="panel graph-panel"><div class="graph-toolbar"><h2>Connectivity map</h2><div class="tabs"><button data-phase="baseline" class="${state.phase === 'baseline' ? 'active' : ''}">Baseline</button><button data-phase="candidate" class="${state.phase === 'candidate' ? 'active' : ''}">Candidate</button></div></div><div class="graph-wrap"><svg class="network" viewBox="0 0 ${w} ${h}" role="img" aria-label="${esc(state.phase)} network model. Selected intent, changed, and containment paths; use Connections for full scope."><defs>${[
-    ['allow', '#000000'],
-    ['deny', '#bdbdbd'],
-    ['path', '#c90000'],
+    ['allow', '#3b4757'],
+    ['deny', '#cbd2d9'],
+    ['path', '#c25450'],
   ]
     .map(
       ([id, c]) =>
@@ -303,79 +303,81 @@ function overview() {
   const r = state.report,
     s = r.stats,
     newPaths = r.threat.findings.filter((p) => p.new).length;
+  const changed = s.NEWLY_ALLOWED + s.NEWLY_BLOCKED;
+  const plural = (n, word) => `${n} ${word}${n === 1 ? '' : 's'}`;
   const hero = newPaths
     ? {
-        title: s.intent_fail ? 'An indirect path to a sensitive asset opens.' : 'Direct checks pass, but an indirect path opens.',
-        text: `${s.intent_pass} intents pass and ${s.intent_fail} fail. Under the declared relay assumptions, the change creates ${newPaths} new route(s) to a sensitive asset.`,
-        action: 'See the path',
+        title: `${plural(newPaths, 'new path')} to a sensitive asset`,
+        text: `${s.intent_pass} of ${r.intents.length} intents pass. The path depends on the declared relay assumptions.`,
+        action: 'Open containment',
         view: 'containment',
       }
     : s.intent_fail
       ? {
-          title: `${s.intent_fail} intent${s.intent_fail === 1 ? '' : 's'} now fail.`,
-          text: 'The policy change broke expected application behaviour. Open the rule trace, or shrink the change to a small replayable case.',
+          title: `${plural(s.intent_fail, 'intent')} failing`,
+          text: `${plural(changed, 'connection')} changed between baseline and candidate.`,
           action: 'Open experiments',
           view: 'experiments',
         }
       : s.UNKNOWN
         ? {
-            title: 'Some results are Unknown.',
-            text: 'A policy the model cannot fully read affects these connections, so NetScope does not claim a complete pass.',
-            action: 'See affected connections',
+            title: `${plural(s.UNKNOWN, 'Unknown result')}`,
+            text: 'A policy the model cannot read affects these connections, so the review cannot pass.',
+            action: 'Open connections',
             view: 'connections',
           }
         : {
-            title: 'Everything declared passes.',
-            text: 'Try injecting small policy mistakes to see which ones your intents would catch.',
+            title: 'No issues found',
+            text: `All ${r.intents.length} intents pass and ${plural(changed, 'connection')} changed.`,
             action: 'Open experiments',
             view: 'experiments',
           };
   const gate = r.exit_code === 0 ? 'green' : r.exit_code === 1 ? 'red' : 'amber';
   return `<div class="metrics">${metric('Changed connections', s.NEWLY_ALLOWED + s.NEWLY_BLOCKED, `${s.NEWLY_ALLOWED} opened, ${s.NEWLY_BLOCKED} blocked`)}${metric('Intents passing', `${s.intent_pass} of ${r.intents.length}`, s.intent_fail ? `${s.intent_fail} failing` : 'None failing', s.intent_fail ? 'red' : '')}${metric('Paths to sensitive assets', r.threat.findings.length, `${newPaths} new in this change`, newPaths ? 'amber' : '')}${metric('Review result', r.status, `${s.queries} connections checked`, gate)}</div>
  <div class="finding finding-${gate}"><span class="finding-mark" aria-hidden="true"></span><p><strong>${hero.title}</strong> ${hero.text}</p><button class="small-button" data-goto="${hero.view}">${hero.action} →</button></div>
- <div class="grid-main"><div>${graph()}<div class="panel"><div class="section-line"><h2>What changed</h2><button class="link-button" data-goto="connections">All connections →</button></div>${changedTable()}</div></div><div><div class="panel"><div class="section-line"><h2>Intents</h2><span class="subtle">Candidate revision</span></div>${intentList()}</div><div class="panel side-note"><h3>New here?</h3><p>The Guide explains every page and term. The Examples page has ${state.examples.length} ready-made scenarios, each showing one idea.</p><div class="button-row"><button class="small-button" data-goto="guide">Read the guide</button><button class="small-button" data-goto="examples">Browse examples</button></div></div></div></div>`;
+ <div class="grid-main"><div>${graph()}<div class="panel"><div class="section-line"><h2>What changed</h2><button class="link-button" data-goto="connections">All connections →</button></div>${changedTable()}</div></div><div><div class="panel"><div class="section-line"><h2>Intents</h2><span class="subtle">Candidate revision</span></div>${intentList()}</div><div class="panel"><div class="section-line"><h2>Result</h2>${pill(r.status)}</div>${r.gate_reasons.length ? `<ul class="reason-list">${r.gate_reasons.map((g) => `<li>${esc(g)}</li>`).join('')}</ul>` : '<p class="help">All declared checks pass.</p>'}<div class="data-pair"><span>Workloads</span><strong>${s.endpoints}</strong></div><div class="data-pair"><span>Connections checked</span><strong>${s.queries}</strong></div><div class="data-pair"><span>Analysis time</span><strong>${s.duration_ms} ms</strong></div><p class="help">Static model. Not checked against a live cluster.</p></div></div></div>`;
 }
 const showcase = {
   'agent-escape': {
     topic: 'Containment',
-    look: 'All five direct checks pass, yet the agent can now reach the database through the gateway.',
+    look: 'Direct intents pass, but a gateway relay opens a two-hop path to the database.',
     view: 'containment',
   },
   'parallel-relay': {
     topic: 'Containment',
-    look: 'Remove one relay and a second gateway still carries the path. One fix is not enough.',
+    look: 'Two gateways relay the same traffic; removing one still leaves a path.',
     view: 'containment',
   },
   'checkout-regression': {
     topic: 'Regression',
-    look: 'Two connections flip and two intents fail. Shrink the change to a one-policy replay.',
+    look: 'Two connections change and two intents fail. Reducible to a one-policy replay.',
     view: 'experiments',
   },
   'selector-trap': {
     topic: 'Selectors',
-    look: 'One indentation change turns an AND into an OR and widens namespace access.',
+    look: 'Splitting a combined peer turns AND into OR and widens namespace access.',
     view: 'connections',
     change: 'NEWLY_ALLOWED',
   },
   'last-policy-deleted': {
     topic: 'Regression',
-    look: 'Deleting a policy removes isolation, so more traffic is allowed rather than less.',
+    look: 'Deleting the last selecting policy removes isolation and opens traffic.',
     view: 'overview',
   },
   'unsupported-policy': {
     topic: 'Coverage',
-    look: 'A vendor policy the model cannot read. Affected results are marked Unknown, not guessed.',
+    look: 'An unsupported vendor policy makes the affected results Unknown.',
     view: 'connections',
     verdict: 'Unknown',
   },
   'clean-baseline': {
     topic: 'Testing',
-    look: 'Nothing changed. Inject faults to find mistakes your intents would miss.',
+    look: 'No changes. A reference for fault injection and suggested checks.',
     view: 'experiments',
   },
   'cross-namespace-check': {
     topic: 'Coverage',
-    look: 'NetScope predicts Allow. Only a real CNI run can settle which analyzer is right.',
+    look: 'Analyzers disagree on a selector case. A candidate for a live check.',
     view: 'connections',
   },
 };
@@ -384,16 +386,16 @@ function examples() {
   const list = [...state.examples].sort(
     (a, b) => (order.indexOf(a.id) + 1 || 99) - (order.indexOf(b.id) + 1 || 99),
   );
-  const cards = list
+  const rows = list
     .map((x) => {
-      const m = showcase[x.id] || { topic: 'Example', look: '', view: 'overview' };
+      const m = showcase[x.id] || { topic: 'Example', look: x.description, view: 'overview' };
       const current = state.report?.name === x.name;
-      return `<article class="example-card ${current ? 'current' : ''}"><div class="example-topic">${esc(m.topic)}${current ? '<span class="current-tag">Open now</span>' : ''}</div><h3>${esc(x.name)}</h3><p>${esc(x.description)}</p>${m.look ? `<p class="example-look"><strong>Look for:</strong> ${esc(m.look)}</p>` : ''}<button data-example="${esc(x.id)}">${current ? 'Reopen' : 'Open example →'}</button></article>`;
+      return `<tr class="example-card ${current ? 'current' : ''}"><td><strong>${esc(x.name)}</strong>${current ? '<span class="current-tag">Loaded</span>' : ''}</td><td>${esc(m.topic)}</td><td class="example-look">${esc(m.look)}</td><td>${esc(names[m.view])}</td><td class="row-action"><button class="small-button" data-example="${esc(x.id)}">${current ? 'Reload' : 'Open'}</button></td></tr>`;
     })
     .join('');
-  return `<div class="section-line"><div><h2>Examples</h2><p class="lead">Small, ready-made clusters, each built to show one idea. Opening one runs the review and takes you to the page where the result is.</p></div></div>
- <section class="panel demo-guide"><h2>A five-minute walkthrough</h2><ol><li><strong>Show the surprise.</strong> Open the indirect escape: every direct check passes, but the agent can reach the database through a gateway. <button class="small-button" data-example="agent-escape">Open</button></li><li><strong>Challenge the assumption.</strong> On Containment, remove one relay and watch the path disappear while the policies stay the same.</li><li><strong>Find a small repair.</strong> On Experiments, search for the fewest policy reverts that restore safe behaviour.</li><li><strong>Make the regression portable.</strong> Open the database switch, reduce it to a single policy, and download the replay bundle. <button class="small-button" data-example="checkout-regression">Open</button></li></ol><p class="help">All results here are static. Real Kubernetes enforcement is not checked unless you run the live lab from Evidence. More detail is in docs/DEMO_SCRIPT.md.</p></section>
- <div class="example-grid">${cards}</div>`;
+  return `<div class="section-line"><div><h2>Examples</h2><p class="lead">Bundled projects covering each feature. Opening one runs its review and goes to the page where the result appears.</p></div><span class="count-tag">${list.length} projects</span></div>
+ <div class="panel flush"><div class="table-wrap"><table class="example-table"><thead><tr><th>Project</th><th>Area</th><th>What it shows</th><th>Opens on</th><th><span class="sr-only">Action</span></th></tr></thead><tbody>${rows}</tbody></table></div></div>
+ <p class="help">Each project is a JSON file in src/app/resources/examples/ and can be edited on Inputs &amp; history.</p>`;
 }
 const guidePages = [
   [
@@ -403,8 +405,8 @@ const guidePages = [
   ],
   [
     'examples',
-    'Learn the tool with ready-made scenarios.',
-    'Each card says what to look for. Opening one runs its review and takes you to the page where the result appears. The walkthrough at the top is a five-minute demonstration.',
+    'Try each feature on a bundled project.',
+    'Each row says what the project shows. Opening one runs its review and goes to the page where the result appears.',
   ],
   [
     'connections',
@@ -522,12 +524,12 @@ function containment() {
   const t = state.report.threat;
   if (!t.enabled)
     return `<div class="panel"><h2>No containment model in this review</h2><p class="subtle">This input has no threat model. Load “The indirect escape” to explore agent → gateway → database, or declare entrypoints, pivots, and assets in Inputs.</p><button class="primary" data-load="agent-escape">Load agent-containment scenario</button></div>`;
-  return `<div class="section-line"><div><h2>Could a compromised agent reach the asset?</h2><p class="lead">Follows allowed connections through workloads you have marked as possible relays, up to four hops.</p></div></div><div class="alert">${esc(t.warning)}</div><div class="metrics">${metric('Reachable before', t.baseline.reachable_pairs, 'Entry point to workload pairs')}${metric('Reachable after', t.candidate.reachable_pairs, 'Within four hops', t.candidate.reachable_pairs > t.baseline.reachable_pairs ? 'amber' : '')}${metric('Paths to sensitive assets', t.findings.length, 'Shortest path for each', t.findings.length ? 'red' : '')}${metric('Declared relays', t.pivots.length, 'Workloads assumed able to forward')}</div><div class="threat-grid"><div>${t.findings.length ? t.findings.map((p) => `<div class="path-card"><div class="section-line"><h3>${p.new ? 'New path to a sensitive asset' : 'Existing path to a sensitive asset'}</h3>${pill(p.new ? 'New' : 'Existing')}</div><div class="path-flow"><span class="path-node">${esc(p.entrypoint)}</span>${p.hops.map((h) => `<span class="path-arrow">→<small>${h.protocol}/${h.port}</small></span><button class="path-node ${h.destination === p.asset ? 'asset' : ''}" data-row="${h.tuple_id}">${esc(h.destination)}</button>`).join('')}</div><div class="assumptions"><strong>Conditions behind this path</strong><ul>${p.assumptions.map((a) => `<li>${esc(a)}</li>`).join('')}</ul></div><p class="help">Each edge has a known Allow decision. Click a hop to inspect both policy directions.</p>${assumptionEvidence(p)}</div>`).join('') : '<div class="panel"><h3>No asset path found within this model.</h3><p class="subtle">This does not prove that omitted endpoints, credentials, or unqueried traffic are safe.</p></div>'}<div class="panel"><h2>What if none of the workloads can relay?</h2><p class="help">This changes the declared pivot assumption in a new run. It does not change NetworkPolicy permissions.</p><button id="no-pivots">Re-evaluate without pivot assumptions →</button></div></div><div><div class="panel"><h2>Reach of each entry point</h2>${t.entrypoints
+  return `<div class="section-line"><div><h2>Containment</h2><p class="lead">Paths from entry points to sensitive assets through declared relays, up to four hops.</p></div></div><div class="alert">${esc(t.warning)}</div><div class="metrics">${metric('Reachable before', t.baseline.reachable_pairs, 'Entry point to workload pairs')}${metric('Reachable after', t.candidate.reachable_pairs, 'Within four hops', t.candidate.reachable_pairs > t.baseline.reachable_pairs ? 'amber' : '')}${metric('Paths to sensitive assets', t.findings.length, 'Shortest path for each', t.findings.length ? 'red' : '')}${metric('Declared relays', t.pivots.length, 'Workloads assumed able to forward')}</div><div class="threat-grid"><div>${t.findings.length ? t.findings.map((p) => `<div class="path-card"><div class="section-line"><h3>${p.new ? 'New path to a sensitive asset' : 'Existing path to a sensitive asset'}</h3>${pill(p.new ? 'New' : 'Existing')}</div><div class="path-flow"><span class="path-node">${esc(p.entrypoint)}</span>${p.hops.map((h) => `<span class="path-arrow">→<small>${h.protocol}/${h.port}</small></span><button class="path-node ${h.destination === p.asset ? 'asset' : ''}" data-row="${h.tuple_id}">${esc(h.destination)}</button>`).join('')}</div><div class="assumptions"><strong>Conditions behind this path</strong><ul>${p.assumptions.map((a) => `<li>${esc(a)}</li>`).join('')}</ul></div><p class="help">Each edge has a known Allow decision. Click a hop to inspect both policy directions.</p>${assumptionEvidence(p)}</div>`).join('') : '<div class="panel"><h3>No asset path found within this model.</h3><p class="subtle">This does not prove that omitted endpoints, credentials, or unqueried traffic are safe.</p></div>'}<div class="panel"><h2>What if none of the workloads can relay?</h2><p class="help">This changes the declared pivot assumption in a new run. It does not change NetworkPolicy permissions.</p><button id="no-pivots">Re-evaluate without pivot assumptions →</button></div></div><div><div class="panel"><h2>Reach of each entry point</h2>${t.entrypoints
     .map((e) => {
       const b = t.baseline.radius[e]?.length || 0,
         c = t.candidate.radius[e]?.length || 0,
         max = Math.max(1, state.report.nodes.length - 1);
-      return `<p class="mono" style="margin-top:18px">${esc(e)}</p><div class="data-pair"><span>Baseline</span><strong>${b} endpoints</strong></div><div class="radius-bar"><span style="width:${(100 * b) / max}%;background:#9a9a9a"></span></div><div class="data-pair"><span>Candidate</span><strong>${c} endpoints</strong></div><div class="radius-bar"><span style="width:${(100 * c) / max}%;background:#000000"></span></div>`;
+      return `<p class="mono" style="margin-top:18px">${esc(e)}</p><div class="data-pair"><span>Baseline</span><strong>${b} endpoints</strong></div><div class="radius-bar"><span style="width:${(100 * b) / max}%;background:#cbd2d9"></span></div><div class="data-pair"><span>Candidate</span><strong>${c} endpoints</strong></div><div class="radius-bar"><span style="width:${(100 * c) / max}%;background:#52606d"></span></div>`;
     })
     .join(
       '',

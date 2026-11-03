@@ -118,7 +118,7 @@ cand[2]["spec"]["egress"].append(
 agent = {
     "schemaVersion": 1,
     "name": "The indirect escape",
-    "description": "Direct agent isolation still passes. One gateway egress edit creates a conditional two-hop path to the database. Can you spot it before merging?",
+    "description": "Direct agent isolation still passes. One gateway egress edit creates a conditional two-hop path to the database.",
     "topology": common,
     "baseline": base,
     "candidate": cand,
