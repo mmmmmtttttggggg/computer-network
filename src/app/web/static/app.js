@@ -105,8 +105,10 @@ async function task(button, work) {
 function pill(v) {
   const color = ['Allow', 'PASS', 'COMPLETE', 'VERIFIED_ON_SCOPE'].includes(v)
     ? 'good'
-    : ['Deny', 'FAIL', 'UNEXPECTED_REACHABILITY'].includes(v)
-      ? 'bad'
+    : v === 'Deny'
+      ? 'deny'
+      : ['FAIL', 'UNEXPECTED_REACHABILITY'].includes(v)
+        ? 'bad'
       : ['Unknown', 'INCOMPLETE', 'INCONCLUSIVE', 'INTERRUPTED', 'CANCELLED'].includes(v)
         ? 'warn'
         : 'neutral';
@@ -238,7 +240,7 @@ function graph() {
         allowed = e[state.phase] === 'Allow',
         changed = e.change !== 'UNCHANGED',
         path = pathIDs.has(e.tuple_id) && state.phase === 'candidate';
-      const color = path ? '#b7791f' : allowed ? (changed ? '#2f6b55' : '#7fa896') : '#b9b3a6';
+      const color = path ? '#c90000' : allowed ? (changed ? '#000000' : '#7a7a7a') : '#bdbdbd';
       const sx = a.x + (a.x < b.x ? 59 : a.x > b.x ? -59 : 0),
         sy = a.y + (a.x === b.x ? (a.y < b.y ? 16 : -16) : 0),
         tx = b.x + (a.x < b.x ? -61 : a.x > b.x ? 61 : 0),
@@ -252,7 +254,7 @@ function graph() {
   const groupSVG = groups
     .map(
       (ns, i) =>
-        `<rect x="${col * (i + 1) - 77}" y="34" width="154" height="239" rx="12" fill="#f4f1ea" stroke="#e3ded3"/><text x="${col * (i + 1)}" y="23" text-anchor="middle" fill="#8a8579" font-family="system-ui, sans-serif" font-size="10">${esc(ns)}</text>`,
+        `<rect x="${col * (i + 1) - 77}" y="34" width="154" height="239" fill="#f0f0f0"/><text x="${col * (i + 1) - 77}" y="24" fill="#000000" font-family="SwissMinimalistHost, Arial, sans-serif" font-size="9" font-weight="700" letter-spacing="1.1">${esc(ns.toUpperCase())}</text>`,
     )
     .join('');
   const nodeSVG = nodes
@@ -266,14 +268,14 @@ function graph() {
             : n.role === 'tool'
               ? 'tool'
               : 'workload';
-      const color = n.role === 'agent' ? '#2f6b55' : n.role === 'asset' ? '#b7791f' : '#7d8ea3';
-      return `<g class="node" tabindex="0" role="button" data-node="${esc(n.id)}" aria-label="Inspect connections for ${esc(n.id)}"><rect x="${x - 59}" y="${y - 18}" width="118" height="36" rx="8" fill="#fffefb" stroke="${n.role === 'asset' ? '#e2c48f' : n.role === 'agent' ? '#a9c9b9' : '#d9d4c8'}"/><circle cx="${x - 47}" cy="${y}" r="3.5" fill="${color}"/><text x="${x - 37}" y="${y - 2}" fill="#2a2925" font-family="system-ui, sans-serif" font-size="10.5" font-weight="500">${esc(n.name)}</text><text x="${x - 37}" y="${y + 10}" fill="#8a8579" font-family="system-ui, sans-serif" font-size="8">${type}</text></g>`;
+      const color = n.role === 'asset' ? '#c90000' : n.role === 'agent' ? '#000000' : '#9a9a9a';
+      return `<g class="node" tabindex="0" role="button" data-node="${esc(n.id)}" aria-label="Inspect connections for ${esc(n.id)}"><rect x="${x - 59}" y="${y - 18}" width="118" height="36" fill="#ffffff" stroke="#000000" stroke-width="${n.role === 'asset' ? 2 : 1}"/><rect x="${x - 50}" y="${y - 3.5}" width="7" height="7" fill="${color}"/><text x="${x - 37}" y="${y - 2}" fill="#000000" font-family="SwissMinimalistHost, Arial, sans-serif" font-size="10.5" font-weight="700">${esc(n.name)}</text><text x="${x - 37}" y="${y + 10}" fill="#5c5c5c" font-family="SwissMinimalistHost, Arial, sans-serif" font-size="8">${type}</text></g>`;
     })
     .join('');
   return `<div class="panel graph-panel"><div class="graph-toolbar"><h2>Connectivity map</h2><div class="tabs"><button data-phase="baseline" class="${state.phase === 'baseline' ? 'active' : ''}">Baseline</button><button data-phase="candidate" class="${state.phase === 'candidate' ? 'active' : ''}">Candidate</button></div></div><div class="graph-wrap"><svg class="network" viewBox="0 0 ${w} ${h}" role="img" aria-label="${esc(state.phase)} network model. Selected intent, changed, and containment paths; use Connections for full scope."><defs>${[
-    ['allow', '#5f8f7b'],
-    ['deny', '#b9b3a6'],
-    ['path', '#b7791f'],
+    ['allow', '#000000'],
+    ['deny', '#bdbdbd'],
+    ['path', '#c90000'],
   ]
     .map(
       ([id, c]) =>
@@ -437,7 +439,7 @@ function containment() {
       const b = t.baseline.radius[e]?.length || 0,
         c = t.candidate.radius[e]?.length || 0,
         max = Math.max(1, state.report.nodes.length - 1);
-      return `<p class="mono" style="margin-top:18px">${esc(e)}</p><div class="data-pair"><span>Baseline</span><strong>${b} endpoints</strong></div><div class="radius-bar"><span style="width:${(100 * b) / max}%;background:#9bb3c7"></span></div><div class="data-pair"><span>Candidate</span><strong>${c} endpoints</strong></div><div class="radius-bar"><span style="width:${(100 * c) / max}%;background:#d9a54e"></span></div>`;
+      return `<p class="mono" style="margin-top:18px">${esc(e)}</p><div class="data-pair"><span>Baseline</span><strong>${b} endpoints</strong></div><div class="radius-bar"><span style="width:${(100 * b) / max}%;background:#9a9a9a"></span></div><div class="data-pair"><span>Candidate</span><strong>${c} endpoints</strong></div><div class="radius-bar"><span style="width:${(100 * c) / max}%;background:#000000"></span></div>`;
     })
     .join(
       '',
