@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "networkpolicy-digital-twin"
-version = "1.2.0"
+version = "1.2.1"
 description = "NetScope: Kubernetes policy digital twin, agent containment, and reproducible regression experiments"
 readme = "README.md"
 requires-python = ">=3.10"

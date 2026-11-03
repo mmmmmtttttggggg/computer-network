@@ -570,7 +570,9 @@ function jobResult() {
   const j = state.job;
   if (!j) return '';
   const r = j.result || {};
-  return `<div class="job-card"><div class="section-line"><h3>Live job ${j.id.slice(0, 8)}</h3>${pill(j.state)}</div>${r.error ? `<div class="alert">${esc(r.error)}</div>` : ''}<p>${r.observations?.length || 0} tuple/phase observations · exit ${r.exit_code ?? 'pending'}</p>${['QUEUED', 'RUNNING'].includes(j.state) ? '<button id="cancel-job" class="danger-button small-button">Cancel and clean owned resources</button>' : ''}<div class="timeline">${(
+  const active = ['QUEUED', 'RUNNING'].includes(j.state);
+  const cleaning = active && r.stage === 'CLEANUP';
+  return `<div class="job-card"><div class="section-line"><h3>Live job ${j.id.slice(0, 8)}</h3>${pill(cleaning ? 'CLEANUP' : j.state)}</div>${cleaning ? '<p class="help">Cleaning owned namespaces. Wait here; the cluster lock will be released when cleanup finishes.</p>' : ''}${r.error ? `<div class="alert">${esc(r.error)}</div>` : ''}<p>${r.observations?.length || 0} tuple/phase observations · exit ${active ? 'pending' : (r.exit_code ?? 'pending')}</p>${active && !cleaning ? '<button id="cancel-job" class="danger-button small-button">Cancel and clean owned resources</button>' : ''}<div class="timeline">${(
     r.events || []
   )
     .slice(-6)

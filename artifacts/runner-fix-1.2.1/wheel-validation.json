@@ -1,0 +1,9 @@
+{
+  "wheel_version": "1.2.1",
+  "package_loaded_outside_source": true,
+  "source_and_asset_files_matched": 43,
+  "http_review": "passed",
+  "policy_deletion_plan": 23,
+  "real_kubernetes_run": false,
+  "wheel_sha256": "a83b7f54a32ff513b5d9fafaeabfbf931c0bb8af90bac6ff27052c9a25cd412e"
+}

@@ -1,3 +1,11 @@
+# Release 1.2.1: live runner resource fix
+
+Bound probe execs to two per source Pod within the ten-worker global limit. Increase trusted fixture memory limits from 64 MiB to 128 MiB and CPU limits from 250m to 500m. Waiting work observes cancellation and the existing test budget; full planned query coverage is retained.
+
+Record execution settings and concrete Pod, policy and namespace drift details. Handle fixture SIGTERM explicitly, publish namespace cleanup progress, and show pending exit codes during active work. Ownership/UID cleanup guards and conservative inconclusive verdicts remain in place. The current dashboard styling, Examples and Guide pages are preserved.
+
+Add overload, cross-source parallelism, queued cancellation/deadline, failed-fixture, cleanup, full-plan and graceful-termination regression coverage, plus browser checks for active/cleanup/final job presentation. Real Kubernetes rerun evidence remains a separate gate.
+
 # Release 1.2 finalization
 
 Added regression-check suggestions with deterministic training/holdout separation, reference verification, reusable JSON assertions, CLI checking, and explicit synthetic-coverage limitations. Added a candidate query composer for exact tuples outside the saved port grid.

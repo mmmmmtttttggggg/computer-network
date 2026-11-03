@@ -4,7 +4,7 @@ No project-supplied commands or executable code are used by the runner.
 """
 
 PROGRAM = r"""
-import socket,sys,json,threading,time
+import socket,sys,json,threading,time,signal
 
 def listen(port, proto):
     kind=socket.SOCK_DGRAM if proto=='UDP' else socket.SOCK_STREAM
@@ -23,6 +23,9 @@ def listen(port, proto):
             finally:conn.close()
 
 if sys.argv[1]=='serve':
+    # Python is PID 1 in the fixture container. Handle graceful Kubernetes
+    # termination explicitly instead of waiting for the grace-period SIGKILL.
+    signal.signal(signal.SIGTERM, lambda *_: sys.exit(0))
     for p,proto in json.loads(sys.argv[2]):
         threading.Thread(target=listen,args=(p,proto),daemon=True).start()
     while True:time.sleep(3600)

@@ -1,0 +1,20 @@
+F                                                                        [100%]
+=================================== FAILURES ===================================
+____________ test_source_fanout_is_bounded_without_sampling_queries ____________
+
+    def test_source_fanout_is_bounded_without_sampling_queries():
+        fake = LoadedCluster()
+        raw = fanout_project()
+        result = run(raw, fake)
+>       assert result["state"] == "COMPLETE", result.get("error")
+E       AssertionError: None
+E       assert 'INCOMPLETE' == 'COMPLETE'
+E
+E         - COMPLETE
+E         + INCOMPLETE
+E         ? ++
+
+tests/test_runtime_resources.py:114: AssertionError
+=========================== short test summary info ============================
+FAILED tests/test_runtime_resources.py::test_source_fanout_is_bounded_without_sampling_queries
+1 failed in 0.89s

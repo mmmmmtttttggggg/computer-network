@@ -1,4 +1,18 @@
-# Validation evidence — NetScope 1.2
+# Validation evidence — NetScope 1.2.1
+
+## Runner fix validation — 4 November 2026
+
+The 1.2.1 source was checked on Linux x86_64 with Python 3.12.14. All **295 automated tests passed**, including eight new runner regressions. Ruff lint and formatting checks passed. The existing Starlette/httpx deprecation warning remains visible in the test log.
+
+The source-overload regression fails against the original ten-workers/64-MiB runner and passes after the fix. New checks cover a busy single source without query sampling, parallel work across sources, cancellation and budget expiry while work is queued, failed-fixture termination diagnostics, guarded cleanup/progress, all 23 connections in the deletion example, and an actual local fixture process exiting cleanly on SIGTERM. Scripted transports check orchestration rather than real memory limits or CNI enforcement.
+
+The current dashboard's Chromium workflow passed at 1440, 1366 and 390 px with no JavaScript page errors or horizontal overflow across all eight views. This includes the Examples/Guide pages, repairs, reducer ZIP downloads, mutation/check/label/query experiments, and presentation-only active/cleanup/final job states. A separate launch confirmed the sidebar version is 1.2.1 and rendered the cleanup display. No simulated job was stored as live evidence.
+
+The rebuilt 1.2.1 wheel was installed outside the source checkout. All 43 packaged source/example/asset files matched the checkout, including the fixture program and local font. The packaged HTTP app reviewed the deletion case with 23 planned connections, 18 newly allowed connections and five passing intents.
+
+Raw logs and structured results are retained in `artifacts/runner-fix-1.2.1/`. Docker, kind and kubectl are absent from this environment, so no real Kubernetes enforcement, Pod OOM limit, cross-node traffic or API-server cleanup result is claimed for this fix. Rerun the deletion scenario on the Mac and retain its final job JSON as described in `docs/LIVE_LAB.md`.
+
+## Retained 1.2 release evidence
 
 Release checkpoint: 1 November 2026. This file records tests actually executed in the build workspace. It does not turn scripted or loopback checks into Kubernetes enforcement evidence.
 

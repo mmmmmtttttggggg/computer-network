@@ -50,10 +50,22 @@ The runner:
 - Refuses reserved or pre-existing test namespaces, including leftovers from another run.
 - Creates trusted non-root, non-privileged fixtures with original labels/names, no service-account token mount, resource limits, and no host mounts.
 - Checks unrestricted planned connectivity and known allow/deny controls before verification.
-- Applies each entire revision, including deletions, confirms API read-back, waits ten seconds, then makes three fresh attempts with two-second timeouts and one-second gaps, at most ten concurrent attempts.
+- Applies each entire revision, including deletions, confirms API read-back, waits ten seconds, then makes three fresh attempts with two-second timeouts and one-second gaps. At most ten attempts run globally, and at most two run inside any one source Pod. Waiting work checks cancellation and the test budget; no planned tuples are sampled out.
 - Checks controls and Pod/namespace/policy drift around batches. UDP requires a nonce-matched reply.
 - Runs allow/deny controls for every planned transport protocol (with TCP health controls retained), records node names, and shows a baseline/candidate observation matrix for the exact plan. Missing observations remain `NOT_TESTED`. Cross-node counts describe observed placement and may be zero.
 - Saves requested mutations before execution and partial results on failure. Cleanup has ownership/UID preconditions and waits for deletion; leftovers prevent successful completion.
+
+### Fixture resources and cleanup (1.2.1)
+
+Each trusted fixture requests 50m CPU and 32 MiB memory, with limits of 500m CPU and 128 MiB memory. Every probe exec starts another Python interpreter inside its source container. The per-source concurrency bound prevents a batch of ten queries from launching ten interpreters inside one small fixture. These limits provide headroom, not a measured memory guarantee for every topology.
+
+Exported evidence records `environment.execution`, including the runner revision, global/per-source concurrency and fixture resources. Pod drift details retain expected and observed states, container termination reasons/exit codes and restart counts when supplied by Kubernetes. A failed fixture remains inconclusive even if network controls are healthy.
+
+Fixtures handle SIGTERM explicitly. During deletion the dashboard displays **CLEANUP**, retains the cluster lock, and shows the exit code as pending until the job finishes. Namespace progress appears in the event log. Wait for terminal status and inspect cleanup leftovers before starting another run.
+
+After updating an existing checkout, stop the server after any active job finishes cleanup, then relaunch it with `python3.12 scripts/start.py --lab`. The ordinary launcher refreshes the editable install; later launches may use `--skip-install`. An already configured, healthy lab can be reused without another `lab.py up`.
+
+Rerun **The last policy disappears** from a new review. If enforcement agrees with the model, expect 23/23 connections conclusive in both revisions (46 observations), 18 newly opened connections, no drift or cleanup leftovers, and a final exit 1 for the intentionally unapproved change. Download the final JSON; a matching model prediction alone is not live evidence.
 
 A completed runtime job is evidence only for its recorded scope/environment. Model/runtime agreement does not waive a failed application intent or an unapproved semantic change. Timeouts do not prove policy causation.
 

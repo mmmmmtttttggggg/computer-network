@@ -27,6 +27,12 @@ CONTROL_NS = "netscope-controls"
 # This image is only an explicit local development default. Supply a digest in
 # NETSCOPE_FIXTURE_IMAGE for release evidence; the runner records resolved imageIDs.
 DEFAULT_IMAGE = "python:3.12.8-alpine3.21"
+MAX_PARALLEL_PROBES = 10
+MAX_PROBES_PER_SOURCE = 2
+FIXTURE_RESOURCES = {
+    "requests": {"cpu": "50m", "memory": "32Mi"},
+    "limits": {"cpu": "500m", "memory": "128Mi"},
+}
 
 
 class RuntimeErrorSafe(ValueError):
@@ -130,6 +136,18 @@ def run_live(raw, context, allowed_contexts, *, cancel=None, progress=None, tran
     pod_info = {}
     image = os.environ.get("NETSCOPE_FIXTURE_IMAGE", DEFAULT_IMAGE)
     control_protocols = sorted({"TCP"} | {row["protocol"] for row in report["plan"]["tuples"]})
+    # Each exec launches another interpreter inside the source container. A
+    # global worker cap alone does not bound memory or CPU use in one fixture.
+    probe_slots = {
+        f"{endpoint.namespace}/{endpoint.name}": threading.BoundedSemaphore(MAX_PROBES_PER_SOURCE)
+        for endpoint in p.topology.pods.values()
+    }
+    probe_slots.update(
+        {
+            f"{CONTROL_NS}/{name}": threading.BoundedSemaphore(MAX_PROBES_PER_SOURCE)
+            for name in ["source", "allowed", "blocked"]
+        }
+    )
 
     def event(message):
         result["coverage"] = summarize_coverage(report, result)
@@ -192,16 +210,23 @@ def run_live(raw, context, allowed_contexts, *, cancel=None, progress=None, tran
                             "readOnlyRootFilesystem": True,
                             "capabilities": {"drop": ["ALL"]},
                         },
-                        "resources": {
-                            "requests": {"cpu": "10m", "memory": "20Mi"},
-                            "limits": {"cpu": "250m", "memory": "64Mi"},
-                        },
+                        "resources": copy.deepcopy(FIXTURE_RESOURCES),
                     }
                 ],
             },
         }
 
     def exec_probe(source, dest, port, proto):
+        gate = probe_slots[source]
+        while not gate.acquire(timeout=0.1):
+            stop()
+        try:
+            stop()
+            return exec_probe_unlocked(source, dest, port, proto)
+        finally:
+            gate.release()
+
+    def exec_probe_unlocked(source, dest, port, proto):
         ns, pn = source.split("/")
         token = uuid.uuid4().hex
         at = utcnow()
@@ -244,6 +269,17 @@ def run_live(raw, context, allowed_contexts, *, cancel=None, progress=None, tran
                 "phase": obj.get("status", {}).get("phase"),
                 "node": obj.get("spec", {}).get("nodeName"),
                 "images": [x.get("imageID") for x in obj.get("status", {}).get("containerStatuses", [])],
+                "reason": obj.get("status", {}).get("reason"),
+                "containers": [
+                    {
+                        "name": x.get("name"),
+                        "ready": x.get("ready"),
+                        "restart_count": x.get("restartCount"),
+                        "state": x.get("state", {}),
+                        "last_state": x.get("lastState", {}),
+                    }
+                    for x in obj.get("status", {}).get("containerStatuses", [])
+                ],
             }
         return state
 
@@ -258,6 +294,12 @@ def run_live(raw, context, allowed_contexts, *, cancel=None, progress=None, tran
             "server": server,
             "kubernetes": json.loads(k.call(["version", "-o", "json"])).get("serverVersion"),
             "fixture_image_requested": image,
+            "execution": {
+                "runner_revision": "source-concurrency-1",
+                "max_parallel_probes": MAX_PARALLEL_PROBES,
+                "max_parallel_probes_per_source": MAX_PROBES_PER_SOURCE,
+                "fixture_resources": copy.deepcopy(FIXTURE_RESOURCES),
+            },
             "cni": "not auto-detected; record lab/versions.json with the exported run",
         }
         daemonsets = json.loads(k.call(["get", "daemonsets", "-A", "-o", "json"]))
@@ -402,19 +444,64 @@ def run_live(raw, context, allowed_contexts, *, cancel=None, progress=None, tran
                 applied[md["namespace"] + "/" + md["name"]] = digest(read["spec"])
 
             def drifted():
-                if snapshot() != reference:
+                current = snapshot()
+                if current != reference:
+                    result.setdefault("drift_details", []).append(
+                        {
+                            "at": utcnow(),
+                            "phase": phase,
+                            "kind": "Pod",
+                            "changes": {
+                                key: {"expected": reference[key], "observed": current[key]}
+                                for key in reference
+                                if reference[key] != current[key]
+                            },
+                        }
+                    )
                     return True
                 for ns in p.topology.namespaces:
                     live = k.get("networkpolicies", ns)["items"]
                     expected = {k_: v for k_, v in applied.items() if k_.startswith(ns + "/")}
                     actual = {ns + "/" + d["metadata"]["name"]: digest(d["spec"]) for d in live}
                     if actual != expected:
+                        result.setdefault("drift_details", []).append(
+                            {
+                                "at": utcnow(),
+                                "phase": phase,
+                                "kind": "NetworkPolicy",
+                                "namespace": ns,
+                                "expected": expected,
+                                "observed": actual,
+                            }
+                        )
                         return True
                     nsobj = k.get("namespace", name=ns)
                     if nsobj["metadata"]["uid"] != namespace_uids[ns]:
+                        result.setdefault("drift_details", []).append(
+                            {
+                                "at": utcnow(),
+                                "phase": phase,
+                                "kind": "Namespace",
+                                "namespace": ns,
+                                "field": "uid",
+                                "expected": namespace_uids[ns],
+                                "observed": nsobj["metadata"]["uid"],
+                            }
+                        )
                         return True
                     target = {**p.topology.namespaces[ns].labels, "kubernetes.io/metadata.name": ns}
                     if nsobj["metadata"].get("labels", {}) != target:
+                        result.setdefault("drift_details", []).append(
+                            {
+                                "at": utcnow(),
+                                "phase": phase,
+                                "kind": "Namespace",
+                                "namespace": ns,
+                                "field": "labels",
+                                "expected": target,
+                                "observed": nsobj["metadata"].get("labels", {}),
+                            }
+                        )
                         return True
                 return False
 
@@ -448,10 +535,10 @@ def run_live(raw, context, allowed_contexts, *, cancel=None, progress=None, tran
 
             # Batches permit control/drift checks between bounded parallel work.
             plan = report["plan"]["tuples"]
-            for offset in range(0, len(plan), 10):
+            for offset in range(0, len(plan), MAX_PARALLEL_PROBES):
                 stop()
-                with ThreadPoolExecutor(max_workers=10) as pool:
-                    batch = list(pool.map(probe_row, plan[offset : offset + 10]))
+                with ThreadPoolExecutor(max_workers=MAX_PARALLEL_PROBES) as pool:
+                    batch = list(pool.map(probe_row, plan[offset : offset + MAX_PARALLEL_PROBES]))
                 healthy, ctrl_after = controls()
                 drift = drifted()
                 for obs in batch:
@@ -463,7 +550,7 @@ def run_live(raw, context, allowed_contexts, *, cancel=None, progress=None, tran
                     obs["controls"] = {"before": ctrl_before, "after": ctrl_after}
                     obs["drift"] = drift
                     result["observations"].append(obs)
-                event(f"{phase}: {min(offset + 10, len(plan))}/{len(plan)} tuples tested")
+                event(f"{phase}: {min(offset + MAX_PARALLEL_PROBES, len(plan))}/{len(plan)} tuples tested")
                 ctrl_before = ctrl_after
                 if not healthy or drift:
                     raise RuntimeErrorSafe(
@@ -488,10 +575,13 @@ def run_live(raw, context, allowed_contexts, *, cancel=None, progress=None, tran
     finally:
         # Namespaces are exclusively created for this run. UID and ownership must
         # still agree before deletion, so no unrelated namespace can be removed.
+        result["stage"] = "CLEANUP"
+        event("Cleaning owned namespaces; the cluster lock stays held until cleanup finishes")
         for kind, ns, n in reversed(created):
             if kind != "Namespace":
                 continue
             try:
+                event("Cleaning owned namespace: " + n)
                 obj = k.get("namespace", name=n)
                 if not owned(obj) or obj["metadata"]["uid"] != namespace_uids[n]:
                     raise RuntimeErrorSafe("ownership or namespace identity changed")
@@ -501,6 +591,7 @@ def run_live(raw, context, allowed_contexts, *, cancel=None, progress=None, tran
                     {"apiVersion": "v1", "kind": "DeleteOptions", "preconditions": {"uid": uid}},
                 )
                 k.call(["wait", "--for=delete", "namespace/" + n, "--timeout=45s"], timeout=50)
+                event("Removed owned namespace: " + n)
             except Exception as e:
                 result["leftovers"].append({"namespace": n, "reason": str(e)[:300]})
         confirmed_names = {n for kind, ns, n in created if kind == "Namespace"}
@@ -517,6 +608,8 @@ def run_live(raw, context, allowed_contexts, *, cancel=None, progress=None, tran
             result["state"] = "INCOMPLETE"
             result["runtime_status"] = "INCOMPLETE"
         result["finished_at"] = utcnow()
+        result["stage"] = "FINISHED"
+        event("Cleanup finished" if not result["leftovers"] else "Cleanup incomplete; inspect leftovers")
         result["coverage"] = summarize_coverage(report, result)
         progress(copy.deepcopy(result))
     return result

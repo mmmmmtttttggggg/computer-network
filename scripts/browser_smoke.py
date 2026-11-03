@@ -222,6 +222,31 @@ def main():
                     matrix,
                 )
                 assert "NOT_TESTED" in text and "0 /" in text
+                # Render provisional and cleanup states without creating a live
+                # job. A running job's default exit 2 is not a final verdict.
+                for job_state, stage, code, expected_exit, cancel_visible in [
+                    ("RUNNING", None, 2, "pending", True),
+                    ("RUNNING", "CLEANUP", 2, "pending", False),
+                    ("COMPLETE", "FINISHED", 1, "1", False),
+                    ("INCOMPLETE", "FINISHED", 2, "2", False),
+                ]:
+                    rendered = page.evaluate(
+                        """x => {
+                            const previous = state.job;
+                            try {
+                                state.job = {id: 'presentation-only', state: x.state,
+                                    result: {stage: x.stage, exit_code: x.code, observations: []}};
+                                const el = document.createElement('div');
+                                el.innerHTML = jobResult();
+                                return {text: el.textContent, cancel: !!el.querySelector('#cancel-job')};
+                            } finally { state.job = previous; }
+                        }""",
+                        {"state": job_state, "stage": stage, "code": code},
+                    )
+                    assert f"exit {expected_exit}" in rendered["text"]
+                    assert rendered["cancel"] is cancel_visible
+                    if stage == "CLEANUP":
+                        assert "CLEANUP" in rendered["text"] and "cluster lock" in rendered["text"]
                 # Validate layout on desktop and mobile for every workspace.
                 for width in [1440, 1366, 390]:
                     page.set_viewport_size({"width": width, "height": 1000 if width > 400 else 844})
@@ -267,6 +292,7 @@ def main():
                                 "immutable label experiment shows shorter direct asset path",
                                 "exact query beyond saved port scope and portable check download",
                                 "observation matrix rendering with explicitly missing observations (presentation-only test)",
+                                "active, cleanup and final live-job rendering (presentation-only test)",
                                 "keyboard row inspection",
                                 "invalid input feedback",
                                 "eight views without horizontal overflow",

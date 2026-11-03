@@ -11,7 +11,7 @@ from app.review.intents import check_intents, IntentStatus
 from app.analysis.threat import analyze_threat
 from app.util import plain, digest
 
-VERSION = "1.2.0"
+VERSION = "1.2.1"
 
 
 def utcnow():

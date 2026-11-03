@@ -1,18 +1,20 @@
 {
   "project": "NetScope",
-  "version": "1.2.0",
-  "release_date": "2026-11-01",
+  "version": "1.2.1",
+  "release_date": "2026-11-04",
   "validation": {
-    "automated_tests_passed": 287,
-    "browser_workflows": "passed",
-    "packaged_wheel": "passed outside source tree",
+    "automated_tests_passed": 295,
+    "browser_workflows": "passed on current 1.2.1 source at 1440/1366/390 px",
+    "packaged_wheel": "1.2.1 installed and HTTP-tested outside source; 43 packaged files match source",
     "retained_oracle_release": "1.1.0",
     "independent_oracle_comparisons": 5472,
     "retained_oracle_disagreements": 1,
     "retained_performance_release": "1.1.0",
     "reference_runs_under_5_seconds": 19,
     "reference_runs": 20,
-    "real_cni_verified": false
+    "real_cni_verified": false,
+    "runner_revision": "source-concurrency-1",
+    "current_evidence": "artifacts/runner-fix-1.2.1/summary.json"
   },
   "files": {
     ".dockerignore": {
@@ -36,12 +38,8 @@
       "bytes": 605
     },
     "README.md": {
-      "sha256": "dfa2912bfd0e70d052202ad10002d7cd22cd6ef841cb16bd9cc2c06d5154a564",
-      "bytes": 19679
-    },
-    "START_HERE.md": {
-      "sha256": "10a7bfc3ef26ffe58aa2b12fd8815135795a5378464f3f7785886d4e327d582d",
-      "bytes": 3187
+      "sha256": "b5e8956990fc987504fc96ca0e676dd39e9008d23a4abea1854f390400ccd099",
+      "bytes": 6869
     },
     "artifacts/benchmark-contended.json": {
       "sha256": "35819e8c189fc061a4a6c0b553b0d8be0a01d99da65bf093350c23c763ccc42e",
@@ -198,6 +196,38 @@
     "artifacts/feature-evaluation.json": {
       "sha256": "ddb62c1048df2a590e0328d88bc8602b561a3163c7220a90e4fe94a154875051",
       "bytes": 882
+    },
+    "artifacts/oracle-replay/case-00/baseline.log.txt": {
+      "sha256": "6b19fc1667ce91805ea17ca8c4443084d941f108a2067bedc8cf78c6035c89e5",
+      "bytes": 153
+    },
+    "artifacts/oracle-replay/case-00/baseline.oracle.txt": {
+      "sha256": "a81beb86fdc95ded38ab5c1c8624975ad78b7430683bd97c149d458942b07dc3",
+      "bytes": 277
+    },
+    "artifacts/oracle-replay/case-00/baseline.yaml": {
+      "sha256": "353ca95db408ec2694dfdb3aac43071cffc1a212af3bcf2e8e06a9ea0c611c2b",
+      "bytes": 744
+    },
+    "artifacts/oracle-replay/case-00/candidate.log.txt": {
+      "sha256": "088864cabac75b672a16af61f095c36c63d85ad0d13012e199d580dc078934ad",
+      "bytes": 153
+    },
+    "artifacts/oracle-replay/case-00/candidate.oracle.txt": {
+      "sha256": "01a979c1127ee90c00793bd28206764cb312f8c1322b3190f77b6ab836c3e579",
+      "bytes": 190
+    },
+    "artifacts/oracle-replay/case-00/candidate.yaml": {
+      "sha256": "9326ae7bee1958c1b264da19e20113aed9b8bf213d256e4fa34fa6beb5840fdd",
+      "bytes": 1051
+    },
+    "artifacts/oracle-replay/case-00/project.json": {
+      "sha256": "ef1c33ceab98b6a24d682e974084d3ba81d6194cf31b89a8376828388a4d2832",
+      "bytes": 3033
+    },
+    "artifacts/oracle-replay/summary.json": {
+      "sha256": "80d3c7908d1fa0ea77da6e77417e92d1935cf893ffb6149ec2e1cca43e912eee",
+      "bytes": 1059
     },
     "artifacts/oracle/case-00/baseline.log.txt": {
       "sha256": "44ce49a5f8973e7b280ccee61e2bdff7eae790de8f6e6d0ab2f4faed143494f7",
@@ -1027,121 +1057,97 @@
       "sha256": "8209127e7ee673b3f05914b8584ef013efb7563e5d14f0a3c2ee837972486e54",
       "bytes": 7263
     },
-    "artifacts/oracle-replay/case-00/baseline.log.txt": {
-      "sha256": "6b19fc1667ce91805ea17ca8c4443084d941f108a2067bedc8cf78c6035c89e5",
-      "bytes": 153
-    },
-    "artifacts/oracle-replay/case-00/baseline.oracle.txt": {
-      "sha256": "a81beb86fdc95ded38ab5c1c8624975ad78b7430683bd97c149d458942b07dc3",
-      "bytes": 277
-    },
-    "artifacts/oracle-replay/case-00/baseline.yaml": {
-      "sha256": "353ca95db408ec2694dfdb3aac43071cffc1a212af3bcf2e8e06a9ea0c611c2b",
-      "bytes": 744
-    },
-    "artifacts/oracle-replay/case-00/candidate.log.txt": {
-      "sha256": "088864cabac75b672a16af61f095c36c63d85ad0d13012e199d580dc078934ad",
-      "bytes": 153
-    },
-    "artifacts/oracle-replay/case-00/candidate.oracle.txt": {
-      "sha256": "01a979c1127ee90c00793bd28206764cb312f8c1322b3190f77b6ab836c3e579",
-      "bytes": 190
-    },
-    "artifacts/oracle-replay/case-00/candidate.yaml": {
-      "sha256": "9326ae7bee1958c1b264da19e20113aed9b8bf213d256e4fa34fa6beb5840fdd",
-      "bytes": 1051
-    },
-    "artifacts/oracle-replay/case-00/project.json": {
-      "sha256": "ef1c33ceab98b6a24d682e974084d3ba81d6194cf31b89a8376828388a4d2832",
-      "bytes": 3033
-    },
-    "artifacts/oracle-replay/summary.json": {
-      "sha256": "80d3c7908d1fa0ea77da6e77417e92d1935cf893ffb6149ec2e1cca43e912eee",
-      "bytes": 1059
-    },
     "artifacts/package-check.json": {
       "sha256": "8e44f2713524d303c54f07ec9f71ffaa4f05eda30b2e226ecd5c9a21b895530c",
       "bytes": 488
+    },
+    "artifacts/runner-fix-1.2.1/browser-results.json": {
+      "sha256": "d29838087e3106b87056836c720720e86d4ca988be85b87a1af4df836051e9e4",
+      "bytes": 1138
+    },
+    "artifacts/runner-fix-1.2.1/overload-before-fix.txt": {
+      "sha256": "a704b1a3612825302956083e36d740f6fa2381993bb002b523b122d09d76d56b",
+      "bytes": 848
+    },
+    "artifacts/runner-fix-1.2.1/summary.json": {
+      "sha256": "2feda177af83a920e50bbf7d8fa1fdaf63f8095b32ef090f528f50ba266e77a9",
+      "bytes": 933
+    },
+    "artifacts/runner-fix-1.2.1/test-results.txt": {
+      "sha256": "712e8298cb71283d484891e6cc59504750e042121ba58da397d2f48e566f4c38",
+      "bytes": 946
+    },
+    "artifacts/runner-fix-1.2.1/wheel-validation.json": {
+      "sha256": "47816faa18b8939c1ee2351032d88df05fe2d6ccd5fb86e34d7ddc0d7d380fd5",
+      "bytes": 287
     },
     "artifacts/test-results.txt": {
       "sha256": "5b477df47691578b426014a898551737763d69698814c0b30cf0bda3e9ef9bd6",
       "bytes": 866
     },
-    "dist/networkpolicy_digital_twin-1.2.0-py3-none-any.whl": {
-      "sha256": "2958b6387b5654e8d2e16846063dc597bede4cfdcd35a79942c7e6cc45565e8c",
-      "bytes": 100658
+    "dist/networkpolicy_digital_twin-1.2.1-py3-none-any.whl": {
+      "sha256": "a83b7f54a32ff513b5d9fafaeabfbf931c0bb8af90bac6ff27052c9a25cd412e",
+      "bytes": 123954
     },
     "docs/ARCHITECTURE.md": {
       "sha256": "25968bacebec9ca9f3a977483d8093dc3b2b811865c23900d47c6953d92360b6",
       "bytes": 7764
     },
     "docs/CHANGELOG.md": {
-      "sha256": "b4fd27fd25e2beb99cf80b7ee2c1e8dbd8a2eb00e838a0d6f02e833f2837f624",
-      "bytes": 3773
+      "sha256": "c0da303d5ea24d311cc0359526620ab97ec483aa2189f86f3b26ed502dfe1ae4",
+      "bytes": 4722
     },
     "docs/DEMO_SCRIPT.md": {
-      "sha256": "01478d9eace991f9332c5fd8b7b8ca102ce59738e43f33f76a6af1edf9ea59cb",
-      "bytes": 3722
+      "sha256": "ef09abc8fd65d16d2d3a5e550afe74e70a645ae9a1570642b9da734714693ffe",
+      "bytes": 3721
     },
     "docs/EXPERIMENTS.md": {
       "sha256": "db7ee04e66a239717028db8a58b0019958a6bcc12777d1a0f46388056b4d3e2c",
       "bytes": 3608
     },
-    "docs/FINALIZATION.md": {
-      "sha256": "bde194460157b86f5d7c414e6e7865e29cbf6b2acd815b85c7c8f52ab2c4ce87",
-      "bytes": 6405
-    },
     "docs/LIVE_LAB.md": {
-      "sha256": "9eaf91b70e29539f526fbdecc4f3aba6b3f9bef7da20d6d125666f248a2d9b95",
-      "bytes": 5850
+      "sha256": "589e53924dcff1e43684fe207135c73270982fdc1293581dc6d4942fba4a16db",
+      "bytes": 7772
     },
     "docs/ORACLE_CHECK.md": {
-      "sha256": "6c98787d211699811ebc219f04c204ef639957a1ace6b86cf8c2a18c7fb9597d",
-      "bytes": 4746
+      "sha256": "d85491bcdffc4f01cddc6d77946dbdc07f03c60ea6129cb272311a5c5508620a",
+      "bytes": 4742
     },
     "docs/PROJECT_FORMAT.md": {
       "sha256": "4f387e7aac047c2640a798fd9ed3d93f41b4c918fda507266c214b672c18ff2a",
       "bytes": 4903
     },
-    "docs/RESEARCH.md": {
-      "sha256": "dbab311cdc3c336a4f555b26748876de87ac214a9711be981b853e15db87213d",
-      "bytes": 5000
-    },
-    "docs/SRS_COVERAGE.md": {
-      "sha256": "f4bcfab344f3a500d6a42de58959b4caeff388e62a3430e8bf8f5ac57963933d",
-      "bytes": 6007
-    },
     "docs/VALIDATION.md": {
-      "sha256": "4c2987ea09fbc8b3bef571cb1ead0762a1eecc02528c974b9f3565efaadb7f32",
-      "bytes": 7496
-    },
-    "lab/README.md": {
-      "sha256": "af476244a484da0bd6bcffc54637edb76ddfbab234adad842ff43b96b26eda72",
-      "bytes": 493
+      "sha256": "0013c911291543f27902fdc8328a92913e893d9cb1abc4f63793913b3c80d4c3",
+      "bytes": 10321
     },
     "pyproject.toml": {
-      "sha256": "a471c013eff188c0fe9f8244364d65248bba25ce5f43017bed7c2f920481cb50",
-      "bytes": 960
+      "sha256": "abcf88357b41b49130db161b42dfd002f6626e01e3cb8ca4528506c342e36fcc",
+      "bytes": 1058
+    },
+    "releases/NetScope-1.2.zip": {
+      "sha256": "4ec17a08dd321332a681fe78f7652d55a0b992b315aa0db2bbd23e5e78424fae",
+      "bytes": 582675
     },
     "requirements.lock": {
-      "sha256": "11341c32ea9fd615c91057411dbbda2c32f03eb1cac17791003d02ef6d335381",
-      "bytes": 398
+      "sha256": "150822b03ce185f9450d927f439b390c866c19817db0c3c14df45c70bc9815d4",
+      "bytes": 558
     },
     "scripts/benchmark.py": {
       "sha256": "9d05a5e668fbdaa6ed5873374129966a7aa0f573969c471cb632da04854077fd",
       "bytes": 4892
     },
     "scripts/browser_smoke.py": {
-      "sha256": "3234d44b221423bcaf3bd310ebb752b68ca22a324830bbe4e088420187d6e20c",
-      "bytes": 15247
+      "sha256": "08bff9dcd621bccd93aad608bb00a35a74a4d3373315dfb15c2d979ea063bad2",
+      "bytes": 17748
     },
     "scripts/lab.py": {
-      "sha256": "b61f2339fce0d95a30ea8ae352b5de5d8efceab95567db14ae75ff62b254afb4",
-      "bytes": 7643
+      "sha256": "cabc391e7e3026a738bbae19216b885cc9eeeda94611fd5ed5799eaed70d80ad",
+      "bytes": 8000
     },
     "scripts/make_examples.py": {
-      "sha256": "42b1eae28307c904a892eb13472e26b1c7a97e41bac272974a9f85fb6a9acf97",
-      "bytes": 8110
+      "sha256": "10c5a09273ca99023a8743f65bb2f387d1d00e88ed04f0379b6663236d606868",
+      "bytes": 8078
     },
     "scripts/oracle_check.py": {
       "sha256": "23a81588887175b756e3cd38cc54bc4c38e21099d9bf60ab8d1c0bf732cd8819",
@@ -1212,8 +1218,8 @@
       "bytes": 4246
     },
     "src/app/resources/examples/agent-escape.json": {
-      "sha256": "a98963de636bd658987979b896ea16d8cb3c05319d4f8808e418f8b43dc60df9",
-      "bytes": 29011
+      "sha256": "6f60f773b62079e899d7cbc564e802bb7da5586c9b33ad4225342d05c7f8f20b",
+      "bytes": 28979
     },
     "src/app/resources/examples/checkout-regression.json": {
       "sha256": "8e2bc5122bea6e583ce0e89587bd00f72d4b1534c2eb33bce1b7e5139a69b633",
@@ -1264,19 +1270,19 @@
       "bytes": 3185
     },
     "src/app/runtime/fixture.py": {
-      "sha256": "b7c46e9f69911631118875d35ed5506c1f770086d07165ffb0fc8ffc1bff0920",
-      "bytes": 1651
+      "sha256": "58de86ad71ea98a3ec911f15560270c4f7fa65d4890fbf8335f48ac1dc0253e6",
+      "bytes": 1869
     },
     "src/app/runtime/runner.py": {
-      "sha256": "ac21382813d87d5d657a4cac647333a309b8fc87df854662e26d40c9563bd5af",
-      "bytes": 23122
+      "sha256": "891f62bdaea2feec1606dc7bc0b0e2e63c3c3cb35b080f5fbe9f5fa99ce1736b",
+      "bytes": 27376
     },
     "src/app/runtime/verdicts.py": {
       "sha256": "c17f943ff30ffd31f5d862a4100782bbb0a2557476129a19151e7d77e7626d0d",
       "bytes": 980
     },
     "src/app/service.py": {
-      "sha256": "65bf2d93f1780adf44721510d87d4e344d0a3d75566a19b06f6889b4d5673bdb",
+      "sha256": "4acdec757433cdb3ef86aa9f97896d2f2cdfa43f6f2819206ee500498510772c",
       "bytes": 6515
     },
     "src/app/store.py": {
@@ -1296,20 +1302,28 @@
       "bytes": 11308
     },
     "src/app/web/static/app.js": {
-      "sha256": "031e3d857c414a2c3f4631ea08639c6479eb9a85e5d50e01f5861c804eb671e0",
-      "bytes": 50435
+      "sha256": "164651e538ef4e5dba948dedda4e8d157126ab8835a13abe7763c391fbb900a9",
+      "bytes": 59213
     },
     "src/app/web/static/experiments-extra.js": {
-      "sha256": "79d670cea10db661e2df35ff1f4c7e08af34b2d932cfa56cb48d78be15124264",
-      "bytes": 11771
+      "sha256": "b3e0f84661683f9ac2d568ff5924929b9e09e8677eb99f6f227b5f89db3fec4c",
+      "bytes": 11763
+    },
+    "src/app/web/static/fonts/HostGrotesk-latin.woff2": {
+      "sha256": "ce9c9db8a488852eb7e4a52f51fd8ce0c93ef61a8d3bfa054b509ec92958dcfe",
+      "bytes": 20296
+    },
+    "src/app/web/static/fonts/OFL.txt": {
+      "sha256": "f04ad0873907546e160c7a79b1e42bd3cd380c7e5ee4c1b3c11f43faca1675e7",
+      "bytes": 4398
     },
     "src/app/web/static/index.html": {
-      "sha256": "1cc099bdb20586f99adb4d3398ab05d83307a052bf6eb8e1a3162328f6ed74e7",
-      "bytes": 4420
+      "sha256": "17a0455c121599813e182360e02bbbfbb7f7300a61ddd37900070ec6c3188957",
+      "bytes": 3903
     },
     "src/app/web/static/style.css": {
-      "sha256": "13e91c447788158e33d8837241c5041ae416c4682fa5152b865c3bc1ce75001f",
-      "bytes": 24292
+      "sha256": "ca71f5523859665c5ee8d07ce9bb1184213a9143b4b8d31cd5a65eccdb50e4c5",
+      "bytes": 28269
     },
     "src/networkpolicy/__init__.py": {
       "sha256": "35d91411826f0074f175757b40de0b988aa2e55688a6c3b08407b5efae51c3d8",
@@ -1363,14 +1377,14 @@
       "sha256": "3738ceef826d9acde1fec8082b2e2762c9d5562dd188334872766732cc07b81c",
       "bytes": 9911
     },
+    "tests/test_runtime_resources.py": {
+      "sha256": "6c37686069c394267663037569ddc28dc08c82044e624787e34ccbe454bc4e16",
+      "bytes": 9539
+    },
     "tests/test_selectors.py": {
       "sha256": "bae8b823ffbd7541fe0af86a22e7705e6b659b94974c0b1dc33ad8c82fbd1823",
       "bytes": 5306
-    },
-    "releases/NetScope-1.2.zip": {
-      "sha256": "4ec17a08dd321332a681fe78f7652d55a0b992b315aa0db2bbd23e5e78424fae",
-      "bytes": 582675
     }
   },
-  "distribution_note": "GitHub handoff: README expanded with verification and remaining-work instructions; releases/NetScope-1.2.zip preserves the original final archive unchanged."
+  "distribution_note": "Release 1.2.1 includes the current source and rebuilt wheel. Historical 1.1/1.2 reports and measurements remain retained evidence; current fix validation is in artifacts/runner-fix-1.2.1/. Real Kubernetes verification remains separate."
 }

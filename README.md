@@ -107,6 +107,8 @@ python3 scripts/lab.py down        # when finished
 
 Then open **Evidence** and follow the on-screen steps. Only the dedicated lab cluster is ever targeted. See [docs/LIVE_LAB.md](docs/LIVE_LAB.md) for details.
 
+Version 1.2.1 limits probes to two per source Pod and ten globally, with 128 MiB fixture memory limits. Live jobs show cleanup progress and retain container failure diagnostics. Update the checkout and restart the launcher to use the fix; real enforcement still needs a completed lab run.
+
 ## Limits
 
 - Allow means NetworkPolicy permits the traffic, not that a service is listening or that access is safe.

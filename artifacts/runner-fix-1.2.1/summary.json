@@ -1,0 +1,24 @@
+{
+  "version": "1.2.1",
+  "base_commit": "c1920ae4d18f1092b2d73c437ef5a87824b2fd45",
+  "captured_at_utc": "2026-11-03T19:13:08.421542+00:00",
+  "environment": {
+    "python": "3.12.14",
+    "platform": "Linux-6.18.57-x86_64-with-glibc2.39"
+  },
+  "automated_tests_passed": 295,
+  "new_runner_tests": 8,
+  "lint": "passed",
+  "format": "passed",
+  "browser_workflows": "passed at 1440, 1366 and 390 px",
+  "wheel": "installed and HTTP-tested outside source; 43 packaged files match checkout",
+  "original_overload_regression": "expected failure against original runner; passes after fix",
+  "probe_settings": {
+    "global": 10,
+    "per_source": 2,
+    "fixture_cpu_limit": "500m",
+    "fixture_memory_limit": "128Mi"
+  },
+  "real_kubernetes_enforcement": "not run: docker, kind and kubectl unavailable",
+  "required_live_followup": "Rerun last-policy-deleted; retain final evidence with both phases, controls, drift and cleanup."
+}
