@@ -59,4 +59,4 @@ These checks exclude external IP/NAT, host-network, vendor/AdminNetworkPolicy, a
 
 ## Release 1.2 live-ready case
 
-`src/app/resources/examples/cross-namespace-check.json` keeps the reduced two-Pod/one-policy structure and exact TCP query, while adding a `must_allow` application intent based on the specification interpretation. This makes its initial live plan executable without changing the historical reproducer. It is a declared hypothesis to test, not independent proof. Use the dashboard scenario and `docs/FINALIZATION.md` to collect actual CNI observations. The historical NCA artifacts remain unmodified and labeled 1.1.
+`src/app/resources/examples/cross-namespace-check.json` keeps the reduced two-Pod/one-policy structure and exact TCP query, while adding a `must_allow` application intent based on the specification interpretation. This makes its initial live plan executable without changing the historical reproducer. It is a declared hypothesis to test, not independent proof. Use the dashboard scenario and `docs/LIVE_LAB.md` to collect actual CNI observations. The historical NCA artifacts remain unmodified and labeled 1.1.

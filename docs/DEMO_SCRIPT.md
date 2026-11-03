@@ -27,4 +27,4 @@ For a shorter demo, show the first three rows and export the HTML report. For ex
 
 ## Optional release 1.2 extension (two minutes)
 
-Show the clean baseline’s suggested checks: four drafts improve training and held-out fault detection, while two held-out faults still escape. Explain that expected behavior is reviewed reference behavior. Then run the agent label counterfactual: losing egress selection and gaining a trusted database peer match turns the two-hop path into a direct one. Agent intents become INVALID rather than silently passing. `docs/EXPERIMENTS.md` has the exact claims; `docs/FINALIZATION.md` lists the live evidence to collect.
+Show the clean baseline’s suggested checks: four drafts improve training and held-out fault detection, while two held-out faults still escape. Explain that expected behavior is reviewed reference behavior. Then run the agent label counterfactual: losing egress selection and gaining a trusted database peer match turns the two-hop path into a direct one. Agent intents become INVALID rather than silently passing. `docs/EXPERIMENTS.md` has the exact claims; `docs/LIVE_LAB.md` explains how to collect live evidence.
