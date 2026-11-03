@@ -2,6 +2,12 @@
 
 Release checkpoint: 1 November 2026. This file records tests actually executed in the build workspace. It does not turn scripted or loopback checks into Kubernetes enforcement evidence.
 
+## Local follow-up run — 3 November 2026
+
+On macOS arm64 with Python 3.13.0, the full suite passed **287/287**, including the TCP/UDP loopback fixture checks after running outside the socket-restricted sandbox. Ruff lint and formatting checks also passed. One Starlette/httpx deprecation warning remains. The exact result and environment are recorded in `artifacts/local-validation-2026-11-03.json`. This is an additional local result; it does not replace the release's Python 3.12 run or verify browser workflows.
+
+The disposable-cluster checks could not be run. Docker CLI, kind, kubectl, and Colima were installed, but the container engine is not running; approval to start the Colima VM was rejected. Python 3.12 is also unavailable. No real-cluster, cross-node, or real API-server cleanup evidence was generated.
+
 ## Retained release 1.1 performance baseline
 
 - Environment: `Linux-6.18.55-x86_64-with-glibc2.39`; Python `3.12.14`. Shared/containerized resources can vary.
