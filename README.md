@@ -141,4 +141,4 @@ docs/          Detailed documentation
 - [docs/EXPERIMENTS.md](docs/EXPERIMENTS.md): the experiments and their expected results
 - [docs/DEMO_SCRIPT.md](docs/DEMO_SCRIPT.md): a presentation script
 - [docs/LIVE_LAB.md](docs/LIVE_LAB.md): live-cluster setup
-- [docs/VALIDATION.md](docs/VALIDATION.md): test and validation results
+- [docs/VALIDATION.md](docs/VALIDATION.md): test and validation results.
